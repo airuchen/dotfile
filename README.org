@@ -6,7 +6,7 @@
 sudo apt install htop git curl scrot xdotool xclip fdfind fzf build-essential pass stalonetray ripgrep feh
 #+END_SRC
 
-Optional for laptop backlight control:
+Optional for laptop backlight control if regular hotkeys don't work:
 
 #+BEGIN_SRC sh
 sudo apt install light
@@ -42,7 +42,9 @@ sudo make install
 
 ** picom
 
-As compositor for transparency
+Optional as compositor for transparency:
+
+[[https://github.com/yshui/picom]]
 
 * Neovim
 
@@ -64,6 +66,8 @@ sh -c 'curl -fLo "${XDG_DATA_HOME:-$HOME/.local/share}"/nvim/site/autoload/plug.
 pip3 install pynvim
 #+END_SRC
 
+In nvim, run =:PlugInstall=.
+
 If telescope complains about fzf, just do the =make= step by hand.
 
 For clipboard installation, install =xclip=.
@@ -71,7 +75,7 @@ For clipboard installation, install =xclip=.
 * Settings
 ** Keyboard
 | Repeat delay | Repeat speed |
--------------------------------
+|--------------|--------------|
 | 250ms        | 30           |
 
 Remove application shortcuts!
@@ -95,7 +99,7 @@ Clone sources
 #+BEGIN_SRC sh
 ln -s ~/config/xmonad .xmonad && cd .xmonad
 git clone https://github.com/xmonad/xmonad
-git clone https://github.com/xmonad/xmonad
+git clone https://github.com/xmonad/xmonad-contrib
 git clone https://github.com/jaor/xmobar
 #+END_SRC
 
