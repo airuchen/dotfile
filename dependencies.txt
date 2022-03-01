@@ -1,0 +1,8 @@
+ghci
+htop
+git
+neovim
+mpc
+ncmpcpp
+scrot
+xdotool

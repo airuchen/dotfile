@@ -1,0 +1,287 @@
+# bi0's .bash_profile
+# based on dmnc's
+
+# If not running interactively, don't do anything
+case $- in
+  *i*) ;;
+  *) return;;
+esac
+
+# check the window size after each command and, if necessary,
+# update the values of LINES and COLUMNS.
+shopt -s checkwinsize
+
+# set variable identifying the chroot you work in (used in the prompt below)
+if [ -z "${debian_chroot:-}" ] && [ -r /etc/debian_chroot ]; then
+  debian_chroot=$(cat /etc/debian_chroot)
+fi
+
+
+export BLOCKSIZE=1M # use megabytes wherever $BLOCKSIZE is respected
+
+export HISTCONTROL=ignoredups # don't save duplicate lines in the history
+export HISTCONTROL=$HISTCONTROL:erasedups # remove duplicate lines when writing
+export HISTCONTROL=$HISTCONTROL:ignorespace # don't save lines prefixed with ' '
+
+# no history for searches in less
+export LESSHISTSIZE=0 # in case a file already exists
+export LESSHISTFILE=/dev/null
+
+# currently only used for man
+export HIGHLIGHT_COLOR="0;33";
+
+if [ -z "$LANG" ]; then
+  export LANG="en_GB.UTF-8"
+fi
+
+# make sure the default umask is 0022 (prevent write for group/world)
+UMASK=$(umask)
+if [ "$UMASK" != "0022" ]; then
+  _INTERNAL_UMASK_ERROR="umask received from system was $UMASK - setting 0022"
+  umask 0022
+fi
+unset UMASK
+
+# set vi mode for the bash command line editor
+set -o vi
+if [ ! -e "$HOME/.inputrc" ]; then
+  _INTERNAL_READLINE_ERROR="readline uses vi mode but there is no .inputrc"
+elif [ ! -r "$HOME/.inputrc" ]; then
+  _INTERNAL_READLINE_ERROR="readline uses vi mode but .inputrc cannot be read"
+fi
+
+# prints notifications above the prompt if needed/applicable
+print_prompt_notifications() {
+  # if a process exits with an error exit status, display it above the prompt
+  if [ "$1" -gt 256 ]; then # these codes will not be returned on bash >= 4
+    echo "[31m[ [1mbash internal error [0m[31m: [0m${1} [31m][0m"
+  elif [ ! "$1" = 0 ]; then
+    local SIGNAL_NAME
+    SIGNAL_NAME=$(kill -l "$1" 2> /dev/null)
+    if [ ! -z "$SIGNAL_NAME" ] && [ "$1" -gt 128 ]; then
+      local SIGNAL_STRING="[31m([0m$SIGNAL_NAME[31m) [0m"
+    else
+      local SIGNAL_STRING=""
+    fi
+    echo "[31m[ [1mexit status [0m[31m: [0m${1} ${SIGNAL_STRING}[31m][0m"
+  fi
+
+  # show a notification if there are any background jobs, running or stopped
+  local JOBS
+  JOBS="$(jobs -p | wc -l)"
+  if [ "$JOBS" -gt 0 ]; then
+    local STOPPED
+    STOPPED="$(jobs -ps | wc -l)"
+    if [ "$STOPPED" -eq "$JOBS" ]; then
+      STOPPED="[0mstopped "
+    elif [ "$STOPPED" -gt 0 ]; then
+      STOPPED="[0;${COLOR}m([0m$STOPPED stopped[${COLOR}m) [0m"
+    else
+      STOPPED=""
+    fi
+    echo "[${COLOR}m[ [${HIGHLIGHT_COLOR}mjobs [0;${COLOR}m: [0m$JOBS $STOPPED[${COLOR}m][0m"
+  fi
+}
+
+
+# internal variables
+OS=$(uname) # to avoid spawning multiple uname processes
+
+# │┤
+
+# prompt
+if [ "$USER" = "root" ] ; then
+  PS1="${debian_chroot:+($debian_chroot)}\[\e[0;31m\][\[\e[1;37m\]\u\[\e[0;31m\]@\[\e[m\]\h\[\e[0;31m\]:\[\e[1;31m\]\w\[\e[0;31\]]\[\e[0m\] "
+  PS2="\[\e[0;31\]]\[\e[0m\] "
+else
+  prompt_pre_part="\[\e[0;92m\]┌[ \[\e[0;94m\]\u\[\e[0;32m\] @ \[\e[0;93m\]\h\[\e[0;32m\] : \[\e[0;94m\]\w\[\e[0m\]${debian_chroot:+ [chroot: $debian_chroot]}${VIRTUAL_ENV:+ \[\e[0;35m\]🐍$(basename ${VIRTUAL_ENV})\[\e[0m\]}"
+  prompt_post_part=" \[\e[0;92m\]]\n└>\[\e[0m\] "
+  PS1="${prompt_pre_part}${prompt_post_part}"
+  PS2="\[\e[0;92m\]~>\[\e[0m\] "
+  if [ -e /usr/lib/git-core/git-sh-prompt ]; then
+    . /usr/lib/git-core/git-sh-prompt
+    GIT_PS1_SHOWDIRTYSTATE=1
+    GIT_PS1_SHOWCOLORHINTS=1
+    GIT_PS1_SHOWUPSTREAM="auto"
+    PROMPT_COMMAND='print_prompt_notifications $?;echo -ne "\033]0;${USER} @ `hostname -s` : `dirs`\007";__git_ps1 "${prompt_pre_part}" "${prompt_post_part}"'
+  fi
+  #[user@host:working/dir]
+  #PS1="\[\e[0;32m\][\[\e[1;37m\]\u\[\e[0;32m\]@\[\e[m\]\h\[\e[0;32m\]:\[\e[1;32m\]\w\[\e[0;32m\]]\[\e[0m\] "
+  #PS2="\[\e[0;32m\]]\[\e[0m\] "
+fi
+
+# make less the preferred pager if available
+unalias less 2> /dev/null # some which implementations return aliases otherwise
+LESS_PATH=$(which less)
+if [ "$LESS_PATH" ] && [ -x "$LESS_PATH" ]; then
+  export LESS="-R" # make sure ANSI color codes come through correctly
+  export LESS="$LESS -F" # quit automatically after printing short files
+  export LESS="$LESS -X" # don't clear the screen when starting less
+
+  export PAGER='less'
+
+
+  if [ "$OS" = "OpenBSD" ] && [ "$(uname -r)" = "5.7" ]; then
+    MAN_HIGHLIGHT_COLOUR='0;33'
+    export MANPAGER="env LESS_TERMCAP_mb=[1;31m LESS_TERMCAP_md=[${MAN_HIGHLIGHT_COLOUR}m LESS_TERMCAP_me=[0m LESS_TERMCAP_se=[0m LESS_TERMCAP_so=[${MAN_HIGHLIGHT_COLOUR};7m LESS_TERMCAP_ue=[0m LESS_TERMCAP_us=[1m less"
+  else
+    MAN_HIGHLIGHT_COLOUR='0\;33'
+    export MANPAGER="env LESS_TERMCAP_mb=[1\;31m LESS_TERMCAP_md=[${MAN_HIGHLIGHT_COLOUR}m LESS_TERMCAP_me=[0m LESS_TERMCAP_se=[0m LESS_TERMCAP_so=[${MAN_HIGHLIGHT_COLOUR}\;7m LESS_TERMCAP_ue=[0m LESS_TERMCAP_us=[1m less"
+  fi
+  unset MAN_HIGHLIGHT_COLOUR
+else
+  _INTERNAL_LESS_ERROR="less could not be found on this system"
+fi
+unset LESS_PATH
+
+# make vim the preferred editor if available
+unalias vim 2> /dev/null
+VIM_PATH=$(which vim)
+NVIM_PATH=$(which nvim)
+if [ "$NVIM_PATH" ] && [ "$NVIM_PATH" ]; then
+  export VISUAL=nvim
+  export EDITOR=nvim
+  alias vi='nvim'
+  alias vim='nvim'
+elif [ "$VIM_PATH" ] && [ "$VIM_PATH" ]; then
+  export VISUAL=vim
+  export EDITOR=vim
+  alias vi='vim'
+else
+  _INTERNAL_VIM_ERROR="vim could not be found on this system"
+fi
+unset VIM_PATH
+unset NVIM_PATH
+
+
+# other aliases
+alias su='su -'
+alias clear='history -c; cat /dev/null > ~/.bash_history; clear; echo "cl34r3d"'
+alias less='less -R' # make sure ANSI color codes come through correctly
+alias screen='screen -U' # enforce UTF-8 mode for screen
+alias tmux='tmux -u -2' # enforce UTF-8 mode and 256 colours for tmux
+alias ll='ls -alhF'
+alias la='ls -A'
+alias multidl='curl -L -A "Mozilla/4.0" --remote-name-all'
+
+# gnuls colours
+export LS_COLORS="fi=00:di=94:ln=35:ex=32:or=05;38;41:mi=05;38;41" # gruvbox
+#export LS_COLORS="fi=00:di=36:ln=35:ex=32:or=05;37;41:mi=05;37;41" # solarized/default
+if [ -x /usr/local/bin/gls ] ; then
+  if [ "$USER" = "root" ] ; then
+    alias ls='gls -F -A --color=auto'
+  else
+    alias ls='gls -F --color=auto'
+  fi
+elif [ -x /usr/local/bin/gnuls ] ; then
+  if [ "$USER" = "root" ] ; then
+    alias ls='gnuls -F -A --color=auto'
+  else
+    alias ls='gnuls -F --color=auto'
+  fi
+elif [ "$OS" = "Linux" ] ; then # linux, assume it's GNU ls
+  if [ "$USER" = "root" ] ; then
+    alias ls='ls -F -A --color=auto'
+  else
+    alias ls='ls -F --color=auto'
+  fi
+elif [ "$OS" = "Darwin" ] ; then # os x, make its ls behave like gnuls
+  export LSCOLORS="GxHxxxxxCxxxxxxxxxxxxx"
+  alias ls='ls -FG'
+fi
+
+if [ "$TERM" = "xterm" ] ; then
+  export TERM='xterm-256color'
+fi
+
+# prints a theme-colored message on the form "[$1] $2"
+print_message() {
+  # default to cyan if no color has been set
+  if [ ! "$BASH_THEME_COLOR" ]; then
+    export BASH_THEME_COLOR="0;36"
+  fi
+  if [ ! $HIGHLIGHT_COLOR ]; then
+    export HIGHLIGHT_COLOR="1;36"
+  fi
+
+  echo "[${BASH_THEME_COLOR}m[[${HIGHLIGHT_COLOR}m$1[${BASH_THEME_COLOR}m] [0m$2"
+}
+
+if [ -f ~/config/bash_aliases ] && [ -r ~/config/bash_aliases ] ; then
+  source ~/config/bash_aliases
+fi
+
+# Enable bash completion for non-login shells
+if [ -f /etc/bash_completion ] && ! shopt -oq posix; then
+    . /etc/bash_completion
+fi
+
+# Tell fzf to use fd for searching. If it's installed as fdfind, use that, otherwise use try fd
+! alias fd 2&>/dev/null && command -v fd > /dev/null && export FZF_DEFAULT_COMMAND='fd --type f'
+command -v fdfind > /dev/null && export FZF_DEFAULT_COMMAND='fdfind --type f'
+export FZF_DEFAULT_OPTS='--layout=reverse'
+
+_INTERNAL_FZF_ERROR="fzf not found!"
+for fzf_conf in "${XDG_CONFIG_HOME:-$HOME/.config}"/fzf/fzf.bash /usr/share/doc/fzf/examples/key-bindings.bash; do
+  if [ -f "${fzf_conf}" ]; then
+    source "${fzf_conf}"
+    unset _INTERNAL_FZF_ERROR
+    break;
+  fi
+done
+
+# TODO make a generic _ERROR variable and append stuff separated by some char
+# display warnings if the shell is interactive
+case $- in
+  *i*)
+    if [ ! -z "$_INTERNAL_READLINE_ERROR" ]; then
+      print_message "!" "$_INTERNAL_READLINE_ERROR"
+    fi
+    if [ ! -z "$_INTERNAL_VIM_ERROR" ]; then
+      print_message "!" "$_INTERNAL_VIM_ERROR"
+    fi
+    if [ ! -z "$_INTERNAL_LESS_ERROR" ]; then
+      print_message "!" "$_INTERNAL_LESS_ERROR"
+    fi
+    if [ ! -z "$_INTERNAL_FZF_ERROR" ]; then
+      print_message "!" "$_INTERNAL_FZF_ERROR"
+    fi
+    #if [ ! -z "$_INTERNAL_UMASK_ERROR" ]; then
+    #    print_message "!" "$_INTERNAL_UMASK_ERROR"
+    #fi
+    if [ -z "$TERM" ] || [ "$TERM" = "dumb" ]; then
+      print_message "!" "\$TERM missing or running inside a dumb terminal"
+    fi
+    if [ -z "$PATH" ] || [ "$PATH" = "" ]; then
+      print_message "!" "\$PATH is unset or empty"
+    fi
+    #if [ -z "$MAIL" ]; then
+    #    print_message "!" "\$MAIL is unset or empty"
+    #elif [ ! -r "$MAIL" ]; then
+    #    print_message "!" "\$MAIL is set but unreadable"
+    #fi
+    ;;
+esac
+# clear internal variables
+unset _INTERNAL_VIM_ERROR
+unset _INTERNAL_LESS_ERROR
+unset _INTERNAL_READLINE_ERROR
+unset _INTERNAL_UMASK_ERROR
+unset OS
+
+# if login shell, display stuff
+# XXX if we're not in an interactive shell, the variables will not have been set
+if shopt -q login_shell; then
+  if [ ! -z "$SSH_CONNECTION" ]; then # if remote login, display connection
+    echo "$SSH_CONNECTION" | awk '{printf "[%smconnected from: [0m%s[%sm:[0m%d[%sm\tto: [0m%s[%sm:[0m%d\n\n",
+    ENVIRON["COLOR"], $1, ENVIRON["COLOR"], $2, ENVIRON["COLOR"], $3,
+    ENVIRON["COLOR"], $4;}'
+  fi
+  echo -n "[${HIGHLIGHT_COLOR}m" && uptime # show uptime
+  echo -n "[0;0m"
+fi
+
+# Add rust binaries to path
+#if [[ ! "$PATH" == */home/felix/.cargo/bin* ]]; then
+#  export PATH="${PATH:+${PATH}:}/home/felix/.cargo/bin"
+#fi

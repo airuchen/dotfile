@@ -1,0 +1,19 @@
+set editing-mode vi
+set meta-flag on
+set convert-meta off
+set output-meta on
+set input-meta on
+
+set bell-style none
+set keymap vi
+$if mode=vi
+	set keymap vi-insert
+	"jj": vi-movement-mode	#jj is esc
+$endif
+
+# Fix del key for readline in st terminal
+set enable-keypad on
+# requires bash 4.3 and readline 6.3
+#set show-mode-in-prompt on
+
+#set completion-ignore-case On

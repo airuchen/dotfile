@@ -1,0 +1,125 @@
+!-------------------------------------------------------------------------------
+! Xft settings
+!-------------------------------------------------------------------------------
+
+Xft.dpi:                    90
+Xft.antialias:              false
+Xft.rgba:                   rgb
+Xft.hinting:                true
+Xft.hintstyle:              hintslight
+
+!-------------------------------------------------------------------------------
+! URxvt settings
+! Colours lifted from Solarized (http://ethanschoonover.com/solarized)
+! More info at:
+! http://pod.tst.eu/http://cvs.schmorp.de/rxvt-unicode/doc/rxvt.1.pod
+!-------------------------------------------------------------------------------
+
+URxvt.depth:                32
+URxvt.geometry:             90x30
+URxvt.transparent:          false
+URxvt.fading:               0
+! URxvt.urgentOnBell:         true
+! URxvt.visualBell:           true
+URxvt.loginShell:           true
+URxvt.saveLines:            100000
+URxvt.internalBorder:       3
+URxvt.lineSpace:            0
+
+! Fonts
+URxvt.allow_bold:           true
+URxvt.font: xft:DejaVuSansMono:size=12
+URxvt.boldFont: xft:dejavu sans mono:bold:size=12
+
+! Fix font space
+URxvt*letterSpace: -1
+
+! Scrollbar
+URxvt.scrollStyle:          rxvt
+URxvt.scrollBar:            false
+
+! Perl extensions
+URxvt.perl-ext-common:      default,matcher
+URxvt.matcher.button:       1
+URxvt.urlLauncher:          firefox
+
+! Cursor
+URxvt.cursorBlink:          true
+URxvt.cursorUnderline:      false
+
+! Pointer
+URxvt.pointerBlank:         true
+
+URxvt.background: #282828
+URxvt.foreground: #ebdbb2
+! URxvt.cursorColor: #fbf1c7
+URxvt.cursorColor: #d5c4a1
+
+!! black dark/light
+URxvt.color0: #282828
+URxvt.color8: #928374
+
+!! red dark/light
+URxvt.color1: #cc241d
+URxvt.color9: #fb4934
+
+!! green dark/light
+URxvt.color2: #98971a
+URxvt.color10: #b8bb26
+
+!! yellow dark/light
+URxvt.color3: #d79921
+URxvt.color11: #fabd2f
+
+!! blue dark/light
+URxvt.color4: #458588
+URxvt.color12: #83a598
+
+!! magenta dark/light
+URxvt.color5: #b16286
+URxvt.color13: #d3869b
+
+!! cyan dark/light
+URxvt.color6: #689d6a
+URxvt.color14: #8ec07c
+
+!! white dark/light
+URxvt.color7: #a89984
+URxvt.color15: #ebdbb2
+
+URXvt.color236: #32302f
+URXvt.color234: #1d2021
+
+URXvt.color235: #282828
+URXvt.color237: #3c3836
+URXvt.color239: #504945
+URXvt.color241: #665c54
+URXvt.color243: #7c6f64
+
+URXvt.color244: #928374
+URXvt.color245: #928374
+
+URXvt.color228: #f2e5bc
+URXvt.color230: #f9f5d7
+
+URXvt.color229: #fbf1c7
+URXvt.color223: #ebdbb2
+URXvt.color250: #d5c4a1
+URXvt.color248: #bdae93
+URXvt.color246: #a89984
+
+URXvt.color167: #fb4934
+URXvt.color142: #b8bb26
+URXvt.color214: #fabd2f
+URXvt.color109: #83a598
+URXvt.color175: #d3869b
+URXvt.color108: #8ec07c
+URXvt.color208: #fe8019
+
+URXvt.color88: #9d0006
+URXvt.color100: #79740e
+URXvt.color136: #b57614
+URXvt.color24: #076678
+URXvt.color96: #8f3f71
+URXvt.color66: #427b58
+URXvt.color130: #af3a03

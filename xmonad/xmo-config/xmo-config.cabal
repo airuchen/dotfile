@@ -1,0 +1,30 @@
+name:           xmo-config
+version:        0.1
+description:    xmonad extras and xmobar configs
+author:         Felix
+maintainer:     felix@fzeltner.de
+copyright:      2021 Felix Zeltner
+license:        ISC
+build-type:     Simple
+cabal-version:  >= 1.10
+
+library
+  hs-source-dirs: src/lib
+  exposed-modules: XMonad.CustomColors, XMonad.Prompt.SaferPrompts, XMonad.Prompt.MyPass, Xmobar.MyMonitors, Helpers
+  build-depends: base, process, xmonad, xmonad-contrib, xmobar, filepath, unix, directory
+  default-language: Haskell2010
+
+executable xmobar-custom
+  main-is: xmobar.hs
+  hs-source-dirs: src
+  ghc-options: -O3
+  build-depends: base, xmobar, xmo-config
+  default-language: Haskell2010
+
+-- executable xmonad-x86_64-linux
+--   main-is: xmonad.hs
+--   hs-source-dirs: src
+--   ghc-options: -rtsopts -with-rtsopts=-V0 -threaded -fforce-recomp
+--   build-depends: base, containers, X11==1.10, xmonad, xmonad-contrib, my-binaries
+--   default-language: Haskell2010
+

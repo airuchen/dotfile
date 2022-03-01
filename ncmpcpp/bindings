@@ -1,0 +1,15 @@
+# Disable lyric search stuff
+def_key "l"
+  dummy
+
+def_key "L"
+  dummy
+
+def_key "j"
+  scroll_down
+
+def_key "k"
+  scroll_up
+
+def_key "d"
+  delete_playlist_items

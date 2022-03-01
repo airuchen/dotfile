@@ -1,0 +1,9 @@
+*.errors
+*.o
+*.hi
+xmonad
+xmobar
+xmonad-contrib
+xmonad-x86_64-linux
+.stack-work
+stack.yaml.lock

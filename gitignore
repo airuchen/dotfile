@@ -1,0 +1,11 @@
+compile_commands.json
+**/.clangd/
+**/.cache/
+**/.mypy_cache/
+.clangd/
+.cache/
+__pycache__/
+**/__pycache__/
+*.pyc
+**/.stack-work
+stack.yaml.lock

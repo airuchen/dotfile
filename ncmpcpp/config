@@ -1,0 +1,20 @@
+playlist_display_mode = "columns" (classic/columns)
+browser_display_mode = "columns" (classic/columns)
+search_engine_display_mode = "columns" (classic/columns)
+playlist_editor_display_mode = "columns" (classic/columns)
+
+mpd_music_dir = "/mnt/music"
+
+song_columns_list_format = "(20)[cyan]{a|A:Artist} (5)[green]{nrE:##} (35)[yellow]{t|f} (29)[red]{bE} (5)[green]{yE} (6)[green]{lr}"
+playlist_separate_albums = "yes"
+
+enable_window_title = "no"
+song_window_title_format = "{%a} - {%t}"
+
+display_bitrate = "yes"
+
+visualizer_fifo_path = "/tmp/mpd.fifo"
+visualizer_output_name = "FIFO"
+visualizer_sync_interval = "10"
+visualizer_type = "spectrum" (spectrum/wave)
+visualizer_look = "+|"

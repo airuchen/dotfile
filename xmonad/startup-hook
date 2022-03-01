@@ -1,0 +1,25 @@
+#!/bin/bash
+
+stalonetrayrc="${HOME}/config/xmonad/hosts/${HOSTNAME}/stalonetrayrc"
+if [ ! -e "${stalonetrayrc}" ]; then
+	stalonetrayrc="${HOME}/config/xmonad/stalonetrayrc"
+fi
+if [ -z "$(pgrep stalonetray)" ]; then
+	stalonetray -c "${stalonetrayrc}" &
+else
+	pkill stalonetray
+	stalonetray -c "${stalonetrayrc}" &
+fi
+
+pgrep nm-applet || nm-applet&
+
+pgrep picom || picom --config ~/config/xmonad/picom.conf &
+
+# app launcher
+#pgrep kupfer || kupfer --no-splash &
+
+# Single screen
+#feh --bg-scale ~/Pictures/Wallpaper\ Switching/IMG_1265-2-2.jpg&
+
+# Multiple screens
+sh -c 'sleep 3 && ~/config/scripts/set_multi_wallpapers.sh'

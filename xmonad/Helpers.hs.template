@@ -1,0 +1,8 @@
+module Helpers
+  where
+
+myHostname :: String
+myHostname = "<hostname>"
+
+myHome :: String
+myHome = "<home>"

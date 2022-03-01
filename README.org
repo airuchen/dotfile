@@ -1,0 +1,116 @@
+#+TITLE: Configs
+
+* Dependencies
+
+#+BEGIN_SRC sh
+sudo apt install htop git curl scrot xdotool xclip fdfind fzf build-essential pass stalonetray ripgrep feh
+#+END_SRC
+
+Optional for laptop backlight control:
+
+#+BEGIN_SRC sh
+sudo apt install light
+#+END_SRC
+
+Might need
+
+#+BEGIN_SRC
+ACTION=="add", SUBSYSTEM=="backlight", KERNEL=="amdgpu_bl0", RUN+="/bin/chgrp video /sys/class/backlight/%k/brightness"
+ACTION=="add", SUBSYSTEM=="backlight", KERNEL=="amdgpu_bl0", RUN+="/bin/chmod g+w /sys/class/backlight/%k/brightness"
+#+END_SRC
+
+in =/etc/udev/rules.d/backlight.rules=
+
+* Tools (st, dmenu)
+
+** st
+
+#+BEGIN_SRC sh
+sudo apt install libxft-dev libfontconfig-dev libx11-dev fonts-dejavu
+CFLAGS=-O2 make
+sudo make install
+sudo tic -sx st.info
+#+END_SRC
+
+** dmenu
+
+#+BEGIN_SRC sh
+sudo apt install libxinerama-dev
+CFLAGS=-O2 make
+sudo make install
+#+END_SRC
+
+** picom
+
+As compositor for transparency
+
+* Neovim
+
+** Building
+
+#+BEGIN_SRC sh
+sudo apt install cmake libtool-bin gettext xclip
+make CMAKE_BUILD_TYPE=Release
+sudo make install
+#+END_SRC
+
+** Config
+
+#+BEGIN_SRC sh
+mkdir ~/.config/nvim && cd ~/.config/nvim
+ln -s ~/config/vimrc init.vim
+ln -s ~/config/vim/lua .
+sh -c 'curl -fLo "${XDG_DATA_HOME:-$HOME/.local/share}"/nvim/site/autoload/plug.vim --create-dirs https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim'
+pip3 install pynvim
+#+END_SRC
+
+If telescope complains about fzf, just do the =make= step by hand.
+
+For clipboard installation, install =xclip=.
+
+* Settings
+** Keyboard
+| Repeat delay | Repeat speed |
+-------------------------------
+| 250ms        | 30           |
+
+Remove application shortcuts!
+
+* XMonad
+
+** Installation
+
+Install build dependencies
+
+#+BEGIN_SRC sh
+sudo apt install libxrandr-dev libxss-dev libasound2-dev libmpd-dev libxpm-dev
+#+END_SRC
+
+Install =stack=
+#+BEGIN_SRC sh
+curl -sSL https://get.haskellstack.org/ | sh
+#+END_SRC
+
+Clone sources
+#+BEGIN_SRC sh
+ln -s ~/config/xmonad .xmonad && cd .xmonad
+git clone https://github.com/xmonad/xmonad
+git clone https://github.com/xmonad/xmonad
+git clone https://github.com/jaor/xmobar
+#+END_SRC
+
+Build everything
+#+BEGIN_SRC sh
+./build.sh
+#+END_SRC
+
+** Setup in xfce4
+
+Remove all the keybinds that get in our way from the keyboard hotkyes!
+
+Enable the *Session chooser* in xfce4 *Sessions and Startup* settings and make a new session by logging out and in.
+Remove the panel and remove everything but *Power Manager* and *Xfsettingsd* from the restart in *Current Session*.
+Potentially hit *Save Session* afterwards.
+If stuff keeps starting on subsequent logins (like firefox), make sure to uncheck *Automatically save session on logout*.
+In the new session, add an *Application Autostart* for =/home/felix/.xmonad/xmonad-x86_64-linux=.
+
