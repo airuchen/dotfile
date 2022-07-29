@@ -13,7 +13,7 @@ local year_input = function(args, state)
 end
 
 
-ls.snippets = { cpp = {
+ls.add_snippets("cpp", {
         s("isc", {
             t({"/*", ""}),
             t( " * Copyright (c) "), d(1, year_input, {}), t(" "), i(2,"NODE Robotics GmbH"), t({"",""}), -- A newline
@@ -34,13 +34,14 @@ ls.snippets = { cpp = {
         s("copyright", {
             t({"/*", ""}),
             t( " * Copyright (c) "), d(1, year_input, {}), t(" "), i(2, "NODE Robotics GmbH"),
-            t({" * All rights reserved.",
+            t({"",
+               " * All rights reserved.",
                " * Unauthorized copying of this file, via any medium is strictly prohibited.",
                " * Proprietary and confidential.",
                " */"})
         })
-    },
-    python = {
+    })
+ls.add_snippets("python", {
         s("isc", {
             t( "# Copyright (c) "), d(1, year_input, {}), t(" "), i(2,"NODE Robotics GmbH"), t({"",""}), -- A newline
             t({"#",
@@ -62,5 +63,9 @@ ls.snippets = { cpp = {
               "# Unauthorized copying of this file, via any medium is strictly prohibited.",
               "# Proprietary and confidential."})
         })
-    }
-}
+    })
+ ls.add_snippets("xml", {
+       s("fez", {t("felix.zeltner@node-robotics.com")}),
+       s("dep", {t("<depend>"), i(1, "pkg"), t("</depend>")}),
+       s("bdep", {t("<build_depend>"), i(1, "pkg"), t("</build_depend>")}),
+    })

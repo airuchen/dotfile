@@ -40,28 +40,50 @@ local get_bufnrs = function()
 end
 
 cmp.setup({
+  -- nvim-cmp by defaults disables autocomplete for prompt buffers
+  -- enabled = function ()
+  --   return vim.api.nvim_buf_get_option(0, "buftype") ~= "prompt"
+  --     or require("cmp_dap").is_dap_buffer()
+  -- end,
   snippet = {
     expand = function(args)
       require('luasnip').lsp_expand(args.body) -- For `luasnip` users.
     end,
   },
   completeopt = 'menu,menuone,noselect',
-  mapping = {
+  mapping = cmp.mapping.preset.insert( {
     ['<C-d>'] = cmp.mapping.scroll_docs(-4),
     ['<C-f>'] = cmp.mapping.scroll_docs(4),
     ['<C-Space>'] = cmp.mapping.complete(),
-    ['<C-e>'] = cmp.mapping.close(),
     ['<CR>'] = cmp.mapping.confirm({ select = true }),
-  },
+  }),
   sources = cmp.config.sources({
     { name = 'nvim_lsp' },
     { name = 'luasnip' },
     { name = 'nvim_lua' },
     { name = 'path' },
     { name = 'orgmode' },
+    -- { name = 'dap' },
     { name = 'buffer', options = {get_bufnrs = get_bufnrs} },
   }),
   experimental = {
     ghost_text = true,
   }
+})
+
+-- `/` cmdline setup.
+cmp.setup.cmdline('/', {
+  mapping = cmp.mapping.preset.cmdline(),
+  sources = {
+    { name = 'buffer' }
+  }
+})
+-- `:` cmdline setup.
+cmp.setup.cmdline(':', {
+  mapping = cmp.mapping.preset.cmdline(),
+  sources = cmp.config.sources({
+    { name = 'path' }
+  }, {
+    { name = 'cmdline' }
+  })
 })

@@ -31,9 +31,6 @@ Plug 'tpope/vim-surround'
 " =p pastes below with autoindent
 Plug 'tpope/vim-unimpaired'
 
-" Make . work with commands that support it
-Plug 'tpope/vim-repeat'
-
 " Align stuff
 Plug 'godlygeek/tabular'
 
@@ -44,9 +41,12 @@ Plug 'wellle/targets.vim'
 Plug 'mbbill/undotree', { 'on': 'UndotreeToggle' }
 
 Plug 'nvim-lua/plenary.nvim'
+Plug 'nvim-telescope/telescope-ui-select.nvim'
 Plug 'nvim-telescope/telescope.nvim'
 Plug 'bi0ha2ard/telescope-ros.nvim'
 Plug 'nvim-telescope/telescope-fzf-native.nvim', { 'branch': 'main', 'do': 'make' }
+Plug 'gbrlsnchs/telescope-lsp-handlers.nvim', { 'branch': 'trunk' }
+Plug 'crispgm/telescope-heading.nvim', { 'branch': 'main' }
 
 " Git integration
 Plug 'tpope/vim-fugitive'
@@ -92,12 +92,12 @@ Plug 'L3MON4D3/LuaSnip'
 " Needs clangd, pip3 install python-language-server cmake-language-server
 Plug 'neovim/nvim-lspconfig'
 " LSP based autocomplete
-"Plug 'hrsh7th/nvim-compe'
 Plug 'hrsh7th/nvim-cmp', { 'branch': 'main' }
 Plug 'hrsh7th/cmp-nvim-lsp', { 'branch': 'main' }
 Plug 'hrsh7th/cmp-path', { 'branch': 'main' }
 Plug 'hrsh7th/cmp-nvim-lua', { 'branch': 'main' }
 Plug 'hrsh7th/cmp-buffer', { 'branch': 'main' }
+Plug 'hrsh7th/cmp-cmdline', { 'branch': 'main' }
 Plug 'saadparwaiz1/cmp_luasnip'
 
 Plug 'ray-x/lsp_signature.nvim'
@@ -112,6 +112,17 @@ Plug 'nvim-treesitter/nvim-treesitter-textobjects'
 Plug 'dense-analysis/ale'
 
 Plug 'nvim-orgmode/orgmode'
+Plug 'dhruvasagar/vim-table-mode'
+
+" Make . work with commands that support it
+Plug 'tpope/vim-repeat'
+
+" Debugger
+Plug 'mfussenegger/nvim-dap'
+Plug 'theHamsta/nvim-dap-virtual-text'
+Plug 'rcarriga/nvim-dap-ui'
+Plug 'nvim-telescope/telescope-dap.nvim'
+" Plug 'rcarriga/cmp-dap'
 
 
 let g:polyglot_disabled = ['cpp-modern']
@@ -342,6 +353,8 @@ require('orgmode').setup({
 })
 EOF
 
+lua require('dap_settings')
+
 " Avoid showing message extra message when using completion
 set shortmess+=c
 
@@ -386,7 +399,7 @@ let g:ros_build_system = 'catkin-tools'
 let g:ros_disable_warnings = 1
 
 " clang-format
-let g:clang_format#command = 'clang-format-11'
+let g:clang_format#command = 'clang-format-14'
 let g:clang_format#detect_style_file = 1 " try to detect .clang_format files
 let g:clang_format#auto_format = 0 " autoformat on write
 let g:clang_format#auto_format_on_insert_leave = 0 " autoformat on insert leave
@@ -489,29 +502,6 @@ nnoremap <leader><leader>s :setlocal spell!<CR>
 
 nnoremap <leader><leader>r :source ~/config/vimrc<CR>
 
-" Telescope
-" LSP references
-nnoremap <silent> <leader>r :lua require'telescope.builtin'.lsp_references{}<CR>
-" Spell suggests
-nnoremap <silent> <leader>s :lua require'telescope.builtin'.spell_suggest(require('telescope.themes').get_dropdown({}))<CR>
-" Ros packages
-nnoremap <silent> <leader>dr :lua require'telescope'.extensions.ros.packages{cwd=os.getenv("ROS_WORKSPACE") or "."}<CR>
-" package files (or just .)
-nnoremap <silent> <leader>ds :lua require'telescope'.extensions.ros.files{}<CR>
-" Grep things
-nnoremap <silent> <leader>dg :lua require'telescope'.extensions.ros.grep_string{}<CR>
-nnoremap <silent> <leader>g :lua require'telescope'.extensions.ros.live_grep{}<CR>
-" LSP Errors
-nnoremap <silent> <leader>e :lua vim.lsp.diagnostic.set_loclist({open_loclist=false}); require'telescope.builtin'.loclist{}<CR>
-" Buffers
-nnoremap <silent> <leader>db :lua require'telescope.builtin'.buffers{}<CR>
-nnoremap <silent> <leader><space> :Telescope buffers<CR>
-" Git files
-nnoremap <silent> <leader>df :Telescope git_files<CR>
-" Lines
-nnoremap <silent> <leader>dl :Telescope current_buffer_fuzzy_find<CR>
-nnoremap <silent> <leader><leader><space> :Telescope resume<CR>
-
 " Undotree
 nnoremap <silent> <leader>ut :UndotreeToggle<CR>:UndotreeFocus<CR>
 nnoremap <silent> <leader>uf :UndotreeFocus<CR>
@@ -540,7 +530,7 @@ function! BuildOrRosBuild()
   elseif filereadable("Makefile")
     :exe "AsyncRun -mode=term -strip -listed=0 -program=make"
   else
-    :exe 'AsyncRun -mode=term -strip -listed=0 clang++-12 "%"'
+    :exe 'AsyncRun -mode=term -strip -listed=0 clang++-14 "%"'
   endif
 endfunction
 
@@ -563,4 +553,5 @@ nnoremap <leader>S vip:sort<CR>
 " Macros
 " convert <arg name="foo" default="bar"/> to <arg name="foo" value="$(arg foo)" />
 nnoremap <leader>a 0"byi"Wcevaluef"ci"$(arg "bpa)j0
+nnoremap <leader>A 0"byi"f/i value="$(arg "bpa)"j0
 nnoremap <leader>p p<<$s{}<ESC>4kf(Bi::<ESC>bi

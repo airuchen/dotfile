@@ -65,6 +65,7 @@ module XMonad.Prompt.MyPass
     , passOTPPrompt
     ) where
 
+import Data.List (isInfixOf)
 import System.Directory (getHomeDirectory)
 import System.FilePath (combine, dropExtension, takeExtension)
 import System.Posix.Env (getEnv)
@@ -250,6 +251,9 @@ escapeQuote = concatMap escape
         escape '"' = "\\\""
         escape x   = [x]
 
+showEntry :: String -> Bool
+showEntry e = not $ isInfixOf "docker-credential-helpers" e
+
 -- | Retrieve the list of passwords from the password store 'passwordStoreDir
 --
 getPasswords :: FilePath -> IO [String]
@@ -260,7 +264,7 @@ getPasswords passwordStoreDir = do
     "-type", "f",
     "-name", "*.gpg",
     "-printf", "%P\n"] []
-  return . map removeGpgExtension $ lines files
+  return . map removeGpgExtension $ filter showEntry $ lines files
 
 removeGpgExtension :: String -> String
 removeGpgExtension file | takeExtension file == ".gpg" = dropExtension file

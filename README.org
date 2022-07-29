@@ -40,6 +40,14 @@ CFLAGS=-O2 make
 sudo make install
 #+END_SRC
 
+** nsxiv
+
+#+BEGIN_SRC sh
+sudo apt install libexif-dev libimlib2-dev
+CFLAGS=-O2 make
+sudo make install
+#+END_SRC
+
 ** picom
 
 Optional as compositor for transparency:

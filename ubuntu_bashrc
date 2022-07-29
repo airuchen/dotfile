@@ -94,7 +94,7 @@ if [ "$USER" = "root" ] ; then
   PS1="${debian_chroot:+($debian_chroot)}\[\e[0;31m\][\[\e[1;37m\]\u\[\e[0;31m\]@\[\e[m\]\h\[\e[0;31m\]:\[\e[1;31m\]\w\[\e[0;31\]]\[\e[0m\] "
   PS2="\[\e[0;31\]]\[\e[0m\] "
 else
-  prompt_pre_part="\[\e[0;92m\]┌[ \[\e[0;94m\]\u\[\e[0;32m\] @ \[\e[0;93m\]\h\[\e[0;32m\] : \[\e[0;94m\]\w\[\e[0m\]${debian_chroot:+ [chroot: $debian_chroot]}${VIRTUAL_ENV:+ \[\e[0;35m\]🐍$(basename ${VIRTUAL_ENV})\[\e[0m\]}"
+  prompt_pre_part='\[\e[0;92m\]┌[ \[\e[0;94m\]\u\[\e[0;32m\] @ \[\e[0;93m\]\h\[\e[0;32m\] : \[\e[0;94m\]\w\[\e[0m\]${debian_chroot:+ [chroot: $debian_chroot]}${IN_NIX_SHELL:+ \[\e[0;35m\]nix\[\e[0m\]}${VIRTUAL_ENV:+ \[\e[0;35m\]🐍$(basename ${VIRTUAL_ENV})\[\e[0m\]}'
   prompt_post_part=" \[\e[0;92m\]]\n└>\[\e[0m\] "
   PS1="${prompt_pre_part}${prompt_post_part}"
   PS2="\[\e[0;92m\]~>\[\e[0m\] "
@@ -103,6 +103,7 @@ else
     GIT_PS1_SHOWDIRTYSTATE=1
     GIT_PS1_SHOWCOLORHINTS=1
     GIT_PS1_SHOWUPSTREAM="auto"
+    # Note: this must be single-quoted to prevent expansion of $?
     PROMPT_COMMAND='print_prompt_notifications $?;echo -ne "\033]0;${USER} @ `hostname -s` : `dirs`\007";__git_ps1 "${prompt_pre_part}" "${prompt_post_part}"'
   fi
   #[user@host:working/dir]
@@ -193,6 +194,11 @@ fi
 if [ "$TERM" = "xterm" ] ; then
   export TERM='xterm-256color'
 fi
+
+export GCC_COLORS="error=01;31:warning=01;35:note=01;36:range1=32:range2=34:locus=01:\
+quote=01:fixit-insert=32:fixit-delete=31:\
+diff-filename=01:diff-hunk=32:diff-delete=31:diff-insert=32:\
+type-diff=01;32"
 
 # prints a theme-colored message on the form "[$1] $2"
 print_message() {

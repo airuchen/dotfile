@@ -162,7 +162,7 @@ myWorkspaces hostname = case hostname of
                             "ikarus" -> map show [1..4] ++ ["dev", "www", "mail", "steam", "full", "NSP"]
                             "vaio"   -> map show [1..4] ++ ["dev", "www", "mail", "steam", "full", "NSP"]
                             "nines"  -> map show [1..4] ++ ["dev", "www", "mail", "steam", "full", "NSP"]
-                            _        -> map show [1..4] ++ ["dev", "www", "mail", "slack", "full", "NSP"]
+                            _        -> map show [1..4] ++ ["dev", "www", "mail", "com", "full", "NSP"]
 
 
 myScreenOrder :: String -> [ScreenId]
@@ -411,7 +411,7 @@ myKeys host home mandb conf@XConfig {XMonad.modMask = modMask} =
 
 -- The CutWordsLeft removes the "Spacing Maximize" prefix
 -- TODO remove gaps from tabbed layout
-myLayout = smartBorders $ renamed [CutWordsLeft 2] $ spacings $ maximizeWithPadding 0 $ onWorkspace "4" rvizlayout $ onWorkspace "dev" devlayout $ onWorkspaces ["steam", "slack"] steamlayout $ onWorkspace "full" full regularlayout
+myLayout = smartBorders $ renamed [CutWordsLeft 2] $ spacings $ maximizeWithPadding 0 $ onWorkspace "4" rvizlayout $ onWorkspace "dev" devlayout $ onWorkspaces ["steam", "com"] steamlayout $ onWorkspace "full" full regularlayout
   where
     spacings = spacingRaw True (Border gapw gapw gapw gapw) gapsOnByDefault (Border gapw gapw gapw gapw) gapsOnByDefault
     gapw = 5
@@ -444,7 +444,7 @@ myManageHook host = composeAll . concat $
   , [ title     =? t --> doFloat       | t <- titleFloats       ]
   , [ title     =? t --> doFullFloat   | t <- titleFullscreen   ]
   , [ className =? c --> doFullFloat   | c <- classFullscreen   ]
-  , [ className =? "Firefox" --> viewShift (getWs 6)     ]
+  , [ className =? "firefox" --> viewShift (getWs 6)     ]
   , [ className =? "Thunderbird" --> viewShift (getWs 7) ]
   , [ className =? "QtCreator" --> viewShift (getWs 5)   ]
   , [ title     =? "Newsboat" --> viewShift (getWs 2)   ]
@@ -452,14 +452,15 @@ myManageHook host = composeAll . concat $
   , [ className =? c --> doShift (getWs 4) | c <- ["rviz", "rviz2"] ]
   , [ className =? c --> hasBorder False | c <-classNoBorder ]
   , [ className =? c --> doIgnore | c <-classIgnore ]
+  , [ isDialog       --> doCenterFloat ]
   ]
   where
-    classCenter     = ["Xfce4-appfinder"]
+    classCenter     = ["Xfce4-appfinder", "xmessage"]
     classFloat      = ["feh_cover"]
     titleFloats     = ["File Operation Progress", "xvkbd - Virtual Keyboard", "florence"]
     classFullscreen = ["Ristretto", "feh", "Sxiv", "Nsxiv", "mpv", "pathofexile_x64steam.exe", "ns2.exe", "GRIS.exe"]
     titleFullscreen = ["Path of Exile", "Natural Selection 2", "Spark Engine"]
-    classNoBorder   = ["Firefox", "mpv", "pathofexile_x64steam.exe", "ns2.exe", "GRIS.exe"]
+    classNoBorder   = ["firefox", "mpv", "pathofexile_x64steam.exe", "ns2.exe", "GRIS.exe"]
     classIgnore     = ["Life is Strange Before the Storm", "Hyper Light Drifter"]
     classSocial     = ["Steam", "Slack"]
     viewShift       = doF . liftM2 (.) W.greedyView W.shift
@@ -474,6 +475,6 @@ myFadeHook = composeAll . concat $
   , [ className =? "stalonetray" --> transparency ( 220 / 255) ]
   ]
   where
-    alwaysVisible = ["Firefox", "Thunderbird", "mpv", "rviz"]
+    alwaysVisible = ["firefox", "Thunderbird", "mpv", "rviz"]
     alwaysFade = []
     fadeInactive = ["URxvt", "st-256color", "Alacritty", "Thunar"]

@@ -82,7 +82,7 @@ local lsp_status = function(bufno, short, opts)
     -- No warnings, etc
     return as_hilight_str("DiagnosticInfo") .. "✔"
   end
-  return value_sep(opts, rendered, ",")
+  return value_sep(opts, rendered, ", ")
 end
 
 local ftstr = function(opts)
@@ -98,9 +98,9 @@ local line_stats = function(opts)
   local total_lines = opts.val_hl .. "%L"
   local perc = opts.extras_hl .. file_percent
   return value_sep(opts, {
-      value_sep(opts, {cur_col, cur_line}, ":"),
+      value_sep(opts, {cur_col, cur_line}, " : "),
       value_sep(opts, {total_lines, box_it(opts, perc, "(", ")") }, " ")
-    }, "/")
+    }, " / ")
 end
 
 local short_line_stats = function(opts)
@@ -112,13 +112,13 @@ local rhs_sep = "%= "
 local buffers = function(bufno, opts)
   local curr_buff = opts.val_hl .. bufno
   local filter_loaded = function(buf)
-    return vim.api.nvim_buf_is_loaded(buf)
+    return vim.api.nvim_buf_is_loaded(buf) and vim.bo[buf].bufhidden ~= "hide"
   end
   local num_bufs = vim.tbl_count(vim.tbl_filter(filter_loaded, vim.api.nvim_list_bufs()))
   if num_bufs == 1 then
     return curr_buff
   end
-  return value_sep(opts, {curr_buff, opts.val_hl .. num_bufs}, "/")
+  return value_sep(opts, {curr_buff, opts.val_hl .. num_bufs}, " / ")
 end
 
 local git_status = function(bufno, opts)
@@ -151,7 +151,7 @@ local not_nil = function(x)
   return x and x ~= ""
 end
 
-M.line = function(bufno)
+local line = function(bufno)
   local theme = M._opts.active
   local left_elems = value_sep(theme, vim.tbl_filter(not_nil, {
     buffers(bufno, theme),
@@ -166,7 +166,15 @@ M.line = function(bufno)
   return box_it(theme, table.concat(vim.tbl_flatten({left_elems, rhs_sep, right_elems})))
 end
 
-M.lineInactive = function(bufno)
+local title = function(bufno, active)
+  local theme = M._opts.inactive_title
+  if active then
+    theme = M._opts.title
+  end
+  return table.concat({theme.bg, "%=", file_info(bufno, theme), theme.extras_hl, "%M%R%="})
+end
+
+local lineInactive = function(bufno)
   local theme = M._opts.inactive
   local curr_buff = theme.val_hl .. bufno
   local left_elems = value_sep(theme, vim.tbl_filter(not_nil, {
@@ -179,33 +187,50 @@ M.lineInactive = function(bufno)
   return box_it(theme, table.concat(vim.tbl_flatten({left_elems, rhs_sep, right_elems})))
 end
 
--- Called on Win/BufEnter
-M.active = function()
-  local bufno = vim.api.nvim_get_current_buf()
-  vim.wo.statusline = "%!v:lua.require'sb'.line(" .. bufno .. ")"
-end
-
--- Called on Win/BufExit
-M.inactive = function()
-  -- store the bufno
-  -- we also have a chance to change the bg and stuff
-  local bufno = vim.api.nvim_get_current_buf()
-  vim.wo.statusline = "%!v:lua.require'sb'.lineInactive(" .. bufno .. ")"
-end
-
 M._opts = {
   active = {
-    sep_hl = as_hilight_str("MySBSep"),
-    val_hl = as_hilight_str("MySBVal"),
-    extras_hl = as_hilight_str("MySBExtra")
+    sep_hl       = as_hilight_str("MySBSep"),
+    val_hl       = as_hilight_str("MySBVal"),
+    extras_hl    = as_hilight_str("MySBExtra")
   },
-  inactive = {
-    sep_hl = as_hilight_str("MySbSepInactive"),
-    val_hl = as_hilight_str("MySBValInactive"),
-    extras_hl = as_hilight_str("MySBExtraInactive")
+  inactive       = {
+    sep_hl       = as_hilight_str("MySBSepInactive"),
+    val_hl       = as_hilight_str("MySBValInactive"),
+    extras_hl    = as_hilight_str("MySBExtraInactive")
+  },
+  title          = {
+    sep_hl       = as_hilight_str("MySBTitleSep"),
+    val_hl       = as_hilight_str("MySBTitleVal"),
+    extras_hl    = as_hilight_str("MySBTitleExtra"),
+    bg           = as_hilight_str("MySBTitleBG")
+  },
+  inactive_title = {
+    sep_hl       = as_hilight_str("MySBTitleSepInactive"),
+    val_hl       = as_hilight_str("MySBTitleValInactive"),
+    extras_hl    = as_hilight_str("MySBTitleExtraInactive"),
+    bg           = as_hilight_str("MySBTitleInactiveBG")
   },
   _loaded = false
 }
+
+M.active = function(buf)
+  if vim.api.nvim_buf_is_valid(buf) then
+    return line(buf)
+  end
+end
+
+M.title = function()
+  local buf = vim.api.nvim_get_current_buf()
+  local win = vim.api.nvim_get_current_win()
+  if buf and vim.api.nvim_buf_is_valid(buf) then
+    return title(buf, win == tonumber(vim.g.actual_curwin))
+  end
+  return ""
+end
+
+M.inactive = function(buf)
+  return lineInactive(buf)
+end
 
 local vimc = vim.api.nvim_command
 
@@ -215,22 +240,53 @@ local one_time_setup = function()
   end
   M._opts._loaded = true
   local active_bg = "#282828"
+  local title_bg = "#1d2021"
+  local inactive_title_bg = "#282828"
   local inactive_bg = active_bg
   local fg = "#8ec97c"
+  local title_fg = "#d56d0e"
   local inactive_fg = "#689d6a"
-  vimc("highlight MySBSep cterm=none ctermbg=0 ctermfg=8 guibg=" .. active_bg .. " guifg=#7c6f64")
-  vimc("highlight MySBVal   cterm=none ctermbg=0 ctermfg=14 guibg=" .. active_bg .. " guifg=" .. fg)
-  vimc("highlight MySBExtra   cterm=none ctermbg=0 ctermfg=4 guibg=" .. active_bg .. " guifg=#458588")
-  vimc("highlight MySBSepInactive cterm=none ctermbg=0 ctermfg=8 guibg=" .. inactive_bg .. " guifg=#7c6f64")
-  vimc("highlight MySBValInactive   cterm=none ctermbg=0 ctermfg=14 guibg=" .. inactive_bg .. " guifg=" .. inactive_fg)
-  vimc("highlight MySBExtraInactive   cterm=none ctermbg=0 ctermfg=4 guibg=" .. inactive_bg .. " guifg=#458588")
-  vimc("autocmd WinEnter,BufEnter * lua require'sb'.active()")
-  vimc("autocmd WinLeave * lua require'sb'.inactive()")
+  vim.o.laststatus = 3
+  vim.o.winbar = [[%{%luaeval("require'sb'.title()")%}]]
+  vimc("highlight MySBSep cterm               = none ctermbg = 0 ctermfg = 8 guibg  = " .. active_bg .. " guifg     = #7c6f64")
+  vimc("highlight MySBVal   cterm             = none ctermbg = 0 ctermfg = 14 guibg = " .. active_bg .. " guifg     = " .. fg)
+  vimc("highlight MySBExtra   cterm           = none ctermbg = 0 ctermfg = 4 guibg  = " .. active_bg .. " guifg     = #458588")
+  vimc("highlight MySBSepInactive cterm       = none ctermbg = 0 ctermfg = 8 guibg  = " .. inactive_bg .. " guifg   = #7c6f64")
+  vimc("highlight MySBValInactive   cterm     = none ctermbg = 0 ctermfg = 14 guibg = " .. inactive_bg .. " guifg   = " .. inactive_fg)
+  vimc("highlight MySBExtraInactive   cterm   = none ctermbg = 0 ctermfg = 4 guibg  = " .. inactive_bg .. " guifg   = #458588")
+
+  vimc("highlight MySBTitleSep cterm               = none ctermbg = 0 ctermfg = 8 guibg  = " .. title_bg .. " guifg     = #7c6f64")
+  vimc("highlight MySBTitleVal   cterm             = none ctermbg = 0 ctermfg = 14 guibg = " .. title_bg .. " guifg     = " .. title_fg)
+  vimc("highlight MySBTitleExtra   cterm           = none ctermbg = 0 ctermfg = 4 guibg  = " .. title_bg .. " guifg     = #458588")
+  vimc("highlight MySBTitleBG   cterm         = none ctermbg = 0 ctermfg = 4 guibg  = " .. title_bg)
+
+  vimc("highlight MySBTitleSepInactive cterm       = none ctermbg = 0 ctermfg = 8 guibg  = " .. inactive_title_bg .. " guifg   = #7c6f64")
+  vimc("highlight MySBTitleValInactive   cterm     = none ctermbg = 0 ctermfg = 14 guibg = " .. inactive_title_bg .. " guifg   = " .. inactive_fg)
+  vimc("highlight MySBTitleExtraInactive   cterm   = none ctermbg = 0 ctermfg = 4 guibg  = " .. inactive_title_bg .. " guifg   = #458588")
+  vimc("highlight MySBTitleInactiveBG   cterm = none ctermbg = 0 ctermfg = 4 guibg  = " .. inactive_title_bg)
+  vim.api.nvim_create_augroup("MySB", { clear = true })
+  vim.api.nvim_create_autocmd({"WinEnter", "BufWinEnter"}, { callback = function()
+    local buf = tonumber(vim.fn.expand("<abuf>"))
+    local bar = M.active(buf)
+    vim.wo.statusline = bar
+  end, group = "MySB", desc = "Set active window statusbar" })
+  -- vim.api.nvim_create_autocmd("WinLeave", { callback = function()
+  --   local buf = tonumber(vim.fn.expand("<abuf>"))
+  --   local win = vim.api.nvim_get_current_win()
+  --   vim.schedule(function()
+  --     -- Buffer might have gone away
+  --     if vim.api.nvim_buf_is_valid(buf) and vim.api.nvim_win_is_valid(win) then
+  --       vim.wo[win].statusline = string.format("%%!luaeval('require\"sb\".inactive(%s)')", buf)
+  --     end
+  --   end)
+  -- end, group = "MySB", desc = "Set inactive window statusbar" })
 end
 
 M.setup = function(opts)
   M._opts = vim.tbl_deep_extend("force", M._opts, opts or {})
   one_time_setup()
+  -- Set initial status line
+  vim.wo.statusline = line(1)
 end
 
 return M

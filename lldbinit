@@ -1,0 +1,3 @@
+command script import /usr/lib/llvm-14/lib/python3.8/site-packages/lldb/formatters/cpp/libcxx.py
+command script import /usr/lib/llvm-14/lib/python3.8/site-packages/lldb/formatters/cpp/gnu_libstdcpp.py
+command script import /home/felix/config/lldb/eigenlldb.py

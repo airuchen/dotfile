@@ -14,19 +14,19 @@ local custom_attach = function(client)
   local opts = {buffer = 0, silent = true, remap = false}
   vim.keymap.set('n', '<c-]>', vim.lsp.buf.definition, opts)
   vim.keymap.set('n', '<leader>h', vim.lsp.buf.hover, opts)
-  vim.keymap.set('n', '<leader>f', vim.lsp.buf.code_action, opts)
+  -- vim.keymap.set('n', '<leader>f', vim.lsp.buf.code_action, opts)
   vim.keymap.set('n', '<leader>cr', vim.lsp.buf.rename, opts)
   -- vim.keymap.set('n', '<leader>r', vim.lsp.buf.references, opts)
-  vim.keymap.set('n', '<leader>d', vim.lsp.diagnostic.show_line_diagnostics, opts)
+  vim.keymap.set('n', '<leader>d', vim.diagnostic.open_float, opts)
   vim.keymap.set('n', '<leader>cf', vim.lsp.buf.formatting, opts)
   vim.keymap.set('v', '<leader>cf', function() vim.lsp.buf.range_formatting(vim.lsp.util.make_range_params()) end, opts)
   vim.keymap.set('n', '<space>a', '<cmd>ClangdSwitchSourceHeader<CR>', opts)
-  vim.keymap.set('n', '[d', vim.lsp.diagnostic.goto_prev, opts)
-  vim.keymap.set('n', ']d', vim.lsp.diagnostic.goto_next, opts)
+  vim.keymap.set('n', '[d', vim.diagnostic.goto_prev, opts)
+  vim.keymap.set('n', ']d', vim.diagnostic.goto_next, opts)
 end
 
 nvim_lsp.clangd.setup{
-  cmd = { "clangd-13", "--log=error", "--inlay-hints", "--background-index", "--clang-tidy", "--header-insertion=never", "-j=6", '--suggest-missing-includes', '--cross-file-rename'},
+  cmd = { "clangd-14", "--log=error", "--inlay-hints", "--background-index", "--clang-tidy", "--header-insertion=never", "-j=6" },
   on_attach = custom_attach,
   capabilities = capabilities
 }

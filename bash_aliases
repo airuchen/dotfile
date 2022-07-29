@@ -9,6 +9,7 @@ alias cp='cp -i'
 alias mv='mv -i'
 alias ncal3='ncal -3 -w'
 alias ytdl720="youtube-dl -f 'bestvideo[width<=720]+bestaudio'"
+alias ytdl_it='yt-dlp --no-mtime --no-call-home'
 command -v fdfind > /dev/null && alias fd='fdfind'
 alias pmode_toggle='xfconf-query -c xfce4-power-manager -p /xfce4-power-manager/presentation-mode -T && echo "Presentation mode is $(xfconf-query  -c xfce4-power-manager -p /xfce4-power-manager/presentation-mode -v)"'
 # Load loopback module for monitoring inputs
@@ -40,12 +41,14 @@ alias reconfig='rosrun rqt_reconfigure rqt_reconfigure'
 alias viewltsmap='roslaunch ipa_long_term_slam lts_view.launch robot_env:=unused map:=$PWD/map.yaml ltsmap:=$PWD/map.ltsmap'
 
 # Compile flags
-alias ckin_dbg_cfg='catkin config --cmake-args "-DCMAKE_EXPORT_COMPILE_COMMANDS=1" "-DCMAKE_BUILD_TYPE=Debug" -DCMAKE_CXX_FLAGS="-Werror=uninitialized -Werror=return-type -Werror=format -Wsign-compare -ggdb"'
-alias ckin_rel_cfg='catkin config --cmake-args "-DCMAKE_EXPORT_COMPILE_COMMANDS=1" "-DCMAKE_BUILD_TYPE=Release" -DCMAKE_CXX_FLAGS="-Werror=uninitialized -Werror=return-type -Werror=format -Wsign-compare -ggdb"'
+alias ckin_dbg_cfg='catkin config --cmake-args "-DCMAKE_C_COMPILER_LAUNCHER=ccache" "-DCMAKE_CXX_COMPILER_LAUNCHER=ccache" "-DCMAKE_EXPORT_COMPILE_COMMANDS=1" "-DCMAKE_BUILD_TYPE=Debug" -DCMAKE_CXX_FLAGS="-Werror=uninitialized -Werror=return-type -Werror=format -Wsign-compare -ggdb"'
+alias ckin_san_cfg='catkin config --cmake-args "-DCMAKE_C_COMPILER_LAUNCHER=ccache" "-DCMAKE_CXX_COMPILER_LAUNCHER=ccache" "-DCMAKE_EXPORT_COMPILE_COMMANDS=1" "-DENABLE_SANITIZER_ADDRESS=ON" "-DENABLE_SANITIZER_LEAK=ON" "-DENABLE_SANITIZER_UNDEFINED_BEHAVIOR=ON" "-DCMAKE_BUILD_TYPE=Debug" -DCMAKE_CXX_FLAGS="-Werror=uninitialized -Werror=return-type -Werror=format -Wsign-compare -ggdb"'
+alias ckin_san_rel_cfg='catkin config --cmake-args "-DCMAKE_C_COMPILER_LAUNCHER=ccache" "-DCMAKE_CXX_COMPILER_LAUNCHER=ccache" "-DCMAKE_EXPORT_COMPILE_COMMANDS=1" "-DENABLE_SANITIZER_ADDRESS=ON" "-DENABLE_SANITIZER_LEAK=ON" "-DENABLE_SANITIZER_UNDEFINED_BEHAVIOR=ON" "-DCMAKE_BUILD_TYPE=Release" -DCMAKE_CXX_FLAGS="-Werror=uninitialized -Werror=return-type -Werror=format -Wsign-compare -ggdb"'
+alias ckin_rel_cfg='catkin config --cmake-args "-DCMAKE_C_COMPILER_LAUNCHER=ccache" "-DCMAKE_CXX_COMPILER_LAUNCHER=ccache" "-DCMAKE_EXPORT_COMPILE_COMMANDS=1" "-DCMAKE_BUILD_TYPE=Release" -DCMAKE_CXX_FLAGS="-Werror=uninitialized -Werror=return-type -Werror=format -Wsign-compare -ggdb"'
 alias use_gcc='CC=gcc CXX=g++'
-alias clang_build='CC=clang-13 CXX=clang++-13 LD=clang++-13'
-alias clang_build_traced='CC="clang-13 -ftime-trace" CXX="clang++-13 -ftime-trace" LD=clang++-13'
-alias clang_asan='CC="clang-13 -fsanitize=address" CXX="clang++-13 -fsanitize=address" LD=clang++-13'
+alias clang_build='CC=clang-14 CXX=clang++-14 LD=clang++-14'
+alias clang_build_traced='CC="clang-14 -ftime-trace" CXX="clang++-14 -ftime-trace" LD=clang++-14'
+alias clang_asan='CC="clang-14 -fsanitize=address" CXX="clang++-14 -fsanitize=address" LD=clang++-14'
 alias gnu_asan='CC="gcc -fsanitize=address -ggdb" CXX="g++ -fsanitize=address -ggdb"'
 alias alias_edit='vim ~/config/bash_aliases && alias_reload'
 alias alias_reload='source ~/config/bash_aliases'
@@ -70,6 +73,17 @@ alias coredumpsoff='ulimit -c 0'
 #setxkbmap to reset kb layout
 
 alias tb_log='tensorboard --host 127.0.0.1 --logdir'
+
+# Docker
+alias kaniko='docker run -v$(pwd):/context:ro gcr.io/kaniko-project/executor:debug --context /context'
+
+function pandocslides {
+	if [ $# -ne 1 ]; then
+		echo "Usage: pandocslides source.org"
+		return;
+	fi;
+	pandoc -t revealjs -s --self-contained --slide-level=3 -o "${1}.html" "${1}"
+}
 
 function mp3_convert {
   find -maxdepth 1 -iname '*.flac' -type f -print0  | xargs -0 -P 8 -n 1 lame --out-dir /tmp -V 0 -S
@@ -405,11 +419,11 @@ function kill_named_pythons {
   fi
 }
 
-alias colb='is_ros_workspace && colcon --log-base "${ROS_WORKSPACE}/log" build --base-paths "${ROS_WORKSPACE}" --cmake-args -DCMAKE_EXPORT_COMPILE_COMMANDS=1 -DCMAKE_CXX_FLAGS=-ggdb --symlink-install --build-base "${ROS_WORKSPACE}/build" --install-base ${ROS_WORKSPACE}/install'
+alias colb='is_ros_workspace && colcon --log-base "${ROS_WORKSPACE}/log" build --mixin compile-commands ccache --base-paths "${ROS_WORKSPACE}" --cmake-args -DCMAKE_EXPORT_COMPILE_COMMANDS=1 -DCMAKE_CXX_FLAGS=-ggdb --symlink-install --build-base "${ROS_WORKSPACE}/build" --install-base ${ROS_WORKSPACE}/install'
 alias colt='is_ros_workspace && colcon --log-base "${ROS_WORKSPACE}/log" test --base-paths "${ROS_WORKSPACE}" --cmake-args -DCMAKE_EXPORT_COMPILE_COMMANDS=1 -DCMAKE_CXX_FLAGS=-ggdb --symlink-install --build-base "${ROS_WORKSPACE}/build" --install-base "${ROS_WORKSPACE}/install"'
-alias colbthis='is_ros_workspace && colcon --log-base "${ROS_WORKSPACE}/log" build --cmake-args -DCMAKE_EXPORT_COMPILE_COMMANDS=1 -DCMAKE_CXX_FLAGS=-ggdb --symlink-install --build-base "${ROS_WORKSPACE}/build" --install-base "${ROS_WORKSPACE}/install"'
+alias colbthis='is_ros_workspace && colcon --log-base "${ROS_WORKSPACE}/log" build --mixin compile-commands ccache --cmake-args -DCMAKE_EXPORT_COMPILE_COMMANDS=1 -DCMAKE_CXX_FLAGS=-ggdb --symlink-install --build-base "${ROS_WORKSPACE}/build" --install-base "${ROS_WORKSPACE}/install"'
 alias coltr='is_ros_workspace && colcon --log-base "${ROS_WORKSPACE}/log" test-result --test-result-base "${ROS_WORKSPACE}/build" --verbose'
-alias colrelbuild='is_ros_workspace && colcon --log-base "${ROS_WORKSPACE}/log" build --base-paths "${ROS_WORKSPACE}" --cmake-args -DCMAKE_EXPORT_COMPILE_COMMANDS=1 -DCMAKE_BUILD_TYPE=Release -DSANITIZE=OFF -DBUILD_TESTING=OFF -DCMAKE_CXX_FLAGS=-ggdb --symlink-install --build-base "${ROS_WORKSPACE}/build" --install-base "${ROS_WORKSPACE}/install"'
+alias colrelbuild='is_ros_workspace && colcon --log-base "${ROS_WORKSPACE}/log" build --mixin compile-commands ccache --base-paths "${ROS_WORKSPACE}" --cmake-args --DCMAKE_EXPORT_COMPILE_COMMANDS=1 DCMAKE_BUILD_TYPE=Release -DSANITIZE=OFF -DBUILD_TESTING=OFF -DCMAKE_CXX_FLAGS=-ggdb --symlink-install --build-base "${ROS_WORKSPACE}/build" --install-base "${ROS_WORKSPACE}/install"'
 
 function single_ros2test {
   if [ $# -lt 2 ]; then
