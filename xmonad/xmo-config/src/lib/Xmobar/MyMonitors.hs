@@ -7,27 +7,31 @@ import Helpers
 baseConfig :: CustomColors -> Int -> Config
 baseConfig c fontsize =
   defaultConfig
-    { font = "xft:DejaVu Sans:size=" ++ show fontsize ++ ":bold:antialias=true"
+    { font = "DejaVu Sans Bold " ++ show fontsize
     , additionalFonts =
-        [ "xft:DejaVu Sans Mono:size=" ++
-          show fontsize ++ ":bold:antialias=true"
-        , "xft:Symbola-" ++ show (fontsize + 1) ++ ":bold:antialias=true"
+        [ "DejaVu Sans Mono Bold " ++ show fontsize
+        , "Symbola Bold " ++ show (fontsize + 1)
+        , "DejaVuSansMono Nerd Font Bold " ++ show fontsize
         ]
-    , iconRoot = myHome ++ "/config/xmonad/icons"
-    , bgColor = xmbBg c
-    , fgColor = xmbFg c
-    , alpha = 220
-    , border = BottomB
-    , borderColor = xmbBg c
-    , position = OnScreen 0 $ TopH 25
-    , allDesktops = False -- show on all desktops
-    , persistent = True -- enable/disable hiding (True = disabled
-                                      --, lowerOnStart      = False   -- send to bottom of window stack on start
-                                      --, hideOnStart       = False   -- start with window unmapped (hidden)
-                                      --, overrideRedirect  = True    -- set the Override Redirect flag (Xlib)
-                                      --, sepChar           = "%"
-                                      --, alignSep          = "}{"
+    , iconRoot     = myHome ++ "/config/xmonad/icons"
+    , bgColor      = xmbBg c
+    , fgColor      = xmbFg c
+    , alpha        = 220
+    , border       = NoBorder
+    , borderColor  = xmbBg c
+    , position     = TopH 25
+    , allDesktops  = False -- show on all desktops
+    , pickBroadest = True
+    , persistent   = False -- enable/disable hiding (True = disabled
+    -- , lowerOnStart      = False   -- send to bottom of window stack on start
+    -- , hideOnStart       = False   -- start with window unmapped (hidden)
+    -- , overrideRedirect  = True    -- set the Override Redirect flag (Xlib)
+    -- , sepChar           = "%"
+    -- , alignSep          = "}{"
     }
+
+sep :: String
+sep = xmoSep
 
 colArgs :: CustomColors -> [String]
 colArgs c =
@@ -46,7 +50,7 @@ buildArgs' args extra col = args ++ (colArgs' col) ++ ["--"] ++ extra
 commonNetOpts :: CustomColors -> [String]
 commonNetOpts c =
   buildArgs
-    [ "--template" , "Net: <fn=1><tx></fn>↑ <fn=1><rx></fn>↓kB/s"
+    [ "--template" , "<action=`nm-connection-editor`>Net: <fn=1><tx></fn>↑ <fn=1><rx></fn>↓kB/s</action>" ++ sep
     , "--Low" , "10240" -- units: B/s
     , "--High" , "55120" -- units: B/s
     , "--minwidth" , "5"
@@ -131,7 +135,7 @@ myMem c rate =
 
 --   (%F = y-m-d date, %a = day of week, %T = h:m:s time)
 myDate :: Date
-myDate = Date "%y-%m-%d (%a, W%V) %T" "date" 10
+myDate = Date "%d.%m. (%a, W%V) %T" "date" 10
 
 myMPD :: Monitors
 myMPD =
@@ -146,7 +150,34 @@ myMPD =
     , "-S" , "<icon=stop.xpm/>"
     , "-Z" , "<icon=pause.xpm/>"
     ]
-    10
+    50
+
+
+-- 📁 📂 🗀
+
+myDiskU :: CustomColors -> Monitors
+myDiskU c = DiskU [("/", "<fn=1>📂</fn> <fn=1><free></fn> <fn=1><usedp></fn>%")]
+                  (buildArgs
+                  [ "-f", "⚪◔◑◕●" -- TODO use icons?
+                  , "-W", "0"
+                  ]
+                  []
+                  c)
+                  1000
+
+myDiskIO :: CustomColors -> Monitors
+myDiskIO c = DiskIO [("/", "<fn=1><read></fn>↑ <fn=1><write></fn>↓")]
+                (buildArgs
+                  [ "--Low" ,  (show $ 1024 * 1024 * 1) -- units: B/s
+                  , "--High" , (show $ 1024 * 1024 * 20) -- units: B/s
+                  , "--minwidth" , "5"
+                  , "--ddigits" , "0"
+                  , "--padchars" , " "
+                  , "--align" , "l"
+                  ]
+                  []
+                  c)
+                  100
 
 commonBatSettings :: CustomColors -> String -> [String]
 commonBatSettings c template =
@@ -200,22 +231,24 @@ myAMDBl rate =
 
 volPart :: String
 volPart = "<action=`xdotool key XF86AudioMute`>%pulse:Master%</action>"
+
 presPart :: String
-presPart = "<action=`" ++ togglePresModeCmd ++ "`><fn=2>%pmode%</fn></action>"
+presPart = "<action=`" ++ togglePresModeCmd ++ "`><fn=3>%pmode%</fn></action>"
+
 cpuPart :: String -> String
 cpuPart temptag = "<action=`xdotool key super+shift+t`>%cpu% %cpufreq% %" ++
   temptag ++
-  "%</action> | %memory%"
+  "%</action>" ++ sep ++ "%memory%"
 
 templateTail :: String -> String -> String
 templateTail nwtag temptag =
   "%" ++
   nwtag ++
   "%" ++
-  " | " ++ cpuPart temptag ++ " | " ++ volPart ++ " | " ++ presPart ++ " | %date% %_XMONAD_PAD%"
+  cpuPart temptag ++ sep ++ "%disku% %diskio%" ++ sep ++ volPart ++ sep ++ gammaStep ++ sep ++ presPart ++ sep ++ "%date%" ++ sep ++ "%_XMONAD_PAD%"
 
 commonMonitors rate cpulow cpuhigh =
-  [ Run StdinReader
+  [ Run XMonadLog
   , Run $ myCpu gruvboxish rate
                       -- memory usage monitor
   , Run $ myMem gruvboxish rate
@@ -223,39 +256,24 @@ commonMonitors rate cpulow cpuhigh =
   , Run myDate
   , Run $ myCpuFreq gruvboxish cpulow cpuhigh rate
   , Run $ myPulse gruvboxish 50
+  , Run $ myDiskU gruvboxish
+  , Run $ myDiskIO gruvboxish
   , Run $ Com (myHome ++ "/config/scripts/pres_mode") [] "pmode" 100
   , Run $ XPropertyLog "_XMONAD_PAD"
+  , Run $ PipeReader "?:${HOME}/.local/state/gammastep" "gammastep"
   ]
 
-ikarusTemplate = "%StdinReader% }{ %mpd% | " ++ templateTail "enp5s0" "k10temp"
+ikarusTemplate = "%XMonadLog% }{ %mpd%" ++ sep ++ templateTail "enp5s0" "k10temp"
 
 ikarusMonitors =
-  commonMonitors 10 3 4 ++
+  commonMonitors 20 3 4 ++
   [ Run myMPD
-  , Run $ myNetwork "enp5s0" gruvboxish 10
+  , Run $ myNetwork "enp5s0" gruvboxish 20
                  -- CPU temp ryzen
-  , Run $ myAmdTemp gruvboxish 10
+  , Run $ myAmdTemp gruvboxish 20
   ]
 
-phobosTemplate = "%StdinReader% }{ " ++ templateTail "dynnetwork" "k10temp"
-
-phobosMonitors =
-  commonMonitors 10 3 4 ++
-  [ Run $ myDynNetwork gruvboxish 10
-                                          -- CPU temp ryzen
-  , Run $ myAmdTemp gruvboxish 10
-  ]
-
-devolaTemplate = "%StdinReader% }{ %dynnetwork% | %bat1% | " ++ cpuPart "thermal0" ++ " | " ++ volPart ++ " | " ++ presBright ++ " | %date% %_XMONAD_PAD%"
-devolaMonitors =
-  commonMonitors 50 1 4 ++
-  [ Run $ myDynNetwork gruvboxish 10
-  , Run $ myIntelTemp gruvboxish 0 50
-  , Run $ myBat1 gruvboxish "BAT0"
-  , Run $ myIntelBl 50
-  ]
-
-ninesTemplate = "%StdinReader% }{ <action=`nm-connection-editor`>%dynnetwork%</action> | <action=`xfce4-power-manager-settings`>%bat1%</action> | " ++ cpuPart "thermal0" ++ " | " ++ volPart ++ " | " ++ presBright ++ " | %date% %_XMONAD_PAD%"
+ninesTemplate = "%XMonadLog% }{ %dynnetwork%<action=`xfce4-power-manager-settings`>%bat1%</action>" ++ sep ++ cpuPart "thermal0" ++ sep ++ "%disku% %diskio%" ++ sep ++ volPart ++ sep ++ presBright ++ sep ++ "%date%" ++ sep ++ "%_XMONAD_PAD%"
 ninesMonitors =
   commonMonitors 100 2 3 ++
   [ Run $ myDynNetwork gruvboxish 30
@@ -264,11 +282,17 @@ ninesMonitors =
   , Run $ myAMDBl 50
   ]
 
+togglePresModeCmd :: String
 togglePresModeCmd = "xfconf-query -c xfce4-power-manager -p /xfce4-power-manager/presentation-mode -T"
-presBright = "<action=`" ++ togglePresModeCmd ++ "`><fn=2>%pmode%</fn>%bright%</action>"
+
+gammaStep :: String
+gammaStep = "<action=`pkill -USR1 '^gammastep$'`><fn=3>%gammastep%</fn></action>"
+
+presBright :: String
+presBright = gammaStep ++ sep ++ "<action=`" ++ togglePresModeCmd ++ "`><fn=3>%pmode%</fn>%bright%</action>"
 
 vaioTemplate =
-  " %StdinReader% }{ %dynnetwork% | %bat1%%bat2% | " ++ cpuPart "thermal0" ++ " | " ++ volPart ++ " | " ++ presBright ++ " | %date% %_XMONAD_PAD%"
+  " %XMonadLog% }{ %dynnetwork%%bat1%%bat2%" ++ sep ++ cpuPart "thermal0" ++ sep ++ volPart ++ sep ++ presBright ++ sep ++ "%date% %_XMONAD_PAD%"
 
 vaioMonitors =
   commonMonitors 100 1 3 ++
@@ -276,18 +300,6 @@ vaioMonitors =
   , Run $ myIntelTemp gruvboxish 0 100
   , Run $ myBat1 gruvboxish "BAT0"
   , Run $ myBat2 gruvboxish "BAT1"
-  , Run $ myIntelBl 30
-  ]
-
-sbTemplate =
-  " %StdinReader% }{ %dynnetwork% | %bat1%%bat2% | " ++ cpuPart "thermal9" ++ " | " ++ volPart ++ " | " ++ presBright ++ " | %date% %_XMONAD_PAD%"
-
-sbMonitors =
-  commonMonitors 50 1 4 ++
-  [ Run $ myDynNetwork gruvboxish 50
-  , Run $ myIntelTemp gruvboxish 9 50
-  , Run $ myBat1 gruvboxish "BAT1"
-  , Run $ myBat2 gruvboxish "BAT2"
   , Run $ myIntelBl 30
   ]
 
@@ -300,7 +312,7 @@ hostConfig "ikarus" c =
     , commands = ikarusMonitors
     }
 hostConfig "nines" c =
-  (baseConfig gruvboxish 11)
+  (baseConfig gruvboxish 17)
     { template = ninesTemplate
     , commands = ninesMonitors
     }
@@ -308,19 +320,4 @@ hostConfig "vaio" c =
   (baseConfig gruvboxish 9)
     { template = vaioTemplate
     , commands = vaioMonitors
-    }
-hostConfig "phobos" c =
-  (baseConfig gruvboxish 11)
-    { template = phobosTemplate
-    , commands = phobosMonitors
-    }
-hostConfig "sb" c =
-  (baseConfig gruvboxish 9)
-    { template = sbTemplate
-    , commands = sbMonitors
-    }
-hostConfig "devola" c =
-  (baseConfig gruvboxish 9)
-    { template = devolaTemplate
-    , commands = devolaMonitors
     }

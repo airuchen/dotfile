@@ -139,12 +139,12 @@ unset LESS_PATH
 unalias vim 2> /dev/null
 VIM_PATH=$(which vim)
 NVIM_PATH=$(which nvim)
-if [ "$NVIM_PATH" ] && [ "$NVIM_PATH" ]; then
+if [ "$NVIM_PATH" ] && [ -x "$NVIM_PATH" ]; then
   export VISUAL=nvim
   export EDITOR=nvim
   alias vi='nvim'
   alias vim='nvim'
-elif [ "$VIM_PATH" ] && [ "$VIM_PATH" ]; then
+elif [ "$VIM_PATH" ] && [ -x "$VIM_PATH" ]; then
   export VISUAL=vim
   export EDITOR=vim
   alias vi='vim'
@@ -165,10 +165,14 @@ alias ll='ls -alhF'
 alias la='ls -A'
 alias multidl='curl -L -A "Mozilla/4.0" --remote-name-all'
 
+
+LSD_PATH=$(which lsd)
 # gnuls colours
 export LS_COLORS="fi=00:di=94:ln=35:ex=32:or=05;38;41:mi=05;38;41" # gruvbox
 #export LS_COLORS="fi=00:di=36:ln=35:ex=32:or=05;37;41:mi=05;37;41" # solarized/default
-if [ -x /usr/local/bin/gls ] ; then
+if [ "$LSD_PATH" ] && [ -x "$LSD_PATH" ]; then
+  alias ls='lsd'
+elif [ -x /usr/local/bin/gls ] ; then
   if [ "$USER" = "root" ] ; then
     alias ls='gls -F -A --color=auto'
   else
@@ -190,6 +194,7 @@ elif [ "$OS" = "Darwin" ] ; then # os x, make its ls behave like gnuls
   export LSCOLORS="GxHxxxxxCxxxxxxxxxxxxx"
   alias ls='ls -FG'
 fi
+unset LSD_PATH
 
 if [ "$TERM" = "xterm" ] ; then
   export TERM='xterm-256color'
@@ -240,32 +245,27 @@ done
 # display warnings if the shell is interactive
 case $- in
   *i*)
-    if [ ! -z "$_INTERNAL_READLINE_ERROR" ]; then
+    if [ -n "$_INTERNAL_READLINE_ERROR" ]; then
       print_message "!" "$_INTERNAL_READLINE_ERROR"
     fi
-    if [ ! -z "$_INTERNAL_VIM_ERROR" ]; then
+    if [ -n "$_INTERNAL_VIM_ERROR" ]; then
       print_message "!" "$_INTERNAL_VIM_ERROR"
     fi
-    if [ ! -z "$_INTERNAL_LESS_ERROR" ]; then
+    if [ -n "$_INTERNAL_LESS_ERROR" ]; then
       print_message "!" "$_INTERNAL_LESS_ERROR"
     fi
-    if [ ! -z "$_INTERNAL_FZF_ERROR" ]; then
+    if [ -n "$_INTERNAL_FZF_ERROR" ]; then
       print_message "!" "$_INTERNAL_FZF_ERROR"
     fi
-    #if [ ! -z "$_INTERNAL_UMASK_ERROR" ]; then
+    # if [ -n "$_INTERNAL_UMASK_ERROR" ]; then
     #    print_message "!" "$_INTERNAL_UMASK_ERROR"
-    #fi
+    # fi
     if [ -z "$TERM" ] || [ "$TERM" = "dumb" ]; then
       print_message "!" "\$TERM missing or running inside a dumb terminal"
     fi
     if [ -z "$PATH" ] || [ "$PATH" = "" ]; then
       print_message "!" "\$PATH is unset or empty"
     fi
-    #if [ -z "$MAIL" ]; then
-    #    print_message "!" "\$MAIL is unset or empty"
-    #elif [ ! -r "$MAIL" ]; then
-    #    print_message "!" "\$MAIL is set but unreadable"
-    #fi
     ;;
 esac
 # clear internal variables
@@ -278,13 +278,19 @@ unset OS
 # if login shell, display stuff
 # XXX if we're not in an interactive shell, the variables will not have been set
 if shopt -q login_shell; then
-  if [ ! -z "$SSH_CONNECTION" ]; then # if remote login, display connection
+  if [ -n "$SSH_CONNECTION" ]; then # if remote login, display connection
     echo "$SSH_CONNECTION" | awk '{printf "[%smconnected from: [0m%s[%sm:[0m%d[%sm\tto: [0m%s[%sm:[0m%d\n\n",
     ENVIRON["COLOR"], $1, ENVIRON["COLOR"], $2, ENVIRON["COLOR"], $3,
     ENVIRON["COLOR"], $4;}'
   fi
   echo -n "[${HIGHLIGHT_COLOR}m" && uptime # show uptime
   echo -n "[0;0m"
+fi
+
+# Set up lf icons
+if [ -e ~/config/lf/lficons ]; then
+  LF_ICONS=$(cat ~/config/lf/lficons)
+  export LF_ICONS
 fi
 
 # Add rust binaries to path

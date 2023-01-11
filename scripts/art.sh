@@ -19,6 +19,6 @@ if [[ -n "$src" ]] ; then
   #resize the image's width to 300px 
   #convert "$src" -resize 300x "$COVER"
   #echo "${src}"
-  feh  --info 'mpc | head -n1' -B black  --class feh_cover "${src}"
+  feh --scale-down --info 'mpc | head -n1' -B black  --class feh_cover "${src}"
   #notify-send -i "${src}" "Now playing" "${playing}"
 fi

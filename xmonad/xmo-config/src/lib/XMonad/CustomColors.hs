@@ -2,7 +2,8 @@ module XMonad.CustomColors
   (
     CustomColors (..),
     solarizedish,
-    gruvboxish
+    gruvboxish,
+    xmoSep
   ) where
 
 data CustomColors = CustomColors { xmbActiveScreen :: String
@@ -29,6 +30,11 @@ data CustomColors = CustomColors { xmbActiveScreen :: String
                                  , monitorLow      :: String
                                  , monitorNormal   :: String
                                  }
+
+xmoSep :: String
+xmoSep = " <fc=" ++ faded_purple ++ ">⠶</fc> " -- :: ⠛ ⣿
+
+
 
 -- TODO if i ever use this again, update the colors that are used for tabbing
 solarizedish = CustomColors { xmbActiveScreen = "#2aa198"

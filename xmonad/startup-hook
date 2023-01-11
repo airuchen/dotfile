@@ -1,6 +1,8 @@
 #!/bin/bash
 
-stalonetrayrc="${HOME}/config/xmonad/hosts/${HOSTNAME}/stalonetrayrc"
+setxkbmap -option caps:escape_shifted_capslock
+
+stalonetrayrc="${HOME}/config/xmonad/hosts/$(hostname --short)/stalonetrayrc"
 if [ ! -e "${stalonetrayrc}" ]; then
 	stalonetrayrc="${HOME}/config/xmonad/stalonetrayrc"
 fi
@@ -11,9 +13,11 @@ else
 	stalonetray -c "${stalonetrayrc}" &
 fi
 
-pgrep nm-applet || nm-applet&
+pgrep '^nm-applet$' || nm-applet&
 
-pgrep picom || picom --config ~/config/xmonad/picom.conf &
+pgrep '^gammastep$' || gammastep&
+
+# pgrep picom || picom --config ~/config/xmonad/picom.conf &
 
 # app launcher
 #pgrep kupfer || kupfer --no-splash &

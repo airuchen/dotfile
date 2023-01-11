@@ -1,7 +1,6 @@
 import qualified Data.Map as M
 import Control.Monad (liftM2)
 import Control.Applicative
-import System.Environment (getEnv) -- to read home
 --import System.Process (readProcess) -- to get hostname
 
 import XMonad hiding ( (|||) )
@@ -13,6 +12,8 @@ import XMonad.Hooks.ManageDocks
 import XMonad.Hooks.FadeWindows
 import XMonad.Hooks.EwmhDesktops -- Fullscreen event hook
 import XMonad.Hooks.InsertPosition -- don't steal master when making new terminal
+import XMonad.Hooks.WindowSwallowing
+import XMonad.Hooks.Rescreen
 import qualified XMonad.StackSet as W
 import XMonad.ManageHook
 
@@ -33,6 +34,7 @@ import XMonad.Layout.Reflect -- flip master to the right
 import XMonad.Layout.MultiToggle -- toggle reflect, etc
 import XMonad.Layout.Tabbed
 import XMonad.Layout.Master
+import XMonad.Layout.WorkspaceDir
 
 import XMonad.Actions.Submap
 import XMonad.Actions.CopyWindow
@@ -40,7 +42,7 @@ import XMonad.Actions.CycleWS
 import XMonad.Actions.GroupNavigation -- nextMatch/historyhook for alt-tab across workspaces
 import XMonad.Actions.PhysicalScreens
 import qualified XMonad.Actions.Navigation2D as N
-import XMonad.Actions.EasyMotion (selectWindow, EasyMotionConfig(..), proportional)
+import XMonad.Actions.EasyMotion (selectWindow, EasyMotionConfig(..), proportional, ChordKeys(..))
 
 import XMonad.Util.Run
 import XMonad.Util.WorkspaceCompare (getSortByXineramaPhysicalRule)
@@ -60,10 +62,9 @@ import Helpers
 
 main = do
   --hostName <- getEnv "HOSTNAME"
-  homeDir <- getEnv "HOME"
   mandb <- getAllManEntries
-  myBar <- statusBarPipe (homeDir ++ "/.local/bin/xmobar-custom") myPP
-  let resultConfig = withEasySB myBar toggleStrutsKey . N.withNavigation2DConfig def . ewmh $ myConfig myHostname homeDir mandb
+  let myBar = statusBarProp (myHome ++ "/.local/bin/xmobar-custom") myPP
+  let resultConfig = addAfterRescreenHook myAfterRescreenHook . withEasySB myBar toggleStrutsKey . N.withNavigation2DConfig def . ewmh $ myConfig mandb
   xmonad resultConfig
 
 myCol :: CustomColors
@@ -82,7 +83,7 @@ myPP = copiesPP indicateCopies $ xmobarPP { ppCurrent = xmobarColor (xmbActiveSc
                 , ppVisible = xmobarColor (xmbVisScreen myCol) "" . sbBrackets
                 , ppHidden = xmobarColor (xmbHidden myCol) "" . sbBrackets
                 , ppLayout = xmobarColor (xmbLayout myCol) ""
-                , ppSep = " | "
+                , ppSep = xmoSep
                 , ppWsSep = ""
                 , ppTitle = xmobarColor (xmbTitle myCol) "" . shorten 180
                 , ppSort = getSortByXineramaPhysicalRule horizontalScreenOrderer
@@ -109,6 +110,10 @@ myTrayEventHook _ = return (All True)
 panelQuery :: Query Bool
 panelQuery = className =? "stalonetray"
 
+-- Reset wallpapers after screen config changes
+myAfterRescreenHook :: X ()
+myAfterRescreenHook = spawn "~/config/scripts/set_multi_wallpapers.sh"
+
 -- Key binding to toggle the gap for the bar
 toggleStrutsKey :: XConfig Layout -> (KeyMask, KeySym)
 toggleStrutsKey XConfig {XMonad.modMask = modMask} = (modMask, xK_b)
@@ -121,23 +126,31 @@ insertHook = insertPosition Above Newer
 
 -- I don't know what the return type actually is...
 -- myConfig :: String -> String -> XConfig l
-myConfig host home mandb = def { terminal           = myTerminal
-                               , modMask            = myModMask
-                               , borderWidth        = myBorderWidth
-                               , workspaces         = myWorkspaces host
-                               , keys               = \c -> mkKeymap c $ myKeys' c
+myConfig mandb = def { terminal           = myTerminal
+                     , modMask            = myModMask
+                     , borderWidth        = myBorderWidth
+                     , workspaces         = myWorkspaces
+                     , keys               = \c -> mkKeymap c $ myKeys mandb c
                                -- Compose from right to left
-                               , manageHook         = insertHook <+> manageDocks <+> namedScratchpadManageHook scratchpads <+> myManageHook host <+> manageHook def
-                               , focusedBorderColor = borderFocused myCol
-                               , normalBorderColor  = borderNormal myCol
-                               , layoutHook         = myLayout
+                     , manageHook         = insertHook <+> manageDocks <+> namedScratchpadManageHook scratchpads <+> myManageHook <+> manageHook def
+                     , focusedBorderColor = borderFocused myCol
+                     , normalBorderColor  = borderNormal myCol
+                     , layoutHook         = myLayout
                                --, logHook            = historyHook
                                -- Versions with transparency
-                               , logHook            = fadeWindowsLogHook myFadeHook <+> historyHook
-                               , handleEventHook    = fadeWindowsEventHook <+> myTrayEventHook
-                               , startupHook        = spawn "~/.xmonad/startup-hook"
-                               }
-                                 where myKeys' = myKeys host home mandb
+                     , logHook            = fadeWindowsLogHook myFadeHook <+> historyHook
+                     , handleEventHook    = fadeWindowsEventHook <+> myTrayEventHook <+> swallowEventHook swallowParents windowsToSwallow
+                     , startupHook        = spawn "~/.xmonad/startup-hook"
+                     }
+
+hasColemak :: Bool
+hasColemak = elem myHostname ["ikarus"]
+
+isHomePc :: Bool
+isHomePc = elem myHostname ["ikarus", "nines"]
+
+gapsOnByDefault :: Bool
+gapsOnByDefault = not $ elem myHostname ["2b"]
 
 myTerminal :: String
 myTerminal = "st"
@@ -145,8 +158,8 @@ myTerminal = "st"
 lightWeightTerm :: String
 lightWeightTerm = "st"
 
-myEditor :: String -> String
-myEditor homeDir = "nvim"
+myEditor :: String
+myEditor = "nvim"
 
 myModMask :: KeyMask
 myModMask = mod4Mask -- Win key
@@ -155,18 +168,17 @@ altMask :: KeyMask
 altMask = mod1Mask
 
 myBorderWidth :: Dimension
-myBorderWidth = 1
+myBorderWidth = case myHostname of
+  "nines" -> 2 -- high dpi
+  _ -> 1
 
-myWorkspaces :: String -> [String]
-myWorkspaces hostname = case hostname of
-                            "ikarus" -> map show [1..4] ++ ["dev", "www", "mail", "steam", "full", "NSP"]
-                            "vaio"   -> map show [1..4] ++ ["dev", "www", "mail", "steam", "full", "NSP"]
-                            "nines"  -> map show [1..4] ++ ["dev", "www", "mail", "steam", "full", "NSP"]
-                            _        -> map show [1..4] ++ ["dev", "www", "mail", "com", "full", "NSP"]
+myWorkspaces :: [String]
+myWorkspaces = if isHomePc
+                  then map show [1..4] ++ ["dev", "www", "mail", "steam", "full", "NSP"]
+                  else map show [1..4] ++ ["dev", "www", "mail", "com", "full", "NSP"]
 
-
-myScreenOrder :: String -> [ScreenId]
-myScreenOrder hostname = case hostname of
+myScreenOrder :: [ScreenId]
+myScreenOrder = case myHostname of
                            "ikarus" -> [2,0,1] -- Desktop
                            _        -> [0..2] -- Regular
 
@@ -203,15 +215,21 @@ tabBarTheme = def { activeBorderColor = borderFocused myCol
                   , urgentTextColor = focusedText myCol
                   }
 
+-- add colemak specific quick keys
+withColemakKeys :: EasyMotionConfig -> EasyMotionConfig
+withColemakKeys conf = if not hasColemak then conf
+        else conf { sKeys = AnyKeys [xK_n, xK_e, xK_i, xK_r, xK_s, xK_t] }
+
 emConfig :: EasyMotionConfig
-emConfig = def { emFont = "xft:DejaVu Sans Mono:size=100:medium:antialias=true"
-               , cancelKey = xK_Escape
-               , borderPx = 8
-               , overlayF = proportional (0.5 :: Double)
-               , txtCol = promptFG myCol
-               , bgCol = promptBG myCol
-               , borderCol = promptBorder myCol
-               }
+emConfig = withColemakKeys def { emFont = "xft:DejaVu Sans Mono:size=100:medium:antialias=true"
+                               , cancelKey = xK_Escape
+                               , borderPx = 8
+                               , overlayF = proportional (0.5 :: Double)
+                               , txtCol = promptFG myCol
+                               , bgCol = promptBG myCol
+                               , borderCol = promptBorder myCol
+                               }
+
 
 -- Prompt config
 myXPConfig :: XPConfig
@@ -265,8 +283,8 @@ fuzzyXPConfig = myXPConfig { searchPredicate = fuzzyMatch
                            }
 
 
-getWorkspace :: String -> Int -> String
-getWorkspace host d = myWorkspaces host !! (d - 1)
+getWorkspace :: Int -> String
+getWorkspace d = myWorkspaces !! (d - 1)
 
 toggleFloat w = windows (\s -> if M.member w (W.floating s)
                                then W.sink w s
@@ -274,8 +292,8 @@ toggleFloat w = windows (\s -> if M.member w (W.floating s)
 
 -- M is Mod
 -- M1 is Alt
-myKeys :: String -> String -> [ManEntry] -> XConfig Layout -> [(String, X())]
-myKeys host home mandb conf@XConfig {XMonad.modMask = modMask} =
+myKeys :: [ManEntry] -> XConfig Layout -> [(String, X())]
+myKeys mandb conf@XConfig {XMonad.modMask = modMask} =
     -- launching and killing programs
     [ ("M-S-<Return>", safeSpawnProg $ XMonad.terminal conf) -- %! Launch terminal
     , ("M1-S-<Return>", safeSpawnProg lightWeightTerm)
@@ -283,11 +301,11 @@ myKeys host home mandb conf@XConfig {XMonad.modMask = modMask} =
     , ("M-S-c", kill1) -- %! Removes a copy of the focused window or closes it if it's the last one.
     , ("M-f", safeSpawnProg "firefox") -- %! Launch firefox
     , ("M-S-f", safeSpawnProg "thunar") -- %! Launch thunar
-    , ("M-v", safeSpawn lightWeightTerm ["-e", myEditor home]) -- %! Launch vim
-    , ("M-S-v", safeSpawn lightWeightTerm ["-e", myEditor home, "-c", "cd " ++ home ++ "/Documents/org/", home ++ "/Documents/org"]) -- %! Launch vim
+    , ("M-v", safeSpawn lightWeightTerm ["-e", myEditor]) -- %! Launch vim
+    , ("M-S-v", safeSpawn lightWeightTerm ["-e", myEditor, "-c", "cd " ++ myHome ++ "/Documents/org/", myHome ++ "/Documents/org"]) -- %! Launch vim
     , ("M-p", safeSpawn myTerminal ["-e", "bpython3"]) -- %! Launch a bpython3
-    , ("M-s", saferSshPrompt (home ++ "/.ssh/config") myXPConfig) -- %! SSH prompt
-    , ("M-S-s", saferSftpPrompt (home ++ "/.ssh/config") myXPConfig) -- %! SFTP prompt
+    , ("M-s", saferSshPrompt (myHome ++ "/.ssh/config") myXPConfig) -- %! SSH prompt
+    , ("M-S-s", saferSftpPrompt (myHome ++ "/.ssh/config") myXPConfig) -- %! SFTP prompt
     , ("M-S-m", saferManPrompt mandb myXPConfig) -- %! man prompt
     , ("M-g", windowMultiPrompt fuzzyXPConfig [(Goto, allWindows), (Goto, wsWindows)])
     , ("M-M1-g", windowMultiPrompt fuzzyXPConfig [(Goto, wsWindows), (Goto, allWindows)])
@@ -298,8 +316,9 @@ myKeys host home mandb conf@XConfig {XMonad.modMask = modMask} =
     , ("M-M1-p p", passPrompt passXPWorkConfig)
     , ("M-M1-p u", passUserPrompt passXPWorkConfig)
     , ("M-M1-p o", passOpenUrlPrompt passXPWorkConfig)
-    , ("M-o", orgPrompt orgXPConfig "TODO" $ home ++ "/Documents/org/refile.org")
-    , ("M-S-o", orgPromptPrimary orgXPConfig "TODO" $ home ++ "/Documents/org/refile.org")
+    , ("M-o", orgPrompt orgXPConfig "NOTE" $ myHome ++ "/Documents/org/refile.org")
+    , ("M-S-o", orgPromptPrimary orgXPConfig "NOTE" $ myHome ++ "/Documents/org/refile.org")
+    , ("M-c", changeDir myXPConfig)
 
     -- Scratchpads
     , ("M-S-t"       , namedScratchpadAction scratchpads "htop")
@@ -313,10 +332,13 @@ myKeys host home mandb conf@XConfig {XMonad.modMask = modMask} =
     , ("M-n ."       , safeSpawn "mpc" ["next"])
     , ("M-n ,"       , safeSpawn "mpc" ["prev"])
     , ("M-n r"       , safeSpawn "mpdrandom" ["-l", "-b", "Music/what"])
-    , ("M-n a"       , safeSpawn "bash" [home ++ "/config/scripts/art.sh"])
+    , ("M-n a"       , safeSpawn "bash" [myHome ++ "/config/scripts/art.sh"])
     ]
     ++
     [ ("M-n " ++ [key], safeSpawn "mpc" ["volume", show (10 * v)]) | (key, v) <- zip "1234567890" [1..] ]
+    -- colemak
+    ++
+    [ ("M-n " ++ [key], safeSpawn "mpc" ["volume", show (10 * v)]) | (key, v) <- zip "qwfpbjluy;" [1..] ]
     ++
 
 
@@ -331,7 +353,7 @@ myKeys host home mandb conf@XConfig {XMonad.modMask = modMask} =
 
     -- move focus up or down the window stack
     , ("M-<Tab>"   , toggleWS' ["NSP"]  ) -- %! Previous ws in history
-    , ("M-S-<Tab>" , moveTo Next $ hiddenWS :&: Not emptyWS :&: ignoringWSs ["NSP"]) -- %! Cycle through all open                         , not visible workspaces
+    , ("M-S-<Tab>" , moveTo Next $ hiddenWS :&: Not emptyWS :&: ignoringWSs ["NSP"]) -- %! Cycle through all open, not visible workspaces
     , ("M1-<Tab>"  , nextMatch History (return True))
     , ("M-m"       , windows W.focusMaster) -- %! Move focus to the master window
     , ("M-j"       , windows W.focusDown  ) -- %! Move focus to the next window
@@ -357,12 +379,12 @@ myKeys host home mandb conf@XConfig {XMonad.modMask = modMask} =
     , ("M-C-h"       , N.windowSwap N.L False)
 
     -- increase or decrease number of windows in the master area
-    , ("M-,",   sendMessage (IncMasterN 1)) -- %! Increment the number of windows in the master area
-    , ("M-.",   sendMessage (IncMasterN (-1))) -- %! Decrement the number of windows in the master area
-    , ("M-S-.", sendMessage (IncMasterRows 1)) -- %! Increment the master grid rows in the splitgrid layout
+    , ("M-,",   sendMessage (IncMasterN 1))       -- %! Increment the number of windows in the master area
+    , ("M-.",   sendMessage (IncMasterN (-1)))    -- %! Decrement the number of windows in the master area
+    , ("M-S-.", sendMessage (IncMasterRows 1))    -- %! Increment the master grid rows in the splitgrid layout
     , ("M-S-,", sendMessage (IncMasterRows (-1))) -- %! Decrement the master grid rows in the splitgrid layout
-    , ("M-C-.", sendMessage (IncMasterCols 1)) -- %! Increment the master grid rows in the splitgrid layout
-    , ("M-C-,", sendMessage (IncMasterCols (-1))) -- %! Decrement the master grid rows in the splitgrid layout
+    , ("M-C-.", sendMessage (IncMasterCols 1))    -- %! Increment the master grid cols in the splitgrid layout
+    , ("M-C-,", sendMessage (IncMasterCols (-1))) -- %! Decrement the master grid cols in the splitgrid layout
 
     -- floating layer support
     , ("M-t", withFocused toggleFloat) -- %! Toggle floating state of window
@@ -387,9 +409,9 @@ myKeys host home mandb conf@XConfig {XMonad.modMask = modMask} =
     , ("<XF86AudioPrev>"         , safeSpawn "mpc" ["prev"])
 
     -- taking screenshots with scrot
-    , ("<Print>"    , safeSpawn "scrot" [home ++ "/Pictures/screenshots/%Y-%m-%dT%H-%M-%S.png"]) -- Whole screen
-    , ("S-<Print>"  , safeSpawn "scrot" ["-u", home ++ "/Pictures/screenshots/%Y-%m-%dT%H-%M-%S.png"]) -- Current window
-    , ("M1-<Print>" , safeSpawn "scrot" ["-s", home ++ "/Pictures/screenshots/%Y-%m-%dT%H-%M-%S.png"]) -- Interactive select
+    , ("<Print>"    , safeSpawn "scrot" [myHome ++ "/Pictures/screenshots/%Y-%m-%dT%H-%M-%S.png"]) -- Whole screen
+    , ("S-<Print>"  , safeSpawn "scrot" ["-u", myHome ++ "/Pictures/screenshots/%Y-%m-%dT%H-%M-%S.png"]) -- Current window
+    , ("M1-<Print>" , safeSpawn "scrot" ["-s", myHome ++ "/Pictures/screenshots/%Y-%m-%dT%H-%M-%S.png"]) -- Interactive select
 
     , ("M-d", safeSpawnProg "xfce4-display-settings")
     ]
@@ -405,7 +427,7 @@ myKeys host home mandb conf@XConfig {XMonad.modMask = modMask} =
     -- mod-{w,e,r} %! Switch to physical/Xinerama screens 1, 2, or 3
     -- mod-shift-{w,e,r} %! Move client to screen 1, 2, or 3
     [(m ++ [key], screenWorkspace sc >>= flip whenJust (windows .f))
-      | (key, sc) <- zip "wer" $ myScreenOrder host
+      | (key, sc) <- zip "wer" $ myScreenOrder
       , (f, m) <- [(W.view, "M-"), (W.shift, "M-S-")]
     ]
 
@@ -415,7 +437,6 @@ myLayout = smartBorders $ renamed [CutWordsLeft 2] $ spacings $ maximizeWithPadd
   where
     spacings = spacingRaw True (Border gapw gapw gapw gapw) gapsOnByDefault (Border gapw gapw gapw gapw) gapsOnByDefault
     gapw = 5
-    gapsOnByDefault = True
 
     squaregrid = renamed [Replace "SquareGrid"] $ GridRatio (16/13)
     splitgrid = mkToggle (single REFLECTX) $ renamed [Replace "Grid"] $ GV.SplitGrid GV.L 2 3 (2/3) (16/9) (3/100)
@@ -426,19 +447,19 @@ myLayout = smartBorders $ renamed [CutWordsLeft 2] $ spacings $ maximizeWithPadd
     evenTiled = tiled (1/2)
     -- Main window at the top and a row of small windows below it
     wide = mkToggle (single REFLECTY) $ renamed [Replace "Wide"] $ Mirror $ Tall 1 (3/100) (4/5)
-    full = noBorders Full
+    full = workspaceDir "~" $ noBorders Full
     threecol = mkToggle (single REFLECTX) $ renamed [Replace "Three"] $ ThreeCol 1 (3/100) (5/12)
     devscreen n = mkToggle (single REFLECTX) $ renamed [Replace n] $ Tall 1 (3/100) 0.7
     goldenspiral = spiral (6/7)
     myTabs = renamed [Replace "Tabbed"] $ tabbedBottomAlways shrinkText tabBarTheme
 
     --regularlayout = threecol ||| evenTiled ||| wide ||| full ||| goldenspiral
-    regularlayout = splitgrid ||| threecol ||| tiled (3/5) ||| wide' ||| myTabs ||| full
-    rvizlayout = wide ||| squaregrid ||| full ||| evenTiled ||| splitgrid
-    devlayout = devscreen "Dev" ||| threecol ||| splitgrid ||| full
-    steamlayout = devscreen "Soc" ||| full ||| evenTiled ||| wide
+    regularlayout = workspaceDir "~" $ splitgrid ||| threecol ||| tiled (3/5) ||| wide' ||| myTabs ||| full
+    rvizlayout = workspaceDir "~/git" $ wide ||| squaregrid ||| full ||| evenTiled ||| splitgrid
+    devlayout = workspaceDir "~/git" (devscreen "Dev") ||| threecol ||| splitgrid ||| full
+    steamlayout = workspaceDir "~" $ devscreen "Soc" ||| full ||| evenTiled ||| wide
 
-myManageHook host = composeAll . concat $
+myManageHook = composeAll . concat $
   [ [ className =? c --> doCenterFloat | c <- classCenter       ]
   , [ className =? c --> doFloat       | c <- classFloat        ]
   , [ title     =? t --> doFloat       | t <- titleFloats       ]
@@ -464,7 +485,7 @@ myManageHook host = composeAll . concat $
     classIgnore     = ["Life is Strange Before the Storm", "Hyper Light Drifter"]
     classSocial     = ["Steam", "Slack"]
     viewShift       = doF . liftM2 (.) W.greedyView W.shift
-    getWs           = getWorkspace host
+    getWs           = getWorkspace
 
 -- Window fading
 myFadeHook = composeAll . concat $
@@ -478,3 +499,10 @@ myFadeHook = composeAll . concat $
     alwaysVisible = ["firefox", "Thunderbird", "mpv", "rviz"]
     alwaysFade = []
     fadeInactive = ["URxvt", "st-256color", "Alacritty", "Thunar"]
+
+-- windows to swallow
+windowsToSwallow :: Query Bool
+windowsToSwallow = return False
+
+swallowParents :: Query Bool
+swallowParents = className =? "st-256color"

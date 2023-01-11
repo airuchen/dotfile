@@ -2,3 +2,5 @@ ncmpcpp/error.log
 vim/.netrwhist
 xmonad/xmonad.state
 xmonad/prompt-history
+nvim/plugin
+nvim/spell/*.spl

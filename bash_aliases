@@ -1,5 +1,8 @@
 # General aliases
+alias ..='cd ..'
+alias ...='cd ../..'
 alias v='vim'
+alias nv='neovide --multigrid'
 alias g='git'
 alias grep='grep --color=auto'
 alias gdb='gdb -q'
@@ -7,8 +10,10 @@ alias feh="feh --scale-down"
 alias diff='diff --color=auto'
 alias cp='cp -i'
 alias mv='mv -i'
+alias mpvs='mpv --shuffle -- '
 alias ncal3='ncal -3 -w'
-alias ytdl720="youtube-dl -f 'bestvideo[width<=720]+bestaudio'"
+alias ytdl720="yt-dlp -f 'bestvideo[height<=720]+bestaudio'"
+alias ytdlhd="yt-dlp -f 'bestvideo[width<=1920]+bestaudio'"
 alias ytdl_it='yt-dlp --no-mtime --no-call-home'
 command -v fdfind > /dev/null && alias fd='fdfind'
 alias pmode_toggle='xfconf-query -c xfce4-power-manager -p /xfce4-power-manager/presentation-mode -T && echo "Presentation mode is $(xfconf-query  -c xfce4-power-manager -p /xfce4-power-manager/presentation-mode -v)"'
@@ -18,43 +23,17 @@ alias paloop='pactl load-module module-loopback'
 # Apt
 alias sau='sudo apt update && apt list --upgradable'
 
-# Workspaces
-alias cdnav='cdws nav'
-alias cdbmw='cdws bmwstr'
-alias cdlearn='cdws learning'
-alias source_ikos='export PATH=/home/fez/local/ikos/bin:$PATH'
-alias tf_env='. ~/git/tensorflow-env/bin/activate'
-
-# Common launch commands
-alias bmwregcfgui='ROBOT_ENV=werk-regensburg-halle-56 roslaunch bmwstr_bringup config_gui.launch launch_server:=false'
-alias bmwrviz='roslaunch bmwstr_bringup rviz.launch robot:=str_v3'
-alias bmwsim='roslaunch bmwstr_simulation single_robot_sim.launch robot:=str_v3'
-alias bmwteleop='roslaunch /home/fez/git/bmwstr/teleop_keyboard.launch'
-alias bmwnav='roslaunch bmwstr_bringup ground_truth_nav.launch'
-alias bmwltsnav='roslaunch bmwstr_bringup ipa_navigation.launch robot:=str_v3 robot_env:=bmw-factory localization_backend:=lts_ng lts_backup_folder:=/tmp'
-alias bgsim='roslaunch cob_bringup_sim robot.launch gui:=false'
-alias fgsim='roslaunch cob_bringup_sim robot.launch'
-alias cobsim='bgsim robot:=cob4-18'
-alias ltsnav='roslaunch ipa_navigation ipa_navigation.launch'
-alias iparviz='roslaunch ipa_navigation rviz.launch'
-alias reconfig='rosrun rqt_reconfigure rqt_reconfigure'
-alias viewltsmap='roslaunch ipa_long_term_slam lts_view.launch robot_env:=unused map:=$PWD/map.yaml ltsmap:=$PWD/map.ltsmap'
-
-# Compile flags
-alias ckin_dbg_cfg='catkin config --cmake-args "-DCMAKE_C_COMPILER_LAUNCHER=ccache" "-DCMAKE_CXX_COMPILER_LAUNCHER=ccache" "-DCMAKE_EXPORT_COMPILE_COMMANDS=1" "-DCMAKE_BUILD_TYPE=Debug" -DCMAKE_CXX_FLAGS="-Werror=uninitialized -Werror=return-type -Werror=format -Wsign-compare -ggdb"'
-alias ckin_san_cfg='catkin config --cmake-args "-DCMAKE_C_COMPILER_LAUNCHER=ccache" "-DCMAKE_CXX_COMPILER_LAUNCHER=ccache" "-DCMAKE_EXPORT_COMPILE_COMMANDS=1" "-DENABLE_SANITIZER_ADDRESS=ON" "-DENABLE_SANITIZER_LEAK=ON" "-DENABLE_SANITIZER_UNDEFINED_BEHAVIOR=ON" "-DCMAKE_BUILD_TYPE=Debug" -DCMAKE_CXX_FLAGS="-Werror=uninitialized -Werror=return-type -Werror=format -Wsign-compare -ggdb"'
-alias ckin_san_rel_cfg='catkin config --cmake-args "-DCMAKE_C_COMPILER_LAUNCHER=ccache" "-DCMAKE_CXX_COMPILER_LAUNCHER=ccache" "-DCMAKE_EXPORT_COMPILE_COMMANDS=1" "-DENABLE_SANITIZER_ADDRESS=ON" "-DENABLE_SANITIZER_LEAK=ON" "-DENABLE_SANITIZER_UNDEFINED_BEHAVIOR=ON" "-DCMAKE_BUILD_TYPE=Release" -DCMAKE_CXX_FLAGS="-Werror=uninitialized -Werror=return-type -Werror=format -Wsign-compare -ggdb"'
-alias ckin_rel_cfg='catkin config --cmake-args "-DCMAKE_C_COMPILER_LAUNCHER=ccache" "-DCMAKE_CXX_COMPILER_LAUNCHER=ccache" "-DCMAKE_EXPORT_COMPILE_COMMANDS=1" "-DCMAKE_BUILD_TYPE=Release" -DCMAKE_CXX_FLAGS="-Werror=uninitialized -Werror=return-type -Werror=format -Wsign-compare -ggdb"'
+# Compilers
 alias use_gcc='CC=gcc CXX=g++'
-alias clang_build='CC=clang-14 CXX=clang++-14 LD=clang++-14'
-alias clang_build_traced='CC="clang-14 -ftime-trace" CXX="clang++-14 -ftime-trace" LD=clang++-14'
-alias clang_asan='CC="clang-14 -fsanitize=address" CXX="clang++-14 -fsanitize=address" LD=clang++-14'
+alias clang_build='CC=clang-15 CXX=clang++-15 LD=clang++-15'
+alias clang_build_traced='CC="clang-15 -ftime-trace" CXX="clang++-15 -ftime-trace" LD=clang++-15'
+alias clang_asan='CC="clang-15 -fsanitize=address" CXX="clang++-15 -fsanitize=address" LD=clang++-15'
 alias gnu_asan='CC="gcc -fsanitize=address -ggdb" CXX="g++ -fsanitize=address -ggdb"'
 alias alias_edit='vim ~/config/bash_aliases && alias_reload'
 alias alias_reload='source ~/config/bash_aliases'
 alias pformat='autopep8 --max-line-length 120 -i -r'
 
-function run_asan {
+run_asan() {
   local asan_loc
   asan_loc=$(ldconfig -p | awk '/libasan/ {print $4}') || return 255
   LD_PRELOAD=${asan_loc} ${@}
@@ -72,10 +51,197 @@ alias coredumpsoff='ulimit -c 0'
 #sudo route add -net default gw 10.17.43.254 netmask 0.0.0.0 dev wlp1s0 metric 1
 #setxkbmap to reset kb layout
 
-alias tb_log='tensorboard --host 127.0.0.1 --logdir'
-
 # Docker
 alias kaniko='docker run -v$(pwd):/context:ro gcr.io/kaniko-project/executor:debug --context /context'
+
+
+# Workspaces
+alias cdnav='cdws nav'
+alias cdbmw='cdws bmwstr'
+# alias cdlearn='cdws learning'
+# alias source_ikos='export PATH=/home/fez/local/ikos/bin:$PATH'
+# alias tf_env='. ~/git/tensorflow-env/bin/activate'
+# alias tb_log='tensorboard --host 127.0.0.1 --logdir'
+
+
+add_ros_alias() {
+	# Common launch commands
+	alias bmwregcfgui='ROBOT_ENV=werk-regensburg-halle-56 roslaunch bmwstr_bringup config_gui.launch launch_server:=false'
+	alias bmwrviz='roslaunch bmwstr_bringup rviz.launch robot:=str_v3'
+	alias bmwsim='roslaunch bmwstr_simulation single_robot_sim.launch robot:=str_v3'
+	alias bmwteleop='roslaunch /home/fez/git/bmwstr/teleop_keyboard.launch'
+	alias bmwnav='roslaunch bmwstr_bringup ground_truth_nav.launch'
+	alias bmwltsnav='roslaunch bmwstr_bringup ipa_navigation.launch robot:=str_v3 robot_env:=bmw-factory localization_backend:=lts_ng lts_backup_folder:=/tmp'
+	alias bgsim='roslaunch cob_bringup_sim robot.launch gui:=false'
+	alias fgsim='roslaunch cob_bringup_sim robot.launch'
+	alias cobsim='bgsim robot:=cob4-18'
+	alias ltsnav='roslaunch ipa_navigation ipa_navigation.launch'
+	alias iparviz='roslaunch ipa_navigation rviz.launch'
+	alias reconfig='rosrun rqt_reconfigure rqt_reconfigure'
+	alias viewltsmap='roslaunch ipa_long_term_slam lts_view.launch robot_env:=unused map:=$PWD/map.yaml ltsmap:=$PWD/map.ltsmap'
+
+	# Compile flags
+	alias ckin_dbg_cfg='catkin config --cmake-args "-DCMAKE_C_COMPILER_LAUNCHER=ccache" "-DCMAKE_CXX_COMPILER_LAUNCHER=ccache" "-DCMAKE_EXPORT_COMPILE_COMMANDS=1" "-DCMAKE_BUILD_TYPE=Debug" -DCMAKE_CXX_FLAGS="-Werror=uninitialized -Werror=return-type -Werror=format -Wsign-compare -ggdb"'
+	alias ckin_san_cfg='catkin config --cmake-args "-DCMAKE_C_COMPILER_LAUNCHER=ccache" "-DCMAKE_CXX_COMPILER_LAUNCHER=ccache" "-DCMAKE_EXPORT_COMPILE_COMMANDS=1" "-DENABLE_SANITIZER_ADDRESS=ON" "-DENABLE_SANITIZER_LEAK=ON" "-DENABLE_SANITIZER_UNDEFINED_BEHAVIOR=ON" "-DCMAKE_BUILD_TYPE=Debug" -DCMAKE_CXX_FLAGS="-Werror=uninitialized -Werror=return-type -Werror=format -Wsign-compare -ggdb"'
+	alias ckin_san_rel_cfg='catkin config --cmake-args "-DCMAKE_C_COMPILER_LAUNCHER=ccache" "-DCMAKE_CXX_COMPILER_LAUNCHER=ccache" "-DCMAKE_EXPORT_COMPILE_COMMANDS=1" "-DENABLE_SANITIZER_ADDRESS=ON" "-DENABLE_SANITIZER_LEAK=ON" "-DENABLE_SANITIZER_UNDEFINED_BEHAVIOR=ON" "-DCMAKE_BUILD_TYPE=Release" -DCMAKE_CXX_FLAGS="-Werror=uninitialized -Werror=return-type -Werror=format -Wsign-compare -ggdb"'
+	alias ckin_rel_cfg='catkin config --cmake-args "-DCMAKE_C_COMPILER_LAUNCHER=ccache" "-DCMAKE_CXX_COMPILER_LAUNCHER=ccache" "-DCMAKE_EXPORT_COMPILE_COMMANDS=1" "-DCMAKE_BUILD_TYPE=Release" -DCMAKE_CXX_FLAGS="-Werror=uninitialized -Werror=return-type -Werror=format -Wsign-compare -ggdb"'
+
+	alias trace_lts_ng='rosparam set /lts_ng/trace_output /tmp/lts_ng && rosparam set /lts_ng/trace_debug true'
+	live_lts_trace() {
+		fname=$(fd -tf lts_ng.*.json /tmp/ | sort -r | head -n 1)
+		if [ "${fname}" ]; then
+			tail -f "${fname}"
+		fi
+	}
+
+	alias no_odom_ramps='rosrun dynamic_reconfigure dynparam  set /move_base/EbandLocalPlanner/controller/diff use_odom_for_ramps false'
+
+	verbose_rosconsole() {
+		export ROSCONSOLE_FORMAT='[${severity} T: ${time}] [${node}/${thread} ${file}:${line} (${function})] ${message}'
+	}
+
+	single_ros_test() {
+		if [ $# -lt 2 ]; then
+			echo "Usage: single_ros_test package testname [test args]"
+			echo "Use --gtest_filter=SomeRegex* to run specific tests only"
+			return;
+		fi;
+		catkin build "$1" --no-deps --make-args "$2" && rosrun "$1" "$2" "${@:3}"
+	}
+
+	rostest_gdb() {
+		if [ $# -lt 2 ]; then
+			echo "Usage: rostest_gdb package testname [test args]"
+			echo "Use --gtest_filter=SomeRegex* to run specific tests only"
+			return;
+		fi;
+		gdb --args "$(catkin_find "$1" "$2")" "${@:3}"
+	}
+
+	single_ros_test_xml() {
+		if [ $# -lt 2 ]; then
+			echo "Usage: single_ros_test_xml package testname [rostest args]"
+			return
+		fi
+		catkin build "$1" --no-deps --make-args "$2" && rostest "${@:3}" "$1" "${2}.xml"
+	}
+
+	single_ros_test_test() {
+		if [ $# -lt 2 ]; then
+			echo "Usage: single_ros_test_test package testname [rostest args]"
+			return
+		fi
+		catkin build "$1" --no-deps --make-args "$2" && rostest "${@:3}" "$1" "${2}.test"
+	}
+
+	single_ros_test_launch() {
+		if [ $# -lt 2 ]; then
+			echo "Usage: single_ros_test_launch package testname [rostest args]"
+			return
+		fi
+		catkin build "$1" --no-deps --make-args "$2" && rostest "${@:3}" "$1" "${2}.launch"
+	}
+
+	stop_override() {
+		local topic="/base/twist_mux/command_teleop_keyboard"
+		if [ $# -gt 0 ]; then
+			topic="${1}"
+		fi
+		echo "topic is ${topic}"
+		rostopic pub "${topic}" geometry_msgs/Twist "{linear: {x: 0.0, y: 0.0, z: 0.0}, angular: {x: 0.0, y: 0.0, z: 0.0}}" -r100
+	}
+}
+
+add_ros2_alias() {
+	function colb {
+		is_ros_workspace && colcon --log-base "${ROS_WORKSPACE}/log" build --mixin compile-commands ccache --base-paths "${ROS_WORKSPACE}" --cmake-args -DCMAKE_EXPORT_COMPILE_COMMANDS=1 -DCMAKE_CXX_FLAGS=-ggdb --symlink-install --build-base "${ROS_WORKSPACE}/build" --install-base ${ROS_WORKSPACE}/install
+	}
+	alias colt='is_ros_workspace && colcon --log-base "${ROS_WORKSPACE}/log" test --base-paths "${ROS_WORKSPACE}" --cmake-args -DCMAKE_EXPORT_COMPILE_COMMANDS=1 -DCMAKE_CXX_FLAGS=-ggdb --symlink-install --build-base "${ROS_WORKSPACE}/build" --install-base "${ROS_WORKSPACE}/install"'
+	alias colbthis='is_ros_workspace && colcon --log-base "${ROS_WORKSPACE}/log" build --mixin compile-commands ccache --cmake-args -DCMAKE_EXPORT_COMPILE_COMMANDS=1 -DCMAKE_CXX_FLAGS=-ggdb --symlink-install --build-base "${ROS_WORKSPACE}/build" --install-base "${ROS_WORKSPACE}/install"'
+	alias coltr='is_ros_workspace && colcon --log-base "${ROS_WORKSPACE}/log" test-result --test-result-base "${ROS_WORKSPACE}/build" --verbose'
+	alias colrelbuild='is_ros_workspace && colcon --log-base "${ROS_WORKSPACE}/log" build --mixin compile-commands ccache --base-paths "${ROS_WORKSPACE}" --cmake-args --DCMAKE_EXPORT_COMPILE_COMMANDS=1 DCMAKE_BUILD_TYPE=Release -DSANITIZE=OFF -DBUILD_TESTING=OFF -DCMAKE_CXX_FLAGS=-ggdb --symlink-install --build-base "${ROS_WORKSPACE}/build" --install-base "${ROS_WORKSPACE}/install"'
+
+	single_ros2test() {
+		if [ $# -lt 2 ]; then
+			echo "Need a package name and test name"
+			return;
+		fi
+		is_ros_workspace || return
+		function rostest_in_base {
+			# suppress cmake stuff
+			colb --packages-up-to "${1}" --symlink-install --cmake-target-skip-unavailable --cmake-target "${2}" > /dev/null || return
+			local test_executable
+			test_executable=$(find "${ROS_WORKSPACE}/build/${1}" -type f -iname "${2}") || return
+			# echo ${test_executable}
+			[ -x "${test_executable}" ] || return 1
+			${test_executable}
+		}
+		rostest_in_base "${1}" "${2}"
+	}
+
+	single_ros2test_gdb() {
+		if [ $# -lt 1 ]; then
+			echo "Need a test name"
+			return;
+		fi
+		is_ros_workspace || return
+		local test_executable
+		test_executable=$(find ${ROS_WORKSPACE}/build -type f -iname "${1}") || return
+		gdb ${test_executable}
+	}
+
+	# Takes filename to unit test and rebuilds it without dependencies + runs it
+	# Any extra arguments will be used as prefix for the test
+	single_ros2test_from_file_fast() {
+		test_executable=$1
+		shift
+		test_name=$(basename "${test_executable}")
+		# Account for /test subfolder
+		build_dir=$(dirname "$test_executable" | sed -e 's#/test$##')
+		pkg_name=$(basename "$build_dir")
+		#echo "Test executable: '${test_executable}', build dir: '${build_dir}', pkg name: '${pkg_name}'"
+		colb --packages-select "${pkg_name}" --cmake-target "${test_name}" && $@ ${test_executable}
+	}
+
+	# Takes filename to unit test and rebuilds + runs it
+	# Any extra arguments will be used as prefix for the test
+	single_ros2test_from_file() {
+		test_executable=$1
+		shift
+		test_name=$(basename "${test_executable}")
+		# Account for /test subfolder
+		build_dir=$(dirname "$test_executable" | sed -e 's#/test$##')
+		pkg_name=$(basename "$build_dir")
+		colb --packages-up-to "${pkg_name}" > /dev/null && $@ ${test_executable}
+	}
+
+	single_ros2test_from_source_file() {
+		is_ros_workspace || return
+		exe=$(basename $1 .cpp)
+		test_executable=$(find ${ROS_WORKSPACE}/build -type f -iname "${exe}") || return
+		single_ros2test_from_file_fast "$test_executable"
+	}
+
+	r2t() {
+		is_ros_workspace || return
+		local test_executable
+		test_executable=$(fd -t x '_test$' "${ROS_WORKSPACE}/build" | fzf) || return
+		single_ros2test_from_file "$test_executable" $@
+	}
+
+	release_ros2_pkg() {
+		if [ $# -lt 1 ]; then
+			echo "Need a pkg name"
+			return
+		fi
+		is_ros_workspace || return
+
+		tmpdir=$(mktemp -d)
+		colcon --log-base "${tmpdir}/log" build --base-paths "${ROS_WORKSPACE}" --executor parallel --merge-install --install-base "${tmpdir}/install" --build-base "${tmpdir}/build" --ament-cmake-args -DCMAKE_BUILD_TYPE=Release -DBUILD_TESTING=OFF --packages-up-to $@
+		echo -e "- Install ROS ${ROS_DISTRO}\n- Install dependencies \`rosdep install --ignore-src --from-path install/share\`\n- Source the workspace \`source install/setup.bash\`" > "${tmpdir}/SETUP.md"
+		tar -czf "/tmp/${1}_$(date --iso-8601).tar.gz" -C "${tmpdir}" SETUP.md install
+	}
+}
 
 function pandocslides {
 	if [ $# -ne 1 ]; then
@@ -107,10 +273,6 @@ function ffmpeg_from_pngs {
   ffmpeg -r 24 -i "${1}" -pix_fmt yuv420p -r 24 "${2}"
 }
 
-function verbose_rosconsole {
-  export ROSCONSOLE_FORMAT='[${severity} T: ${time}] [${node}/${thread} ${file}:${line} (${function})] ${message}'
-}
-
 alias record_rviz_area='sleep 5;ffmpeg -probesize 10M -r 60 -f x11grab -video_size 1920x1080 -i :0.0+5760,58 -c:v libx265 -crf 0 -x265-params pools=4 -preset ultrafast -vf format=yuv420p -r 15'
 alias record_screen_2_x264='sleep 5;ffmpeg -probesize 10M -r 30 -f x11grab -video_size 1920x1080 -i :0.0+5760,58 -c:v libx264 -crf 0 -preset ultrafast'
 alias record_screen_2='sleep 5;ffmpeg -probesize 10M -r 30 -f x11grab -video_size 3840x2160 -i :0.0+3840,0 -c:v libx265 -crf 0 -preset ultrafast -vf format=yuv420p -r 15'
@@ -128,48 +290,6 @@ function ffmpeg_make_gif {
 	fi
 	ffmpeg -i "$1" -filter_complex "[0:v] palettegen" /tmp/palette.png
 	ffmpeg -i "$1" -i /tmp/palette.png -filter_complex "[0:v][1:v] paletteuse" "${1}.gif"
-}
-
-function single_ros_test {
-	if [ $# -lt 2 ]; then
-		echo "Usage: single_ros_test package testname [test args]"
-		echo "Use --gtest_filter=SomeRegex* to run specific tests only"
-		return;
-	fi;
-	catkin build "$1" --no-deps --make-args "$2" && rosrun "$1" "$2" "${@:3}"
-}
-
-function rostest_gdb {
-	if [ $# -lt 2 ]; then
-		echo "Usage: rostest_gdb package testname [test args]"
-		echo "Use --gtest_filter=SomeRegex* to run specific tests only"
-		return;
-	fi;
-  gdb --args "$(catkin_find "$1" "$2")" "${@:3}"
-}
-
-function single_ros_test_xml {
-	if [ $# -lt 2 ]; then
-		echo "Usage: single_ros_test_xml package testname [rostest args]"
-		return
-	fi
-	catkin build "$1" --no-deps --make-args "$2" && rostest "${@:3}" "$1" "${2}.xml"
-}
-
-function single_ros_test_test {
-	if [ $# -lt 2 ]; then
-		echo "Usage: single_ros_test_test package testname [rostest args]"
-		return
-	fi
-	catkin build "$1" --no-deps --make-args "$2" && rostest "${@:3}" "$1" "${2}.test"
-}
-
-function single_ros_test_launch {
-	if [ $# -lt 2 ]; then
-		echo "Usage: single_ros_test_launch package testname [rostest args]"
-		return
-	fi
-	catkin build "$1" --no-deps --make-args "$2" && rostest "${@:3}" "$1" "${2}.launch"
 }
 
 function rsource_ros2_base {
@@ -222,14 +342,18 @@ function cdws {
 		export RCUTILS_COLORIZED_OUTPUT=1
     cd "${workspace}/src/${1}" 2>/dev/null || cd "${workspace}/src/" || cd "${workspace}" || return
     if [ -e "${workspace}/.built_by" ]; then
+			add_ros2_alias
 			rsource_ros2_base
 		else
+			add_ros_alias
 			rsource
 		fi
   fi
 }
 
-alias is_ros_workspace='[ -n "${ROS_WORKSPACE}" ] && [ -d "${ROS_WORKSPACE}" ] || (echo "Not a ROS workspace" && false)'
+function is_ros_workspace {
+	{ [ -n "${ROS_WORKSPACE}" ] && [ -d "${ROS_WORKSPACE}" ]; } || { echo "Not a ROS workspace" && false; }
+}
 alias cdbase='is_ros_workspace && cd $ROS_WORKSPACE'
 alias cds='is_ros_workspace && cd $ROS_WORKSPACE/src'
 alias cdbuild='is_ros_workspace && cd $ROS_WORKSPACE/build'
@@ -261,7 +385,7 @@ function re {
 }
 
 alias threadps='ps -T -f -p '
-alias safety_plot='rosrun rqt_plot rqt_plot cmd_vel_safety/linear/x cmd_vel_reduced/linear/x'
+# alias safety_plot='rosrun rqt_plot rqt_plot cmd_vel_safety/linear/x cmd_vel_reduced/linear/x'
 
 function if_ip_addr {
   ifconfig "${1}" | awk '/inet / {print $2}'
@@ -312,8 +436,8 @@ function with_rostopic {
 alias rti='with_rostopic rostopic info'
 
 function exportrosmaster {
-  local wifi_dev="wlp1s0"
-  local lan_dev="enxc49dede53181"
+  local wifi_dev="enp5s0"
+  local lan_dev="enp5s0"
 
   local dev=${lan_dev}
   local uri="http://127.0.0.1:11311"
@@ -398,15 +522,6 @@ cob4-20 10.4.20.11:11311 wifi"
   exportrosmaster ${selected}
 }
 
-function stop_override {
-  local topic="/base/twist_mux/command_teleop_keyboard"
-  if [ $# -gt 0 ]; then
-    topic="${1}"
-  fi
-  echo "topic is ${topic}"
-  rostopic pub "${topic}" geometry_msgs/Twist "{linear: {x: 0.0, y: 0.0, z: 0.0}, angular: {x: 0.0, y: 0.0, z: 0.0}}" -r100
-}
-
 function kill_named_pythons {
   if [ $# -ne 1 ]; then
     echo "Need an argument"
@@ -417,103 +532,6 @@ function kill_named_pythons {
   if [ "${choice}" = "y" ]; then
     kill -9 $(pgrep -f "python.*${1}")
   fi
-}
-
-alias colb='is_ros_workspace && colcon --log-base "${ROS_WORKSPACE}/log" build --mixin compile-commands ccache --base-paths "${ROS_WORKSPACE}" --cmake-args -DCMAKE_EXPORT_COMPILE_COMMANDS=1 -DCMAKE_CXX_FLAGS=-ggdb --symlink-install --build-base "${ROS_WORKSPACE}/build" --install-base ${ROS_WORKSPACE}/install'
-alias colt='is_ros_workspace && colcon --log-base "${ROS_WORKSPACE}/log" test --base-paths "${ROS_WORKSPACE}" --cmake-args -DCMAKE_EXPORT_COMPILE_COMMANDS=1 -DCMAKE_CXX_FLAGS=-ggdb --symlink-install --build-base "${ROS_WORKSPACE}/build" --install-base "${ROS_WORKSPACE}/install"'
-alias colbthis='is_ros_workspace && colcon --log-base "${ROS_WORKSPACE}/log" build --mixin compile-commands ccache --cmake-args -DCMAKE_EXPORT_COMPILE_COMMANDS=1 -DCMAKE_CXX_FLAGS=-ggdb --symlink-install --build-base "${ROS_WORKSPACE}/build" --install-base "${ROS_WORKSPACE}/install"'
-alias coltr='is_ros_workspace && colcon --log-base "${ROS_WORKSPACE}/log" test-result --test-result-base "${ROS_WORKSPACE}/build" --verbose'
-alias colrelbuild='is_ros_workspace && colcon --log-base "${ROS_WORKSPACE}/log" build --mixin compile-commands ccache --base-paths "${ROS_WORKSPACE}" --cmake-args --DCMAKE_EXPORT_COMPILE_COMMANDS=1 DCMAKE_BUILD_TYPE=Release -DSANITIZE=OFF -DBUILD_TESTING=OFF -DCMAKE_CXX_FLAGS=-ggdb --symlink-install --build-base "${ROS_WORKSPACE}/build" --install-base "${ROS_WORKSPACE}/install"'
-
-function single_ros2test {
-  if [ $# -lt 2 ]; then
-    echo "Need a package name and test name"
-    return;
-  fi
-	is_ros_workspace || return
-  function rostest_in_base {
-    # suppress cmake stuff
-    colb --packages-up-to "${1}" --symlink-install --cmake-target-skip-unavailable --cmake-target "${2}" > /dev/null || return
-    local test_executable
-    test_executable=$(find "${ROS_WORKSPACE}/build/${1}" -type f -iname "${2}") || return
-    # echo ${test_executable}
-    [ -x "${test_executable}" ] || return 1
-    ${test_executable}
-  }
-  rostest_in_base "${1}" "${2}"
-}
-
-function single_ros2test_gdb {
-  if [ $# -lt 1 ]; then
-    echo "Need a test name"
-    return;
-  fi
-	is_ros_workspace || return
-	local test_executable
-	test_executable=$(find ${ROS_WORKSPACE}/build -type f -iname "${1}") || return
-	gdb ${test_executable}
-}
-
-# Takes filename to unit test and rebuilds it without dependencies + runs it
-# Any extra arguments will be used as prefix for the test
-function single_ros2test_from_file_fast {
-	test_executable=$1
-	shift
-	test_name=$(basename "${test_executable}")
-	# Account for /test subfolder
-	build_dir=$(dirname "$test_executable" | sed -e 's#/test$##')
-	pkg_name=$(basename "$build_dir")
-	#echo "Test executable: '${test_executable}', build dir: '${build_dir}', pkg name: '${pkg_name}'"
-	colb --packages-select "${pkg_name}" --cmake-target "${test_name}" && $@ ${test_executable}
-}
-
-# Takes filename to unit test and rebuilds + runs it
-# Any extra arguments will be used as prefix for the test
-function single_ros2test_from_file {
-	test_executable=$1
-	shift
-	test_name=$(basename "${test_executable}")
-	# Account for /test subfolder
-	build_dir=$(dirname "$test_executable" | sed -e 's#/test$##')
-	pkg_name=$(basename "$build_dir")
-	colb --packages-up-to "${pkg_name}" > /dev/null && $@ ${test_executable}
-}
-
-function single_ros2test_from_source_file {
-	is_ros_workspace || return
-	exe=$(basename $1 .cpp)
-	test_executable=$(find ${ROS_WORKSPACE}/build -type f -iname "${exe}") || return
-	single_ros2test_from_file_fast "$test_executable"
-}
-
-function r2t {
-	is_ros_workspace || return
-	local test_executable
-	test_executable=$(fd -t x '_test$' "${ROS_WORKSPACE}/build" | fzf) || return
-	single_ros2test_from_file "$test_executable" $@
-}
-
-alias trace_lts_ng='rosparam set /lts_ng/trace_output /tmp/lts_ng && rosparam set /lts_ng/trace_debug true'
-live_lts_trace() {
-  fname=$(fd -tf lts_ng.*.json /tmp/ | sort -r | head -n 1)
-  if [ "${fname}" ]; then
-    tail -f "${fname}"
-  fi
-}
-
-alias no_odom_ramps='rosrun dynamic_reconfigure dynparam  set /move_base/EbandLocalPlanner/controller/diff use_odom_for_ramps false'
-
-function release_ros2_pkg {
-	if [ $# -lt 1 ]; then
-		echo "Need a pkg name"
-		return
-	fi
-	is_ros_workspace || return
-
-	tmpdir=$(mktemp -d)
-	colcon --log-base "${tmpdir}/log" build --base-paths "${ROS_WORKSPACE}" --executor parallel --merge-install --install-base "${tmpdir}/install" --build-base "${tmpdir}/build" --ament-cmake-args -DCMAKE_BUILD_TYPE=Release -DBUILD_TESTING=OFF --packages-up-to $@
-	echo -e "- Install ROS ${ROS_DISTRO}\n- Install dependencies \`rosdep install --ignore-src --from-path install/share\`\n- Source the workspace \`source install/setup.bash\`" > "${tmpdir}/SETUP.md"
-	tar -czf "/tmp/${1}_$(date --iso-8601).tar.gz" -C "${tmpdir}" SETUP.md install
 }
 
 # Transferring GPG keys

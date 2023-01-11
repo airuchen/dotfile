@@ -1,8 +1,11 @@
+[user]
+	name = Felix
+	email = felix@fzeltner.de
 [core]
 	excludesfile = /home/felix/.gitignore
 [clangFormat]
-  binary = clang-format-14
+  binary = clang-format-15
 [alias]
-  fmt = clang-format-14
+  fmt = clang-format-15
   lg = log --color --graph --pretty=format:'%C(yellow)%h%Creset -%C(bold blue)%d%Creset %s %C(white)(%cr) %C(green)<%an>%Creset' --abbrev-commit
   lg2 = log --color --graph --pretty=format:'%C(yellow)%h%Creset %C(white)%cd %C(green)<%an>%Creset%C(bold blue)%d%n%C(bold white)%s%n%b' --abbrev-commit
