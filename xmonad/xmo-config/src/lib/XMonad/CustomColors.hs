@@ -3,7 +3,8 @@ module XMonad.CustomColors
     CustomColors (..),
     solarizedish,
     gruvboxish,
-    xmoSep
+    tokyonight,
+    myTheme
   ) where
 
 data CustomColors = CustomColors { xmbActiveScreen :: String
@@ -29,11 +30,13 @@ data CustomColors = CustomColors { xmbActiveScreen :: String
                                  , monitorHigh     :: String
                                  , monitorLow      :: String
                                  , monitorNormal   :: String
+                                 , xmoSep          :: String
                                  }
 
-xmoSep :: String
-xmoSep = " <fc=" ++ faded_purple ++ ">⠶</fc> " -- :: ⠛ ⣿
 
+-- Golbal theme
+myTheme :: CustomColors
+myTheme = gruvboxish
 
 
 -- TODO if i ever use this again, update the colors that are used for tabbing
@@ -60,6 +63,7 @@ solarizedish = CustomColors { xmbActiveScreen = "#2aa198"
                             , monitorHigh = "red"
                             , monitorLow = "green"
                             , monitorNormal = "orange"
+                            , xmoSep = " <fc=" ++ "red" ++ ">⠶</fc> " -- :: ⠛ ⣿
                             }
 
 -- gruvbox colors
@@ -129,4 +133,77 @@ gruvboxish = CustomColors { xmbActiveScreen = bright_aqua
                           , monitorHigh = faded_red
                           , monitorLow = faded_green
                           , monitorNormal = faded_yellow
+                          , xmoSep = " <fc=" ++ faded_purple ++ ">⠶</fc> " -- :: ⠛ ⣿
+                          }
+
+tn_bg = "#1a1b26"
+tn_bg_dark = "#16161e"
+tn_bg_float = "#16161e"
+tn_bg_highlight = "#292e42"
+tn_bg_popup = "#16161e"
+tn_bg_search = "#3d59a1"
+tn_bg_sidebar = "#16161e"
+tn_bg_statusline = "#16161e"
+tn_bg_visual = "#33467c"
+tn_black = "#15161e"
+tn_blue = "#7aa2f7"
+tn_blue0 = "#3d59a1"
+tn_blue1 = "#2ac3de"
+tn_blue2 = "#0db9d7"
+tn_blue5 = "#89ddff"
+tn_blue6 = "#b4f9f8"
+tn_blue7 = "#394b70"
+tn_border = "#15161e"
+tn_border_highlight = "#27a1b9"
+tn_comment = "#565f89"
+tn_cyan = "#7dcfff"
+tn_dark3 = "#545c7e"
+tn_dark5 = "#737aa2"
+tn_error = "#db4b4b"
+tn_fg = "#c0caf5"
+tn_fg_dark = "#a9b1d6"
+tn_fg_float = "#c0caf5"
+tn_fg_gutter = "#3b4261"
+tn_fg_sidebar = "#a9b1d6"
+tn_green = "#9ece6a"
+tn_green1 = "#73daca"
+tn_green2 = "#41a6b5"
+tn_hint = "#1abc9c"
+tn_info = "#0db9d7"
+tn_magenta = "#bb9af7"
+tn_magenta2 = "#ff007c"
+tn_none = "NONE"
+tn_orange = "#ff9e64"
+tn_purple = "#9d7cd8"
+tn_red = "#f7768e"
+tn_red1 = "#db4b4b"
+tn_teal = "#1abc9c"
+tn_terminal_black = "#414868"
+tn_warning = "#e0af68"
+tn_yellow = "#e0af68"
+
+tokyonight = CustomColors { xmbActiveScreen = tn_green1
+                          , xmbVisScreen = tn_green2
+                          , xmbHidden = tn_comment
+                          , xmbLayout = tn_info
+                          , xmbTitle = tn_hint
+                          , xmbBg = tn_bg
+                          , xmbFg = tn_comment
+                          , borderFocused = tn_border_highlight
+                          , borderNormal  = tn_border
+                          , borderDarker = tn_black
+                          , promptBorder = tn_magenta
+                          , promptBorder2 = tn_magenta2
+                          , promptBG = tn_bg_float
+                          , promptFG = tn_fg_float
+                          , promptHLFG = tn_bg_float
+                          , promptHLBG = tn_bg_visual
+                          , urgent = tn_info
+                          , urgentBorder = tn_info
+                          , focusedText = tn_black
+                          , unfocusedText = tn_cyan
+                          , monitorHigh = tn_red
+                          , monitorLow = tn_green
+                          , monitorNormal = tn_warning
+                          , xmoSep = " <fc=" ++ tn_purple ++ ">⠶</fc> " -- :: ⠛ ⣿
                           }

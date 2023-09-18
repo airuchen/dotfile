@@ -67,13 +67,15 @@ sudo make install
 ** Config
 
 #+BEGIN_SRC sh
-cd .config
+cd ~/.config
 ln -s ~/config/nvim .
-sh -c 'curl -fLo "${XDG_DATA_HOME:-$HOME/.local/share}"/nvim/site/autoload/plug.vim --create-dirs https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim'
 pip3 install pynvim
 #+END_SRC
 
-In nvim, run =:PlugInstall=.
+The plugin manager should bootstrap on first startup.
+To manage plugins in nvim, run =:Lazy<CR>=.
+
+You may want to also run =:TSUpdate<CR>=.
 
 If telescope complains about fzf, just do the =make= step by hand.
 
@@ -106,6 +108,8 @@ EndSection
 See also =synclient -l=.
 
 * XMonad
+
+Warning: some of the settings are hard-coded to my specific folder layout!
 
 ** Installation
 

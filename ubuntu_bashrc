@@ -58,7 +58,7 @@ print_prompt_notifications() {
   elif [ ! "$1" = 0 ]; then
     local SIGNAL_NAME
     SIGNAL_NAME=$(kill -l "$1" 2> /dev/null)
-    if [ ! -z "$SIGNAL_NAME" ] && [ "$1" -gt 128 ]; then
+    if [ -n "$SIGNAL_NAME" ] && [ "$1" -gt 128 ]; then
       local SIGNAL_STRING="[31m([0m$SIGNAL_NAME[31m) [0m"
     else
       local SIGNAL_STRING=""
@@ -98,8 +98,9 @@ else
   prompt_post_part=" \[\e[0;92m\]]\n└>\[\e[0m\] "
   PS1="${prompt_pre_part}${prompt_post_part}"
   PS2="\[\e[0;92m\]~>\[\e[0m\] "
-  if [ -e /usr/lib/git-core/git-sh-prompt ]; then
-    . /usr/lib/git-core/git-sh-prompt
+  # Could also be already sourced
+  [[ $(type -t __git_ps1) != function ]] && [ -e /usr/lib/git-core/git-sh-prompt ] && source /usr/lib/git-core/git-sh-prompt
+  if [[ $(type -t __git_ps1) == function ]]; then
     GIT_PS1_SHOWDIRTYSTATE=1
     GIT_PS1_SHOWCOLORHINTS=1
     GIT_PS1_SHOWUPSTREAM="auto"
@@ -230,10 +231,11 @@ fi
 # Tell fzf to use fd for searching. If it's installed as fdfind, use that, otherwise use try fd
 ! alias fd 2&>/dev/null && command -v fd > /dev/null && export FZF_DEFAULT_COMMAND='fd --type f'
 command -v fdfind > /dev/null && export FZF_DEFAULT_COMMAND='fdfind --type f'
+command -v fd > /dev/null && export FZF_DEFAULT_COMMAND='fd --type f'
 export FZF_DEFAULT_OPTS='--layout=reverse'
 
 _INTERNAL_FZF_ERROR="fzf not found!"
-for fzf_conf in "${XDG_CONFIG_HOME:-$HOME/.config}"/fzf/fzf.bash /usr/share/doc/fzf/examples/key-bindings.bash; do
+for fzf_conf in "${XDG_CONFIG_HOME:-$HOME/.config}"/fzf/fzf.bash /usr/share/doc/fzf/examples/key-bindings.bash /usr/share/bash-completion/completions/fzf-key-bindings; do
   if [ -f "${fzf_conf}" ]; then
     source "${fzf_conf}"
     unset _INTERNAL_FZF_ERROR

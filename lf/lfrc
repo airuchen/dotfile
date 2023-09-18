@@ -1,0 +1,5 @@
+set shellopts '-eu'
+set icons true
+set scrolloff 5
+set drawbox true
+set smartcase true

@@ -39,6 +39,7 @@ import XMonad.Layout.WorkspaceDir
 import XMonad.Actions.Submap
 import XMonad.Actions.CopyWindow
 import XMonad.Actions.CycleWS
+import XMonad.Actions.MostRecentlyUsed
 import XMonad.Actions.GroupNavigation -- nextMatch/historyhook for alt-tab across workspaces
 import XMonad.Actions.PhysicalScreens
 import qualified XMonad.Actions.Navigation2D as N
@@ -64,11 +65,11 @@ main = do
   --hostName <- getEnv "HOSTNAME"
   mandb <- getAllManEntries
   let myBar = statusBarProp (myHome ++ "/.local/bin/xmobar-custom") myPP
-  let resultConfig = addAfterRescreenHook myAfterRescreenHook . withEasySB myBar toggleStrutsKey . N.withNavigation2DConfig def . ewmh $ myConfig mandb
+  let resultConfig = addAfterRescreenHook myAfterRescreenHook . withEasySB myBar toggleStrutsKey . N.withNavigation2DConfig def . configureMRU . ewmh $ myConfig mandb
   xmonad resultConfig
 
 myCol :: CustomColors
-myCol = gruvboxish
+myCol = myTheme
 
 sbBrackets :: String -> String
 sbBrackets = wrap "❲" "❳"
@@ -77,16 +78,19 @@ sbBrackets = wrap "❲" "❳"
 indicateCopies :: WorkspaceId -> String
 indicateCopies = xmobarColor (xmbHidden myCol) "" . wrap ("<box type=Bottom width=3 color=" ++ (xmbActiveScreen myCol) ++ ">") "</box>" . sbBrackets
 
+myScreenOrder :: ScreenComparator
+myScreenOrder = horizontalScreenOrderer
+
 -- Status bar options
 myPP :: X PP
 myPP = copiesPP indicateCopies $ xmobarPP { ppCurrent = xmobarColor (xmbActiveScreen myCol) "" . wrap ("<box type=Bottom width=3 color=" ++ (xmbActiveScreen myCol) ++ ">❲") "❳</box>"
                 , ppVisible = xmobarColor (xmbVisScreen myCol) "" . sbBrackets
                 , ppHidden = xmobarColor (xmbHidden myCol) "" . sbBrackets
                 , ppLayout = xmobarColor (xmbLayout myCol) ""
-                , ppSep = xmoSep
+                , ppSep = xmoSep myCol
                 , ppWsSep = ""
                 , ppTitle = xmobarColor (xmbTitle myCol) "" . shorten 180
-                , ppSort = getSortByXineramaPhysicalRule horizontalScreenOrderer
+                , ppSort = getSortByXineramaPhysicalRule myScreenOrder
                 }
 
 myTrayEventHook :: Event -> X All
@@ -177,11 +181,6 @@ myWorkspaces = if isHomePc
                   then map show [1..4] ++ ["dev", "www", "mail", "steam", "full", "NSP"]
                   else map show [1..4] ++ ["dev", "www", "mail", "com", "full", "NSP"]
 
-myScreenOrder :: [ScreenId]
-myScreenOrder = case myHostname of
-                           "ikarus" -> [2,0,1] -- Desktop
-                           _        -> [0..2] -- Regular
-
 centeredFloating :: ManageHook
 centeredFloating = customFloating $ W.RationalRect (1/6) (1/6) (4/6) (4/6)
 
@@ -191,7 +190,7 @@ smallFloating = customFloating $ W.RationalRect (1/4) (1/4) (2/4) (2/4)
 scratchpads :: [NamedScratchpad]
 scratchpads = [ NS "htop" (lightWeightTerm ++ " -t htop -e htop") (title =? "htop") centeredFloating
               , NS "ncmpcpp" (lightWeightTerm ++ " -t ncmpcpp -e ncmpcpp") (title =? "ncmpcpp") centeredFloating
-              , NS "ghci" (myTerminal ++ " -t ghci -e ghci") (title =? "ghci") smallFloating
+              , NS "ghci" (myTerminal ++ " -t ghci -e stack --silent ghci --no-load") (title =? "ghci") smallFloating
               ]
 
 -- Match strings prefixed with space
@@ -303,7 +302,7 @@ myKeys mandb conf@XConfig {XMonad.modMask = modMask} =
     , ("M-S-f", safeSpawnProg "thunar") -- %! Launch thunar
     , ("M-v", safeSpawn lightWeightTerm ["-e", myEditor]) -- %! Launch vim
     , ("M-S-v", safeSpawn lightWeightTerm ["-e", myEditor, "-c", "cd " ++ myHome ++ "/Documents/org/", myHome ++ "/Documents/org"]) -- %! Launch vim
-    , ("M-p", safeSpawn myTerminal ["-e", "bpython3"]) -- %! Launch a bpython3
+    , ("M-p", safeSpawn myTerminal ["-e", "bpython"]) -- %! Launch a bpython3
     , ("M-s", saferSshPrompt (myHome ++ "/.ssh/config") myXPConfig) -- %! SSH prompt
     , ("M-S-s", saferSftpPrompt (myHome ++ "/.ssh/config") myXPConfig) -- %! SFTP prompt
     , ("M-S-m", saferManPrompt mandb myXPConfig) -- %! man prompt
@@ -354,7 +353,7 @@ myKeys mandb conf@XConfig {XMonad.modMask = modMask} =
     -- move focus up or down the window stack
     , ("M-<Tab>"   , toggleWS' ["NSP"]  ) -- %! Previous ws in history
     , ("M-S-<Tab>" , moveTo Next $ hiddenWS :&: Not emptyWS :&: ignoringWSs ["NSP"]) -- %! Cycle through all open, not visible workspaces
-    , ("M1-<Tab>"  , nextMatch History (return True))
+    , ("M1-<Tab>"  , mostRecentlyUsed [xK_Alt_L, xK_Alt_R] xK_Tab)
     , ("M-m"       , windows W.focusMaster) -- %! Move focus to the master window
     , ("M-j"       , windows W.focusDown  ) -- %! Move focus to the next window
     , ("M-k"       , windows W.focusUp    ) -- %! Move focus to the previous window
@@ -426,9 +425,9 @@ myKeys mandb conf@XConfig {XMonad.modMask = modMask} =
     ++
     -- mod-{w,e,r} %! Switch to physical/Xinerama screens 1, 2, or 3
     -- mod-shift-{w,e,r} %! Move client to screen 1, 2, or 3
-    [(m ++ [key], screenWorkspace sc >>= flip whenJust (windows .f))
-      | (key, sc) <- zip "wer" $ myScreenOrder
-      , (f, m) <- [(W.view, "M-"), (W.shift, "M-S-")]
+    [(m ++ [key], f sc)
+      | (key, sc) <- zip "wer" [0..]
+      , (f, m) <- [(viewScreen myScreenOrder, "M-"), (sendToScreen myScreenOrder, "M-S-")]
     ]
 
 -- The CutWordsLeft removes the "Spacing Maximize" prefix
@@ -447,17 +446,17 @@ myLayout = smartBorders $ renamed [CutWordsLeft 2] $ spacings $ maximizeWithPadd
     evenTiled = tiled (1/2)
     -- Main window at the top and a row of small windows below it
     wide = mkToggle (single REFLECTY) $ renamed [Replace "Wide"] $ Mirror $ Tall 1 (3/100) (4/5)
-    full = workspaceDir "~" $ noBorders Full
+    full = workspaceDir myHome $ noBorders Full
     threecol = mkToggle (single REFLECTX) $ renamed [Replace "Three"] $ ThreeCol 1 (3/100) (5/12)
     devscreen n = mkToggle (single REFLECTX) $ renamed [Replace n] $ Tall 1 (3/100) 0.7
     goldenspiral = spiral (6/7)
     myTabs = renamed [Replace "Tabbed"] $ tabbedBottomAlways shrinkText tabBarTheme
 
     --regularlayout = threecol ||| evenTiled ||| wide ||| full ||| goldenspiral
-    regularlayout = workspaceDir "~" $ splitgrid ||| threecol ||| tiled (3/5) ||| wide' ||| myTabs ||| full
-    rvizlayout = workspaceDir "~/git" $ wide ||| squaregrid ||| full ||| evenTiled ||| splitgrid
-    devlayout = workspaceDir "~/git" (devscreen "Dev") ||| threecol ||| splitgrid ||| full
-    steamlayout = workspaceDir "~" $ devscreen "Soc" ||| full ||| evenTiled ||| wide
+    regularlayout = workspaceDir myHome $ splitgrid ||| threecol ||| tiled (3/5) ||| wide' ||| myTabs ||| full
+    rvizlayout = workspaceDir (myHome ++ "/git") $ wide ||| squaregrid ||| full ||| evenTiled ||| splitgrid
+    devlayout = workspaceDir (myHome ++ "/git") (devscreen "Dev") ||| threecol ||| splitgrid ||| full
+    steamlayout = workspaceDir myHome $ devscreen "Soc" ||| full ||| evenTiled ||| wide
 
 myManageHook = composeAll . concat $
   [ [ className =? c --> doCenterFloat | c <- classCenter       ]
@@ -473,17 +472,19 @@ myManageHook = composeAll . concat $
   , [ className =? c --> doShift (getWs 4) | c <- ["rviz", "rviz2"] ]
   , [ className =? c --> hasBorder False | c <-classNoBorder ]
   , [ className =? c --> doIgnore | c <-classIgnore ]
+  , [ title     =? t --> doIgnore | t <-titleIgnore ]
   , [ isDialog       --> doCenterFloat ]
   ]
   where
     classCenter     = ["Xfce4-appfinder", "xmessage"]
     classFloat      = ["feh_cover"]
-    titleFloats     = ["File Operation Progress", "xvkbd - Virtual Keyboard", "florence"]
+    titleFloats     = ["File Operation Progress", "xvkbd - Virtual Keyboard", "florence", "Steam Settings"]
     classFullscreen = ["Ristretto", "feh", "Sxiv", "Nsxiv", "mpv", "pathofexile_x64steam.exe", "ns2.exe", "GRIS.exe"]
     titleFullscreen = ["Path of Exile", "Natural Selection 2", "Spark Engine"]
     classNoBorder   = ["firefox", "mpv", "pathofexile_x64steam.exe", "ns2.exe", "GRIS.exe"]
     classIgnore     = ["Life is Strange Before the Storm", "Hyper Light Drifter"]
-    classSocial     = ["Steam", "Slack"]
+    titleIgnore     = []
+    classSocial     = ["steam", "Steam", "Slack"]
     viewShift       = doF . liftM2 (.) W.greedyView W.shift
     getWs           = getWorkspace
 
@@ -498,7 +499,7 @@ myFadeHook = composeAll . concat $
   where
     alwaysVisible = ["firefox", "Thunderbird", "mpv", "rviz"]
     alwaysFade = []
-    fadeInactive = ["URxvt", "st-256color", "Alacritty", "Thunar"]
+    fadeInactive = ["URxvt", "st-256color", "Alacritty", "Thunar", "neovide"]
 
 -- windows to swallow
 windowsToSwallow :: Query Bool

@@ -17,7 +17,7 @@ pgrep '^nm-applet$' || nm-applet&
 
 pgrep '^gammastep$' || gammastep&
 
-# pgrep picom || picom --config ~/config/xmonad/picom.conf &
+pgrep picom || picom --config ~/config/xmonad/picom.conf &
 
 # app launcher
 #pgrep kupfer || kupfer --no-splash &

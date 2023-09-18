@@ -12,6 +12,7 @@ alias cp='cp -i'
 alias mv='mv -i'
 alias mpvs='mpv --shuffle -- '
 alias ncal3='ncal -3 -w'
+alias cal='cal -m'
 alias ytdl720="yt-dlp -f 'bestvideo[height<=720]+bestaudio'"
 alias ytdlhd="yt-dlp -f 'bestvideo[width<=1920]+bestaudio'"
 alias ytdl_it='yt-dlp --no-mtime --no-call-home'
@@ -52,7 +53,7 @@ alias coredumpsoff='ulimit -c 0'
 #setxkbmap to reset kb layout
 
 # Docker
-alias kaniko='docker run -v$(pwd):/context:ro gcr.io/kaniko-project/executor:debug --context /context'
+alias kaniko='docker run --rm -v$(pwd):/context:ro gcr.io/kaniko-project/executor:debug --context /context'
 
 
 # Workspaces
@@ -154,7 +155,7 @@ add_ros_alias() {
 
 add_ros2_alias() {
 	function colb {
-		is_ros_workspace && colcon --log-base "${ROS_WORKSPACE}/log" build --mixin compile-commands ccache --base-paths "${ROS_WORKSPACE}" --cmake-args -DCMAKE_EXPORT_COMPILE_COMMANDS=1 -DCMAKE_CXX_FLAGS=-ggdb --symlink-install --build-base "${ROS_WORKSPACE}/build" --install-base ${ROS_WORKSPACE}/install
+		is_ros_workspace && colcon --log-base "${ROS_WORKSPACE}/log" build --mixin compile-commands ccache --base-paths "${ROS_WORKSPACE}" --cmake-args -DCMAKE_EXPORT_COMPILE_COMMANDS=1 -DCMAKE_CXX_FLAGS=-ggdb --symlink-install --build-base "${ROS_WORKSPACE}/build" --install-base ${ROS_WORKSPACE}/install $@
 	}
 	alias colt='is_ros_workspace && colcon --log-base "${ROS_WORKSPACE}/log" test --base-paths "${ROS_WORKSPACE}" --cmake-args -DCMAKE_EXPORT_COMPILE_COMMANDS=1 -DCMAKE_CXX_FLAGS=-ggdb --symlink-install --build-base "${ROS_WORKSPACE}/build" --install-base "${ROS_WORKSPACE}/install"'
 	alias colbthis='is_ros_workspace && colcon --log-base "${ROS_WORKSPACE}/log" build --mixin compile-commands ccache --cmake-args -DCMAKE_EXPORT_COMPILE_COMMANDS=1 -DCMAKE_CXX_FLAGS=-ggdb --symlink-install --build-base "${ROS_WORKSPACE}/build" --install-base "${ROS_WORKSPACE}/install"'

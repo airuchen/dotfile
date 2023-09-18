@@ -4,3 +4,4 @@ xmonad/xmonad.state
 xmonad/prompt-history
 nvim/plugin
 nvim/spell/*.spl
+config-priv

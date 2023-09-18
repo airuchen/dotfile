@@ -4,8 +4,8 @@ import XMonad.CustomColors
 import Xmobar
 import Helpers
 
-baseConfig :: CustomColors -> Int -> Config
-baseConfig c fontsize =
+baseConfig :: Int -> XPosition -> Config
+baseConfig fontsize pos =
   defaultConfig
     { font = "DejaVu Sans Bold " ++ show fontsize
     , additionalFonts =
@@ -14,12 +14,12 @@ baseConfig c fontsize =
         , "DejaVuSansMono Nerd Font Bold " ++ show fontsize
         ]
     , iconRoot     = myHome ++ "/config/xmonad/icons"
-    , bgColor      = xmbBg c
-    , fgColor      = xmbFg c
+    , bgColor      = xmbBg myTheme
+    , fgColor      = xmbFg myTheme
     , alpha        = 220
     , border       = NoBorder
-    , borderColor  = xmbBg c
-    , position     = TopH 25
+    , borderColor  = xmbBg myTheme
+    , position     = pos
     , allDesktops  = False -- show on all desktops
     , pickBroadest = True
     , persistent   = False -- enable/disable hiding (True = disabled
@@ -31,26 +31,26 @@ baseConfig c fontsize =
     }
 
 sep :: String
-sep = xmoSep
+sep = xmoSep myTheme
 
-colArgs :: CustomColors -> [String]
-colArgs c =
-  ["--low", monitorLow c, "--normal", monitorNormal c, "--high", monitorHigh c]
+colArgs :: [String]
+colArgs =
+  ["--low", monitorLow myTheme, "--normal", monitorNormal myTheme, "--high", monitorHigh myTheme]
 
-colArgs' :: CustomColors -> [String]
-colArgs' c =
-  ["--low", monitorHigh c, "--normal", monitorNormal c, "--high", monitorLow c]
+colArgs' :: [String]
+colArgs' =
+  ["--low", monitorHigh myTheme, "--normal", monitorNormal myTheme, "--high", monitorLow myTheme]
 
-buildArgs :: [String] -> [String] -> CustomColors -> [String]
-buildArgs args extra col = args ++ (colArgs col) ++ ["--"] ++ extra
+buildArgs :: [String] -> [String] -> [String]
+buildArgs args extra = args ++ colArgs ++ ["--"] ++ extra
 
-buildArgs' :: [String] -> [String] -> CustomColors -> [String]
-buildArgs' args extra col = args ++ (colArgs' col) ++ ["--"] ++ extra
+buildArgs' :: [String] -> [String] -> [String]
+buildArgs' args extra = args ++ colArgs' ++ ["--"] ++ extra
 
-commonNetOpts :: CustomColors -> [String]
-commonNetOpts c =
+commonNetOpts :: [String]
+commonNetOpts =
   buildArgs
-    [ "--template" , "<action=`nm-connection-editor`>Net: <fn=1><tx></fn>↑ <fn=1><rx></fn>↓kB/s</action>" ++ sep
+    [ "--template" , "<action=`nm-connection-editor`><icon=net.xpm/><fn=1><tx></fn>↑ <fn=1><rx></fn>↓kB/s</action>" ++ sep
     , "--Low" , "10240" -- units: B/s
     , "--High" , "55120" -- units: B/s
     , "--minwidth" , "5"
@@ -59,29 +59,27 @@ commonNetOpts c =
     , "--align" , "l"
     ]
     []
-    c
 
-myNetwork :: String -> CustomColors -> Int -> Monitors
-myNetwork device c rate = Network device (commonNetOpts c) rate
+myNetwork :: String -> Int -> Monitors
+myNetwork device rate = Network device commonNetOpts rate
 
-myDynNetwork :: CustomColors -> Int -> Monitors
-myDynNetwork c rate = DynNetwork (commonNetOpts c) rate
+myDynNetwork :: Int -> Monitors
+myDynNetwork rate = DynNetwork commonNetOpts rate
 
-myCpu :: CustomColors -> Int -> Monitors
-myCpu c rate =
+myCpu :: Int -> Monitors
+myCpu rate =
   Cpu
     (buildArgs
-       [ "--template" , "Cpu: <fn=1><total></fn>%"
+       [ "--template" , "<icon=cpu_flat.xpm/><fn=1><total></fn>%"
        , "--Low" , "50" -- units: %
        , "--High" , "85" -- units: %
        , "--ppad" , "3"
        ]
-       []
-       c)
+       [])
     rate
 
-myCpuFreq :: CustomColors -> Int -> Int -> Int -> Monitors
-myCpuFreq c low high rate =
+myCpuFreq :: Int -> Int -> Int -> Monitors
+myCpuFreq low high rate =
   CpuFreq
     (buildArgs
        [ "-t" , "<fn=1><cpu0>GHz</fn>"
@@ -90,12 +88,11 @@ myCpuFreq c low high rate =
        , "-H" , show high
        , "-w" , "4"
        ]
-       []
-       c)
+       [])
     rate
 
-myAmdTemp :: CustomColors -> Int -> Monitors
-myAmdTemp c rate =
+myAmdTemp :: Int -> Monitors
+myAmdTemp rate =
   K10Temp
     "0000:00:18.3"
     (buildArgs
@@ -103,12 +100,11 @@ myAmdTemp c rate =
        , "--Low" , "50" -- units: C
        , "--High" , "60" -- units: C
        ]
-       []
-       c)
+       [])
     rate
 
-myIntelTemp :: CustomColors -> Int -> Int -> Monitors
-myIntelTemp c zone rate =
+myIntelTemp :: Int -> Int -> Monitors
+myIntelTemp zone rate =
   ThermalZone
     zone
     (buildArgs
@@ -116,21 +112,19 @@ myIntelTemp c zone rate =
        , "--Low" , "50" -- units: C
        , "--High" , "60" -- units: C
        ]
-       []
-       c)
+       [])
     rate
 
-myMem :: CustomColors -> Int -> Monitors
-myMem c rate =
+myMem :: Int -> Monitors
+myMem rate =
   Memory
     (buildArgs
-       [ "--template" , "Mem: <fn=1><usedratio></fn>%"
+       [ "--template" , "<icon=mem_flat.xpm/> <fn=1><usedratio></fn>%"
        , "--Low" , "20" -- units: %
        , "--High" , "70" -- units: %
        , "--ppad" , "2"
        ]
-       []
-       c)
+       [])
     rate
 
 --   (%F = y-m-d date, %a = day of week, %T = h:m:s time)
@@ -153,20 +147,20 @@ myMPD =
     50
 
 
--- 📁 📂 🗀
+-- 📁 📂 🗀 󰋊
+-- 🗁
 
-myDiskU :: CustomColors -> Monitors
-myDiskU c = DiskU [("/", "<fn=1>📂</fn> <fn=1><free></fn> <fn=1><usedp></fn>%")]
-                  (buildArgs
+myDiskU :: Monitors
+myDiskU = DiskU [("/", "<fn=2>🗁</fn> <fn=1><free></fn> <fn=1><freep></fn>%")]
+                  (buildArgs'
                   [ "-f", "⚪◔◑◕●" -- TODO use icons?
                   , "-W", "0"
                   ]
-                  []
-                  c)
+                  [])
                   1000
 
-myDiskIO :: CustomColors -> Monitors
-myDiskIO c = DiskIO [("/", "<fn=1><read></fn>↑ <fn=1><write></fn>↓")]
+myDiskIO :: Monitors
+myDiskIO = DiskIO [("/", "<fn=1><read></fn>↑ <fn=1><write></fn>↓")]
                 (buildArgs
                   [ "--Low" ,  (show $ 1024 * 1024 * 1) -- units: B/s
                   , "--High" , (show $ 1024 * 1024 * 20) -- units: B/s
@@ -175,12 +169,11 @@ myDiskIO c = DiskIO [("/", "<fn=1><read></fn>↑ <fn=1><write></fn>↓")]
                   , "--padchars" , " "
                   , "--align" , "l"
                   ]
-                  []
-                  c)
+                  [])
                   100
 
-commonBatSettings :: CustomColors -> String -> [String]
-commonBatSettings c template =
+commonBatSettings :: String -> [String]
+commonBatSettings template =
   buildArgs'
     [ "--template" , template
     , "--Low" , "15" -- units: %
@@ -192,28 +185,27 @@ commonBatSettings c template =
     -- charged status
     , "-i" , "<fn=1><left></fn>%"
     ]
-    c
 
-myBat1 :: CustomColors -> String -> Monitors
-myBat1 c dev =
-  BatteryN [dev] (commonBatSettings c "Bat: <acstatus>") 300 "bat1"
+myBat1 :: String -> Monitors
+myBat1 dev =
+  BatteryN [dev] (commonBatSettings "Bat: <acstatus>") 300 "bat1"
 
-myBat2 :: CustomColors -> String -> Monitors
-myBat2 c dev = BatteryN [dev] (commonBatSettings c ", <acstatus>") 300 "bat2"
+myBat2 :: String -> Monitors
+myBat2 dev = BatteryN [dev] (commonBatSettings ", <acstatus>") 300 "bat2"
 
 -- technically Alsa is the nicer option, but it doesn't seem to handle device switches nicely
-myPulse :: CustomColors -> Int -> Monitors
-myPulse c rate =
+myPulse :: Int -> Monitors
+myPulse rate =
   Volume
-    "pulse"
+    "default"
     "Master"
     [ "-t" , "<status><fn=1><volume></fn>%"
     , "--ppad" , "3"
     , "--"
     , "--on" , "<fn=2>🔊</fn>"
     , "--off" , "<fn=2>🔇</fn>"
-    , "--onc" , monitorLow c
-    , "--offc" , monitorHigh c
+    , "--onc" , monitorLow myTheme
+    , "--offc" , monitorHigh myTheme
     ]
     rate
 
@@ -230,7 +222,7 @@ myAMDBl rate =
     rate
 
 volPart :: String
-volPart = "<action=`xdotool key XF86AudioMute`>%pulse:Master%</action>"
+volPart = "<action=`xdotool key XF86AudioMute`>%default:Master%</action>"
 
 presPart :: String
 presPart = "<action=`" ++ togglePresModeCmd ++ "`><fn=3>%pmode%</fn></action>"
@@ -249,36 +241,36 @@ templateTail nwtag temptag =
 
 commonMonitors rate cpulow cpuhigh =
   [ Run XMonadLog
-  , Run $ myCpu gruvboxish rate
+  , Run $ myCpu rate
                       -- memory usage monitor
-  , Run $ myMem gruvboxish rate
+  , Run $ myMem rate
                       -- time and date indicator
   , Run myDate
-  , Run $ myCpuFreq gruvboxish cpulow cpuhigh rate
-  , Run $ myPulse gruvboxish 50
-  , Run $ myDiskU gruvboxish
-  , Run $ myDiskIO gruvboxish
+  , Run $ myCpuFreq cpulow cpuhigh rate
+  , Run $ myPulse 50
+  , Run $ myDiskU
+  , Run $ myDiskIO
   , Run $ Com (myHome ++ "/config/scripts/pres_mode") [] "pmode" 100
   , Run $ XPropertyLog "_XMONAD_PAD"
   , Run $ PipeReader "?:${HOME}/.local/state/gammastep" "gammastep"
   ]
 
-ikarusTemplate = "%XMonadLog% }{ %mpd%" ++ sep ++ templateTail "enp5s0" "k10temp"
+ikarusTemplate = "%XMonadLog% }{ %mpd%" ++ sep ++ templateTail "dynnetwork" "k10temp"
 
 ikarusMonitors =
   commonMonitors 20 3 4 ++
   [ Run myMPD
-  , Run $ myNetwork "enp5s0" gruvboxish 20
+  , Run $ myDynNetwork 20
                  -- CPU temp ryzen
-  , Run $ myAmdTemp gruvboxish 20
+  , Run $ myAmdTemp 20
   ]
 
 ninesTemplate = "%XMonadLog% }{ %dynnetwork%<action=`xfce4-power-manager-settings`>%bat1%</action>" ++ sep ++ cpuPart "thermal0" ++ sep ++ "%disku% %diskio%" ++ sep ++ volPart ++ sep ++ presBright ++ sep ++ "%date%" ++ sep ++ "%_XMONAD_PAD%"
 ninesMonitors =
   commonMonitors 100 2 3 ++
-  [ Run $ myDynNetwork gruvboxish 30
-  , Run $ myIntelTemp gruvboxish 0 50
-  , Run $ myBat1 gruvboxish "BAT0"
+  [ Run $ myDynNetwork 30
+  , Run $ myIntelTemp 0 50
+  , Run $ myBat1 "BAT0"
   , Run $ myAMDBl 50
   ]
 
@@ -296,28 +288,36 @@ vaioTemplate =
 
 vaioMonitors =
   commonMonitors 100 1 3 ++
-  [ Run $ myDynNetwork gruvboxish 100
-  , Run $ myIntelTemp gruvboxish 0 100
-  , Run $ myBat1 gruvboxish "BAT0"
-  , Run $ myBat2 gruvboxish "BAT1"
+  [ Run $ myDynNetwork 100
+  , Run $ myIntelTemp 0 100
+  , Run $ myBat1 "BAT0"
+  , Run $ myBat2 "BAT1"
   , Run $ myIntelBl 30
   ]
 
 -- Note: font size is affected by DPI setting and will grow the bar
+middleScreen :: XPosition
+middleScreen = Static { xpos = 3840 , ypos = 0, width = 3840, height = 25 }
 
-hostConfig :: String -> CustomColors -> Config
-hostConfig "ikarus" c =
-  (baseConfig gruvboxish 11)
+defaultPos :: XPosition
+defaultPos = TopH 25
+
+ninesPos :: XPosition
+ninesPos = TopH 37
+
+hostConfig :: String -> Config
+hostConfig "ikarus" =
+  (baseConfig 11 middleScreen)
     { template = ikarusTemplate
     , commands = ikarusMonitors
     }
-hostConfig "nines" c =
-  (baseConfig gruvboxish 17)
+hostConfig "nines" =
+  (baseConfig 17 ninesPos)
     { template = ninesTemplate
     , commands = ninesMonitors
     }
-hostConfig "vaio" c =
-  (baseConfig gruvboxish 9)
+hostConfig "vaio" =
+  (baseConfig 9 defaultPos)
     { template = vaioTemplate
     , commands = vaioMonitors
     }
