@@ -22,7 +22,7 @@ nm("<space>h", "<C-w>h", {desc = "[^] Window up"})
 nm("<space>j", "<C-w>j", {desc = "[v] Window down"})
 nm("<space>k", "<C-w>k", {desc = "[<] Window right"})
 nm("<space>l", "<C-w>l", {desc = "[>] Window right"})
-nm("<space>c", "<C-w>c", {desc = "[x] Close window"})
+nm("<space>x", "<C-w>c", {desc = "[x] Close window"}) -- used to be space c but that is accident prone with shift-c
 nm("<space>o", "<C-w>o", {desc = "[X] Close all other windows"})
 nm("<space>=", "<C-w>=", {desc = "[=] Equally resize windows"})
 nm("<space>s", ":vspl<CR>", {desc = "VSplit window"})
@@ -46,7 +46,7 @@ nm("<space>F", "<C-w>F", {desc = "Open file under cursor in split at line"})
 nm("<C-H>", ":nohl<CR>", {silent = true, desc = "Clear hlsearch"})
 
 -- Type ß with alt - on UK layout :)
-vim.keymap.set("i", "<leader>-", "ß")
+-- vim.keymap.set("i", "<leader>-", "ß") -- too annoying
 
 -- bind ctrl space to autocomplete
 -- gvim

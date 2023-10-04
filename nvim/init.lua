@@ -4,6 +4,8 @@ vim.opt.modeline = false
 vim.g.editorconfig_enable = false
 -- nvim >= 0.9
 vim.g.editorconfig = false
+vim.g.loaded_netrw = 1
+vim.g.loaded_netrwPlugin = 1
 
 -- Plugins
 pcall(require, 'impatient')

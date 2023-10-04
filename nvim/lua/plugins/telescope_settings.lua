@@ -23,6 +23,16 @@ local preview_opts = {
       )
       return false
     end
+    if opts.ft == "javascript" or opts.ft == "json" then
+      local ok, stats = pcall(vim.loop.fs_stat, filepath)
+      if ok and stats and stats.size then
+        local lc = vim.api.nvim_buf_line_count(bufnr)
+        if (stats.size / lc) > 300 then
+          putils.set_preview_message(bufnr, opts.winid, "<probably minified>")
+          return false
+        end
+      end
+    end
     return true
   end,
   -- 2) Truncate lines to preview window for too large files
@@ -77,6 +87,7 @@ telescope.load_extension('lsp_handlers')
 telescope.load_extension('heading')
 telescope.load_extension('ui-select')
 telescope.load_extension('dap')
+telescope.load_extension('orgmode')
 
 local heading = require('telescope').extensions.heading
 local ros_builder = require('ros-builder')
@@ -130,3 +141,6 @@ nm("<leader>t", builtins.builtin, "Telescope")
 
 -- Headers
 nm("<leader>H", heading.heading, "Jump to headings")
+
+-- Orgmode headings
+nm("<leader>do", telescope.extensions.orgmode.search_headings, "Search Org Headings")

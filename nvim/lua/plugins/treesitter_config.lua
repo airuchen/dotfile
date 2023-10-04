@@ -2,15 +2,61 @@ require('orgmode').setup_ts_grammar()
 
 local tsconf = require('nvim-treesitter.configs')
 
+-- Make it so we don't turn this on for huge files
+local ts_disable_func = function(lang, bufnr)
+  local ok, stats = pcall(vim.loop.fs_stat, vim.api.nvim_buf_get_name(bufnr))
+  if ok and stats and stats.size then
+    local lc = vim.api.nvim_buf_line_count(bufnr)
+    return (stats.size / lc) > 300
+  end
+  return false
+end
+
 tsconf.setup {
-  ensure_installed = { "org", "c", "python", "lua", "yaml", "html", "cpp", "bash", "regex", "css", "javascript", "rst", "latex", "bibtex", "dockerfile", "rust", "haskell" },     -- one of "all", "language", or a list of languages
+  -- one of "all", "language", or a list of languages
+  ensure_installed = { 
+    "bash",
+    "bibtex",
+    "c",
+    "cmake",
+    "cpp",
+    "css",
+    "diff",
+    "dockerfile",
+    "doxygen",
+    "git_rebase",
+    "gitattributes",
+    "gitcommit",
+    "gitignore",
+    "haskell",
+    "html",
+    "javascript",
+    "json",
+    "latex",
+    "lua",
+    "make",
+    "markdown",
+    "markdown_inline",
+    "org",
+    "python",
+    "regex",
+    "requirements",
+    "rst",
+    "rust",
+    "toml",
+    "typescript",
+    "xml",
+    "yaml",
+  },
   highlight = {
     enable = true,
+    disable = ts_disable_func,
     additional_vim_regex_highlighting = {'org'},
   },
   -- in visual mode, select by tree
   incremental_selection = {
     enable = true,
+    disable = ts_disable_func,
     keymaps = {
       init_selection = "gnn",
       node_incremental = "grn",
@@ -21,6 +67,7 @@ tsconf.setup {
   textobjects = {
     select = {
       enable = true,
+      disable = ts_disable_func,
 
       -- Automatically jump forward to textobj, similar to targets.vim
       lookahead = true,
@@ -35,6 +82,7 @@ tsconf.setup {
     },
     move = {
       enable = true,
+      disable = ts_disable_func,
       set_jumps = true, -- whether to set jumps in the jumplist
       goto_next_start = {
         ["]m"] = { query = "@function.outer", desc = "Go to next function" },
@@ -59,6 +107,7 @@ tsconf.setup {
     },
     lsp_interop = {
       enable = true,
+      disable = ts_disable_func,
       peek_definition_code = {
         ["<space>df"] = { query = "@function.outer", desc = "Go to next class" },
         ["<space>dc"] = { query = "@class.outer", desc = "Go to next class" },

@@ -13,6 +13,9 @@ if not vim.loop.fs_stat(lazypath) then
 end
 vim.opt.rtp:prepend(lazypath)
 
+local NVTREE_HEIGHT_RATIO = 0.8
+local NVTREE_WIDTH_RATIO = 0.5
+
 local plugins = {
   ---------------------
   --- Color Schemes ---
@@ -69,7 +72,8 @@ local plugins = {
       'bi0ha2ard/telescope-ros.nvim',
       {'nvim-telescope/telescope-fzf-native.nvim', build = "make"},
       'gbrlsnchs/telescope-lsp-handlers.nvim',
-      'crispgm/telescope-heading.nvim'
+      'crispgm/telescope-heading.nvim',
+      'joaomsa/telescope-orgmode.nvim'
     },
     config = function()
       require("plugins.telescope_settings")
@@ -82,11 +86,24 @@ local plugins = {
   -- Git integration
   'tpope/vim-fugitive',
 
-  {'sindrets/diffview.nvim', opts={}},
+  {
+    'sindrets/diffview.nvim',
+    dependencies = {
+      { 'nvim-tree/nvim-web-devicons', opts = {}},
+    },
+    opts = {}
+  },
 
-  {'lewis6991/gitsigns.nvim', opts={ 
-    signcolumn = false,
-  }},
+  {
+    'lewis6991/gitsigns.nvim', opts = { 
+      signcolumn = false,
+      numhl = true,
+      current_line_blame_opts = {
+        virt_text_pos = 'right_align'
+      },
+      -- TODO: consider enabling some keybinds, like jumping between hunks and staging
+    }
+  },
 
   {
     "NeogitOrg/neogit",
@@ -94,8 +111,10 @@ local plugins = {
     cmd = "Neogit",
     opts = {
       kind = "split_above",
+      disable_line_numbers = false,
       commit_editor = {
         kind = "split_above",
+        disable_line_numbers = false,
       },
       disable_hint = true,
       telescope_sorter = function()
@@ -103,10 +122,19 @@ local plugins = {
       end,
       mappings = {
         status = {
+          -- keep regular b motion
           ["b"] = false,
           ["B"] = "BranchPopup",
+          [">"] = "Toggle",
+          ["o"] = "SplitOpen",
+          -- more like fugitive
+          ["x"] = false,
+          ["X"] = "Discard",
         },
       },
+    },
+    keys = {
+      { "<leader>n", function() require('neogit').open() end, desc = "Neogit" }
     },
   },
 
@@ -255,11 +283,21 @@ local plugins = {
 
   {
     'nvim-orgmode/orgmode',
+    event = 'VeryLazy',
     config = function()
       require('plugins.treesitter_config')
       require('orgmode').setup({
         org_agenda_files = {'~/Documents/org/**/*'},
         org_default_notes_file = '~/Documents/org/refile.org',
+        -- We have a telescope plugin for this
+        mappings = {
+          capture = {
+            org_capture_refile = '<nop>'
+          },
+          org = {
+            org_refile = '<nop>'
+          },
+        }
       })
     end,
     build = function()
@@ -289,28 +327,92 @@ local plugins = {
 
   {
     "bi0ha2ard/ros-builder.nvim",
+    dependencies = {
+      -- to make sure the builder is there
+      'skywind3000/asyncrun.vim',
+    },
     opts = {
-        keys = {
-          build = "<leader>b",
-          test = "<leader>bt",
-        },
-        systems = {
-          colcon = {
-            opts = {
-              cmake_args = {"-DCMAKE_CXX_FLAGS=-ggdb"},
-              mixins = {"compile-commands", "ccache"},
-              build = { "--symlink-install" },
-            },
+      keys = {
+        build = "<leader>b",
+        test = "<leader>bt",
+      },
+      systems = {
+        colcon = {
+          opts = {
+            cmake_args = {"-DCMAKE_CXX_FLAGS=-ggdb"},
+            mixins = {"compile-commands", "ccache"},
+            build = { "--symlink-install" },
           },
-          catkin = {
-            opts = {
-              build = { "-j12", "--no-notify" },
-            },
-          }
+        },
+        catkin = {
+          opts = {
+            build = { "-j12", "--no-notify" },
+          },
         }
       }
+    }
   },
 
+  {
+    'nvim-tree/nvim-tree.lua',
+    event = "VeryLazy",
+    opts = {
+      view = {
+        number = true,
+        relativenumber = true,
+        float = {
+          enable = true,
+          open_win_config = function()
+            local screen_w = vim.opt.columns:get()
+            local screen_h = vim.opt.lines:get() - vim.opt.cmdheight:get()
+            local window_w = screen_w * NVTREE_WIDTH_RATIO
+            local window_h = screen_h * NVTREE_HEIGHT_RATIO
+            local window_w_int = math.floor(window_w)
+            local window_h_int = math.floor(window_h)
+            local center_x = (screen_w - window_w) / 2
+            local center_y = ((vim.opt.lines:get() - window_h) / 2)
+            - vim.opt.cmdheight:get()
+            return {
+              border = 'rounded',
+              relative = 'editor',
+              row = center_y,
+              col = center_x,
+              width = window_w_int,
+              height = window_h_int,
+            }
+          end,
+        },
+        width = function()
+          return math.floor(vim.opt.columns:get() * NVTREE_WIDTH_RATIO)
+        end,
+      },
+      renderer = {
+        special_files = { "Cargo.toml", "Makefile", "README.md", "CMakeLists.txt", "readme.md", "README.org" },
+        add_trailing = true,
+      },
+      actions = {
+        use_system_clipboard = false,
+        change_dir = {
+          enable = false,
+        }
+      },
+      filters = {
+        custom = { "^\\.git$" }
+
+      },
+    }
+  },
+  {
+    'stevearc/oil.nvim',
+    opts = {
+      columns = {
+        "icon",
+        "permissions",
+        "size",
+        "mtime",
+      },
+    }
+  },
   {
     "folke/which-key.nvim",
     event = "VeryLazy",

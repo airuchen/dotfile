@@ -43,6 +43,7 @@ end
 -- }
 -- pip install "python-lsp-server[all]" pyls-mypy python-lsp-black
 nvim_lsp.pylsp.setup{
+  cmd = { vim.loop.os_homedir() .. "/venvs/pylsp/bin/pylsp" },
   on_attach = custom_attach,
   capabilities = capabilities,
   settings = {
@@ -61,35 +62,30 @@ nvim_lsp.pylsp.setup{
 }
 
 -- TODO write something that finds the build dir using catkin/colcon/$ROS_WORKSPACE if it exists
+-- https://github.com/regen100/cmake-language-server
 nvim_lsp.cmake.setup{
+  cmd = { vim.loop.os_homedir() .. "/venvs/cmake_lsp/bin/cmake-language-server" },
   on_attach = custom_attach,
   capabilities = capabilities
 }
 
 -- For sphinx documentation
+-- https://github.com/swyddfa/esbonio
+-- https://github.com/neovim/nvim-lspconfig/blob/master/doc/server_configurations.md#esbonio
+-- https://docs.esbon.io/en/latest/lsp/getting-started.html#lsp-getting-started
 nvim_lsp.esbonio.setup{
+  cmd = { vim.loop.os_homedir() .. "/venvs/esbonio/bin/esbonio" },
   on_attach = custom_attach,
   capabilities = capabilities
 }
 
--- Shortens the time before CursorHold is triggered, which sets inlay hints for current line
-vim.o.updatetime=1000
-require("clangd_extensions").setup {
-  inlay_hints = {
-    inline = vim.fn.has("nvim-0.10") == 1,
-    only_current_line = true,
-  }
-}
 
-local clangd_attach = function()
-  require("clangd_extensions.inlay_hints").setup_autocmd()
-  require("clangd_extensions.inlay_hints").set_inlay_hints()
-  custom_attach()
-end
+-- https://github.com/regen100/cmake-language-server
+require("clangd_extensions").setup {}
 
 nvim_lsp.clangd.setup{
   cmd = { "clangd", "--log=error", "--background-index", "--clang-tidy", "--header-insertion=never", "-j=6" },
-  on_attach = clangd_attach,
+  on_attach = custom_attach,
   capabilities = capabilities
 }
 
@@ -101,7 +97,11 @@ local rt = require("rust-tools")
 -- rustup component add rust-analyzer
 rt.setup({
   -- rust-tools options
-  -- tools = { },
+  tools = { 
+    inlay_hints = {
+      auto = false,
+    }
+  },
   server = {
     cmd = { "rustup", "run", "nightly", "rust-analyzer" },
     on_attach = function(_, bufnr)

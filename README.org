@@ -81,6 +81,11 @@ If telescope complains about fzf, just do the =make= step by hand.
 
 For clipboard installation, install =xclip=.
 
+** LSPs
+
+   Python based LSPs are expected in =~/venvs=.
+   See [[./install_python_lsps.sh][./install_python_lsps.sh]]
+
 * Settings
 ** Keyboard
 | Repeat delay | Repeat speed |

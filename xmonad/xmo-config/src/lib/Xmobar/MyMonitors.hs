@@ -131,11 +131,15 @@ myMem rate =
 myDate :: Date
 myDate = Date "%d.%m. (%a, W%V) %T" "date" 10
 
+-- Actual pattern
+mpdFormat :: String
+mpdFormat = "<artist> [<date> - <album>] <track> - <title> <statei> <ipat>"
+
 myMPD :: Monitors
 myMPD =
   MPD
     [ "-t"
-    , "<action=`xdotool key super+shift+control+n`><artist> [<date> - <album>] <track> - <title></action> <action=`mpc toggle`><statei> <ipat></action>"
+    , "<action=`xdotool key super+shift+control+n` button=2><action=`mpc toggle` button=1><action=`mpc next` button=5><action=`mpc prev` button=4>" ++ mpdFormat ++ "</action></action></action></action>"
     --, "--bback" , "□"
     --, "--bfore" , "■" -- ▣
     , "--"
@@ -193,10 +197,23 @@ myBat1 dev =
 myBat2 :: String -> Monitors
 myBat2 dev = BatteryN [dev] (commonBatSettings ", <acstatus>") 300 "bat2"
 
--- technically Alsa is the nicer option, but it doesn't seem to handle device switches nicely
-myPulse :: Int -> Monitors
-myPulse rate =
-  Volume
+-- myPulse :: Int -> Monitors
+-- myPulse rate =
+--   Volume
+--     "default"
+--     "Master"
+--     [ "-t" , "<status><fn=1><volume></fn>%"
+--     , "--ppad" , "3"
+--     , "--"
+--     , "--on" , "<fn=2>🔊</fn>"
+--     , "--off" , "<fn=2>🔇</fn>"
+--     , "--onc" , monitorLow myTheme
+--     , "--offc" , monitorHigh myTheme
+--     ]
+--     rate
+
+myAlsa =
+  Alsa 
     "default"
     "Master"
     [ "-t" , "<status><fn=1><volume></fn>%"
@@ -206,8 +223,21 @@ myPulse rate =
     , "--off" , "<fn=2>🔇</fn>"
     , "--onc" , monitorLow myTheme
     , "--offc" , monitorHigh myTheme
+    , "--alsactl=/usr/sbin/alsactl"
     ]
-    rate
+
+-- Can show if mic is muted or not, but can't see if anyone is actually using a recording stream
+-- alsaMic =
+--   Alsa 
+--     "default"
+--     "Capture"
+--     [ "-t" , "<status>" 
+--     , "--"
+--     , "--on" , "<fn=2>⏺</fn>" 
+--     , "--off" , "<fn=2> </fn>"
+--     , "--onc" , monitorLow myTheme
+--     , "--offc" , monitorHigh myTheme
+--     ]
 
 myIntelBl :: Int -> Monitors
 myIntelBl rate =
@@ -222,7 +252,7 @@ myAMDBl rate =
     rate
 
 volPart :: String
-volPart = "<action=`xdotool key XF86AudioMute`>%default:Master%</action>"
+volPart = "<action=`xdotool key XF86AudioMute` button=1><action=`killall pavucontrol || pavucontrol` button=23>%alsa:default:Master%</action></action>"
 
 presPart :: String
 presPart = "<action=`" ++ togglePresModeCmd ++ "`><fn=3>%pmode%</fn></action>"
@@ -247,7 +277,7 @@ commonMonitors rate cpulow cpuhigh =
                       -- time and date indicator
   , Run myDate
   , Run $ myCpuFreq cpulow cpuhigh rate
-  , Run $ myPulse 50
+  , Run $ myAlsa
   , Run $ myDiskU
   , Run $ myDiskIO
   , Run $ Com (myHome ++ "/config/scripts/pres_mode") [] "pmode" 100

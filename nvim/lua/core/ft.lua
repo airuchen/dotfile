@@ -25,6 +25,18 @@ add_ft_opt({"markdown", "rst"}, "setlocal spell | nnoremap <buffer> <silent> <le
 -- spellcheck in comments
 add_ft_opt({"org", "rst", "tex", "cpp", "python", "haskell", "xml", "lua"}, "setlocal spell")
 
+-- Refile with telescope
+vim.api.nvim_create_autocmd('FileType', {
+  pattern = 'org',
+  group = vim.api.nvim_create_augroup('orgmode_telescope_nvim', { clear = true }),
+  callback = function()
+    -- Hides links
+    vim.opt.conceallevel = 2
+    vim.opt.concealcursor = 'nc'
+    vim.keymap.set('n', '<leader>or', require('telescope').extensions.orgmode.refile_heading)
+  end,
+})
+
 add_ft_opt("plantuml", "nnoremap <buffer> <leader>bv :AsyncRun plantuml % && feh $(VIM_PATHNOEXT).png<CR>")
 
 -- turn off the character limit in fugitive buffers

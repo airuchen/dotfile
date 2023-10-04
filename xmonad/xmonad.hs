@@ -398,10 +398,16 @@ myKeys mandb conf@XConfig {XMonad.modMask = modMask} =
     -- User has to be in `video` group
     , ("<XF86MonBrightnessUp>"   , safeSpawn "light" ["-A", "10"])
     , ("<XF86MonBrightnessDown>" , safeSpawn "light" ["-U", "10"])
-    , ("<XF86AudioRaiseVolume>"  , safeSpawn "amixer" ["set", "-D", "pulse", "Master", "1%+"])
-    , ("<XF86AudioLowerVolume>"  , safeSpawn "amixer" ["set", "-D", "pulse", "Master", "1%-"])
-    , ("<XF86AudioMicMute>"      , safeSpawn "pactl" ["set-source-mute", "@DEFAULT_SOURCE@", "toggle"])
-    , ("<XF86AudioMute>"         , safeSpawn "pactl" ["set-sink-mute", "@DEFAULT_SINK@", "toggle"])
+    -- Pulse/amixer
+    -- , ("<XF86AudioRaiseVolume>"  , safeSpawn "amixer" ["set", "-D", "pulse", "Master", "1%+"])
+    -- , ("<XF86AudioLowerVolume>"  , safeSpawn "amixer" ["set", "-D", "pulse", "Master", "1%-"])
+    -- , ("<XF86AudioMicMute>"      , safeSpawn "pactl" ["set-source-mute", "@DEFAULT_SOURCE@", "toggle"])
+    -- , ("<XF86AudioMute>"         , safeSpawn "pactl" ["set-sink-mute", "@DEFAULT_SINK@", "toggle"])
+    -- Pipewire
+    , ("<XF86AudioRaiseVolume>"  , safeSpawn "wpctl" ["set-volume", "-l", "1.0", "@DEFAULT_AUDIO_SINK@", "1%+"])
+    , ("<XF86AudioLowerVolume>"  , safeSpawn "wpctl" ["set-volume", "@DEFAULT_AUDIO_SINK@", "1%-"])
+    , ("<XF86AudioMicMute>"      , safeSpawn "wpctl" ["set-mute", "@DEFAULT_AUDIO_SOURCE@", "toggle"])
+    , ("<XF86AudioMute>"         , safeSpawn "wpctl" ["set-mute", "@DEFAULT_AUDIO_SINK@", "toggle"])
     , ("<XF86AudioPlay>"         , safeSpawn "mpc" ["toggle"])
     , ("<XF86AudioStop>"         , safeSpawn "mpc" ["stop"])
     , ("<XF86AudioNext>"         , safeSpawn "mpc" ["next"])
@@ -476,7 +482,7 @@ myManageHook = composeAll . concat $
   , [ isDialog       --> doCenterFloat ]
   ]
   where
-    classCenter     = ["Xfce4-appfinder", "xmessage"]
+    classCenter     = ["Xfce4-appfinder", "Xmessage", "Pavucontrol"]
     classFloat      = ["feh_cover"]
     titleFloats     = ["File Operation Progress", "xvkbd - Virtual Keyboard", "florence", "Steam Settings"]
     classFullscreen = ["Ristretto", "feh", "Sxiv", "Nsxiv", "mpv", "pathofexile_x64steam.exe", "ns2.exe", "GRIS.exe"]
