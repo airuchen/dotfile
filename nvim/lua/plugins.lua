@@ -13,9 +13,6 @@ if not vim.loop.fs_stat(lazypath) then
 end
 vim.opt.rtp:prepend(lazypath)
 
-local NVTREE_HEIGHT_RATIO = 0.8
-local NVTREE_WIDTH_RATIO = 0.5
-
 local plugins = {
   ---------------------
   --- Color Schemes ---
@@ -259,8 +256,14 @@ local plugins = {
   -- Highlight current references
   {
     'RRethy/vim-illuminate',
+    event = { "BufReadPre", "BufNewFile" },
     config = function()
-      require('illuminate').configure({
+        require('illuminate').configure({
+        filetypes_denylist = {
+            'dirvish',
+            'fugitive',
+            'nvimtree',
+        },
         filetypes_allowlist = {
           "cpp",
           "python",
@@ -268,21 +271,17 @@ local plugins = {
           "haskell",
           "bash",
         },
-        under_cursor = false,
+        under_cursor = true,
         min_count_to_highlight = 2
       })
-      -- TODO nicer stuff for this?
-      vim.cmd([[
-      hi def link IlluminatedWordText Visual
-      hi def link IlluminatedWordRead DiffChange
-      " hi IlluminatedWordWrite cterm=reverse ctermbg=241 gui=reverse gui=underline guibg=#665c54
-      hi def link IlluminatedWordWrite DiffDelete
-      ]])
-    end
+    end,
   },
 
   {
     'nvim-orgmode/orgmode',
+    dependencies = {
+      {'akinsho/org-bullets.nvim', lazy = true, ft = 'org', opts = {} },
+    },
     event = 'VeryLazy',
     config = function()
       require('plugins.treesitter_config')
@@ -305,7 +304,6 @@ local plugins = {
       pcall(require('nvim-treesitter.install').update({with_sync = true}))
     end,
   },
-  {'akinsho/org-bullets.nvim', lazy = true, ft = 'org', opts = {} },
 
   -- toggle with <leader>tm
   'dhruvasagar/vim-table-mode',
@@ -353,38 +351,18 @@ local plugins = {
     }
   },
 
+  -- File tree
   {
     'nvim-tree/nvim-tree.lua',
     event = "VeryLazy",
+    cond = false, -- Oil is nicer
+    keys = {
+      { "<leader>T", function() local api = require('nvim-tree.api'); api.tree.toggle() end, desc = "Toggle NvimTree" }
+    },
     opts = {
       view = {
         number = true,
         relativenumber = true,
-        float = {
-          enable = true,
-          open_win_config = function()
-            local screen_w = vim.opt.columns:get()
-            local screen_h = vim.opt.lines:get() - vim.opt.cmdheight:get()
-            local window_w = screen_w * NVTREE_WIDTH_RATIO
-            local window_h = screen_h * NVTREE_HEIGHT_RATIO
-            local window_w_int = math.floor(window_w)
-            local window_h_int = math.floor(window_h)
-            local center_x = (screen_w - window_w) / 2
-            local center_y = ((vim.opt.lines:get() - window_h) / 2)
-            - vim.opt.cmdheight:get()
-            return {
-              border = 'rounded',
-              relative = 'editor',
-              row = center_y,
-              col = center_x,
-              width = window_w_int,
-              height = window_h_int,
-            }
-          end,
-        },
-        width = function()
-          return math.floor(vim.opt.columns:get() * NVTREE_WIDTH_RATIO)
-        end,
       },
       renderer = {
         special_files = { "Cargo.toml", "Makefile", "README.md", "CMakeLists.txt", "readme.md", "README.org" },
@@ -402,8 +380,15 @@ local plugins = {
       },
     }
   },
+
+  -- Replaces netrw with editable buffer
   {
     'stevearc/oil.nvim',
+    lazy = false, -- Needed so nvim . opens an oil:// buffer
+    keys = {
+      -- Note: this also goes to the parent dir in oil:// buffers
+      { "<space>e", function() require('oil').open() end, desc = "Explore at file" }
+    },
     opts = {
       columns = {
         "icon",
@@ -413,6 +398,8 @@ local plugins = {
       },
     }
   },
+
+  -- Shows available keybinds at the bottom
   {
     "folke/which-key.nvim",
     event = "VeryLazy",
