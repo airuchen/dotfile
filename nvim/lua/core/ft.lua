@@ -18,7 +18,8 @@ add_ft_opt("javascript", "setlocal shiftwidth=2 expandtab softtabstop=2")
 add_ft_opt("html", "setlocal shiftwidth=2 expandtab softtabstop=2")
 add_ft_opt("python", "setlocal shiftwidth=4 expandtab softtabstop=4")
 -- Select foo::bar as 2 words, keep signcol open
-add_ft_opt("cpp", "setlocal iskeyword-=: signcolumn=yes")
+add_ft_opt("cpp", "setlocal iskeyword-=:")
+add_ft_opt("rust", "setlocal iskeyword-=:")
 
 add_ft_opt({"markdown", "rst"}, "setlocal spell | nnoremap <buffer> <silent> <leader>bv :AsyncRun -close -mode=term -pos=right ~/go/bin/glow -p %<CR>")
 
@@ -165,9 +166,15 @@ vim.api.nvim_create_autocmd({"FileType"}, {
   desc = "Bind rust runners"
 })
 
-vim.api.nvim_create_autocmd({"BufRead"}, {
-  pattern = "*/install/*",
-  callback = function(ev) vim.bo[ev.buf].readonly = true end,
+local function set_install_space_ro(ev)
+  if string.find(ev.file, "/install/") then
+    vim.bo[ev.buf].readonly = true
+  end
+end
+
+vim.api.nvim_create_autocmd({"FileType"}, {
+  pattern = {"python", "cpp"},
+  callback = set_install_space_ro,
   group = ft_group,
-  desc = "Make files in ROS install spaces readonly"
+  desc = "Mark ros install-space files readonly"
 })

@@ -5,7 +5,7 @@ local telescope = require('telescope')
 
 -- This may not even be that needed anymore with timeout/filesize limit
 local preview_opts = {
-    -- 1) Do not show previewer for certain files
+  -- 1) Do not show previewer for certain files
   filetype_hook = function(filepath, bufnr, opts)
     -- you could analogously check opts.ft for filetypes
     local excluded = vim.tbl_filter(function(ending)
@@ -14,7 +14,7 @@ local preview_opts = {
       ".*%.bag",
       ".*%.tgz",
       ".*%.tar.gz",
-      })
+    })
     if not vim.tbl_isempty(excluded) then
       putils.set_preview_message(
         bufnr,
@@ -52,7 +52,7 @@ local ros_pickers = require('telescope').extensions.ros
 telescope.setup {
   defaults = {
     -- prompt_prefix = ">",
-    file_sorter =  require'telescope.sorters'.get_fuzzy_file,
+    file_sorter = require 'telescope.sorters'.get_fuzzy_file,
     preview = preview_opts,
     path_display = { "truncate", },
     set_env = { ['COLORTERM'] = 'truecolor' }, -- default = nil,
@@ -69,7 +69,7 @@ telescope.setup {
   extensions = {
     fzf = {
       fuzzy = true,                    -- false will only do exact matching
-      override_generic_sorter = false, -- override the generic sorter
+      override_generic_sorter = true, -- override the generic sorter
       override_file_sorter = true,     -- override the file sorter
       case_mode = "smart_case",        -- or "ignore_case" or "respect_case"
                                        -- the default case_mode is "smart_case"
@@ -96,7 +96,7 @@ local ros_builder = require('ros-builder')
 -- Keybinds
 ----------
 local function nm(key, rhs, desc)
-  local opts = {silent = true, remap = false, desc = desc}
+  local opts = { silent = true, remap = false, desc = desc }
   vim.keymap.set('n', key, rhs, opts)
 end
 
@@ -110,7 +110,7 @@ nm("<leader>f", vim.lsp.buf.code_action, "LSP code actions")
 nm("<leader>s", function() builtins.spell_suggest(themes.get_cursor({})) end, "Spell suggest")
 
 -- ROS packages
-nm("<leader>dr", function() ros_pickers.packages{cwd=ros_builder.detect_workspace() or "."} end, "ROS packages")
+nm("<leader>dr", function() ros_pickers.packages { cwd = ros_builder.detect_workspace() or "." } end, "ROS packages")
 
 -- package files (or just .)
 nm("<leader>ds", ros_pickers.files, "ROS files")
@@ -120,7 +120,10 @@ nm("<leader>dg", ros_pickers.grep_string, "Grep word under cursor")
 nm("<leader>g", ros_pickers.live_grep, "Live grep in package")
 
 -- LSP Errors
-nm("<leader>E", function() vim.diagnostic.setloclist({open=false}); builtins.loclist{} end, "LSP Errors to loclist")
+nm("<leader>E", function()
+  vim.diagnostic.setloclist({ open = false });
+  builtins.loclist {}
+end, "LSP Errors to loclist")
 nm("<leader>e", builtins.diagnostics, "LSP diagnostics")
 
 -- Buffers

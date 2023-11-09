@@ -84,6 +84,7 @@ ls.add_snippets("xml", {
   s("fez", {t("felix.zeltner@node-robotics.com")}),
   s("dep", {t("<depend>"), i(1, "pkg"), t("</depend>")}),
   s("bdep", {t("<build_depend>"), i(1, "pkg"), t("</build_depend>")}),
+  s("scheme", {t([[<?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>]])}),
 })
 
 ls.add_snippets("org", {
@@ -102,5 +103,33 @@ ls.add_snippets("cmake", {
     t("add_executable("), i(1, "${name}"), t(" "), e.rep(1),  t(".cpp"), t({")", ""}),
     t("ament_target_dependencies("), e.rep(1), t(" "),  i(2, "${dependencies}"), t({")", ""}),
     t("target_link_libraries("), e.rep(1), t(" "), i(3, "${PROJECT_NAME}"), t({")", ""})
+  }),
+  s({trig = "tid", condition = line_begin}, {
+    t("target_include_directories("), i(1, "${PROJECT_NAME}"),
+    t({"", "  PUBLIC",
+    [[    "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>"]],
+    [[    "$<INSTALL_INTERFACE:include/${PROJECT_NAME}>")]]})
+  }),
+  s({trig="id", condition = line_begin}, {
+    t("target_include_directories("), i(1, "${PROJECT_NAME}"), t(" "), i(2, "PUBLIC"),
+    t({"", "  ${"}), i(3, "lib"), t("_INCLUDE_DIRS}"),
+    t({"", ")"})
+  }),
+  s({trig="it", condition = line_begin}, {
+    t("install(TARGETS "), i(1, "${PROJECT_NAME}"),
+    t({"", "  EXPORT export_"}), e.rep(1),
+    t({"",
+       "  ARCHIVE DESTINATION lib",
+       "  LIBRARY DESTINATION lib",
+       "  RUNTIME DESTINATION bin",
+       ")"})
+  }),
+  s({trig="aet", condition = line_begin}, {
+    t("ament_export_targets(export_"), i(1, "${PROJECT_NAME}"), i(2, " HAS_LIBRARY_TARGET"), t(")")
+  }),
+  s({trig="tll", condition = line_begin}, {
+    t("target_link_libraries("), i(1, "${PROJECT_NAME}"), t(" "), i(2, "PUBLIC"),
+    t({"", "  "}), i(3, "lib"),
+    t({"", ")"})
   }),
 })

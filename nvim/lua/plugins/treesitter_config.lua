@@ -14,7 +14,7 @@ end
 
 tsconf.setup {
   -- one of "all", "language", or a list of languages
-  ensure_installed = { 
+  ensure_installed = {
     "bash",
     "bibtex",
     "c",
@@ -51,7 +51,7 @@ tsconf.setup {
   highlight = {
     enable = true,
     disable = ts_disable_func,
-    additional_vim_regex_highlighting = {'org'},
+    additional_vim_regex_highlighting = { 'org' },
   },
   -- in visual mode, select by tree
   incremental_selection = {
@@ -68,16 +68,16 @@ tsconf.setup {
     select = {
       enable = true,
       disable = ts_disable_func,
-
       -- Automatically jump forward to textobj, similar to targets.vim
       lookahead = true,
-
       keymaps = {
         -- You can use the capture groups defined in textobjects.scm
         ["af"] = { query = "@function.outer", desc = "Select around function" },
         ["if"] = { query = "@function.inner", desc = "Select inner part of function" },
         ["aa"] = { query = "@parameter.outer", desc = "Select around parameter" },
         ["ia"] = { query = "@parameter.inner", desc = "Select inner part of parameter" },
+        ["ac"] = { query = "@class.outer", desc = "Select a class" },
+        ["ic"] = { query = "@class.inner", desc = "Select inner part of class" },
       },
     },
     move = {
@@ -120,6 +120,7 @@ tsconf.setup {
   },
 }
 
+--[[ -- Too flaky
 -- Repeatable treesitter textobject moves
 local ts_repeat_move = require "nvim-treesitter.textobjects.repeatable_move"
 
@@ -133,3 +134,4 @@ vim.keymap.set({ "n", "x", "o" }, "f", ts_repeat_move.builtin_f)
 vim.keymap.set({ "n", "x", "o" }, "F", ts_repeat_move.builtin_F)
 vim.keymap.set({ "n", "x", "o" }, "t", ts_repeat_move.builtin_t)
 vim.keymap.set({ "n", "x", "o" }, "T", ts_repeat_move.builtin_T)
+]]

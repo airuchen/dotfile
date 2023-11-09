@@ -34,6 +34,7 @@ o.lazyredraw = true
 -- Linenumbers
 o.number = true -- Make cursor line show real line in relativenumber
 o.relativenumber = true -- relative line numbers
+o.signcolumn = "yes"
 o.scrolloff = 10 -- Try to keep cursor away from window top/bottom
 o.cursorline = true -- Hilight cursor line
 o.colorcolumn = "120" -- Max line length marker
