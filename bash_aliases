@@ -295,7 +295,7 @@ function ffmpeg_make_gif {
 
 function rsource_ros2_base {
   local ROS_ROOT
-  [ -d "/opt/ros/foxy" ] && . /opt/ros/foxy/setup.bash
+  [ -d "/opt/ros/iron" ] && . /opt/ros/iron/setup.bash
   [ -e /usr/share/colcon_argcomplete/hook/colcon-argcomplete.bash ]\
     && . /usr/share/colcon_argcomplete/hook/colcon-argcomplete.bash
   [ -e /usr/share/colcon_cd/function/colcon_cd.sh ]\
@@ -304,8 +304,6 @@ function rsource_ros2_base {
 
 function rsource {
   local ROS_ROOT
-  [ -d "/opt/ros/melodic" ] && ROS_ROOT="/opt/ros/melodic/setup.bash"
-  [ -d "/opt/ros/kinetic" ] && ROS_ROOT="/opt/ros/kinetic/setup.bash"
   [ -d "/opt/ros/noetic" ] && ROS_ROOT="/opt/ros/noetic/setup.bash"
   # ROS2 things
   [ -e /usr/share/colcon_argcomplete/hook/colcon-argcomplete.bash ]\
@@ -363,26 +361,19 @@ alias cddev='is_ros_workspace && cd $ROS_WORKSPACE/devel/.private'
 # Better roscd
 function rcd {
   local pkgpath
-  if [ $ROS_VERSION = 2 ]; then
-    pkgpath=$(colcon --log-base /dev/null list --base-path "${ROS_WORKSPACE}" 2>/dev/null | fzf -q "${1}" | cut -f 2) && cd "${pkgpath}" || return
-  else
-    pkgpath=$(rospack list 2>/dev/null | fzf -q "${1}" | cut -d" " -f 2) && cd "${pkgpath}" || return
-  fi
-
+  pkgpath=$(cols list --base-paths "${ROS_WORKSPACE}" | fzf -q "${1}" | cut -f 2)
+  [ -n "${pkgpath}" ] && cd "${pkgpath}"
 }
 
 # Better rosed
 function re {
   local pkg
-  if [ $ROS_VERSION = 2 ]; then
-    pkg=$(colcon --log-base /dev/null list --base-path "${ROS_WORKSPACE}" 2>/dev/null | fzf -q "${1}" | cut -f 2) || return
-  else
-    pkg=$(rospack 2>/dev/null list | cut -d" " -f 1 | fzf --prompt="package: ") || return
-    pkg=$(rospack 2>/dev/null find "${pkg}") || return
-  fi
-  local file
-  file=$(fd -0 --type f . "${pkg}" | fzf --read0 --prompt="file: ") || return
-  ${EDITOR} "${file}"
+  pkg=$(cols  list --base-paths "${ROS_WORKSPACE}" | fzf -q "${1}" | cut -f 2)
+  [ -n "${pkg}" ] || return
+  local filename
+  filename=$(fd -0 --type f . "${pkg}" | fzf --read0 --prompt="file: ")
+  [ -n "${filename}" ] || return
+  ${EDITOR} "${filename}"
 }
 
 alias threadps='ps -T -f -p '
@@ -543,4 +534,5 @@ function kill_named_pythons {
 # Keep ros1 on localhost
 export ROS_MASTER_URI=http://localhost:11311
 # Keep ros2 on localhost
-export ROS_LOCALHOST_ONLY=1
+export ROS_AUTOMATIC_DISCOVERY_RANGE=LOCALHOST
+export RMW_IMPLEMENTATION=rmw_cyclonedds_cpp

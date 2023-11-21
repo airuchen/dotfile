@@ -9,11 +9,24 @@ vim.g.editorconfig = false
 -- vim.g.loaded_netrw = 1
 -- vim.g.loaded_netrwPlugin = 1
 
--- Plugins
-pcall(require, 'impatient')
-require('plugins')
+-- Lazy bootstrap
+local lazypath = vim.fn.stdpath("data") .. "/lazy/lazy.nvim"
+if not vim.loop.fs_stat(lazypath) then
+  vim.fn.system({
+    "git",
+    "clone",
+    "--filter=blob:none",
+    "https://github.com/folke/lazy.nvim.git",
+    "--branch=stable", -- latest stable release
+    lazypath,
+  })
+end
+vim.opt.rtp:prepend(lazypath)
 
-require('core.options')
-require('core.keybinds')
-require('core.ft')
-require('core.sb').setup()
+-- Merge all plugin specs from lua/plugins
+require("lazy").setup("plugins")
+
+require("config.options")
+require("config.keybinds")
+require("config.ft")
+require("statusbar").setup()

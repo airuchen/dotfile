@@ -1,0 +1,5 @@
+require("snippets.cmake")
+require("snippets.cpp")
+require("snippets.org")
+require("snippets.python")
+require("snippets.xml")

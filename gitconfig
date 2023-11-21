@@ -12,3 +12,5 @@
   fixup = !sh -c 'REV=$(git rev-parse $1) && git commit --fixup $@ --no-verify && git rebase -i --autosquash $REV^ && pre-commit run --from-ref $REV --to-ref HEAD' -
 [init]
   defaultBranch = main
+[rebase]
+  autosquash = true

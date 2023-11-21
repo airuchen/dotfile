@@ -30,7 +30,7 @@ end
 
 local value_sep = function(opts, elems, sep)
   local elems_filtered = {}
-  for k,v in pairs(elems) do
+  for _ ,v in pairs(elems) do
     if v then
       table.insert(elems_filtered, v)
     end
@@ -39,7 +39,7 @@ local value_sep = function(opts, elems, sep)
 end
 
 local lsp_status = function(bufno, short, opts)
-  if vim.tbl_isempty(vim.lsp.buf_get_clients(bufno)) then
+  if vim.tbl_isempty(vim.lsp.get_clients({ bufnr = bufno })) then
     -- No LSP available
     return nil
   end
@@ -71,8 +71,8 @@ local lsp_status = function(bufno, short, opts)
     { t = "H", sev = ds.HINT,  hl = "DiagnosticHint"}
   }
   local rendered = {}
-  for k, v in pairs(elems) do
-    res = get_element_if(v.t, v.sev, v.hl)
+  for _, v in pairs(elems) do
+    local res = get_element_if(v.t, v.sev, v.hl)
     if res then
       table.insert(rendered, res)
     end
@@ -89,7 +89,7 @@ local ftstr = function(opts)
   return opts.extras_hl .. "%Y%M%R"
 end
 
-file_percent = "%p%%"
+local file_percent = "%p%%"
 
 -- TODO highlights
 local line_stats = function(opts)
@@ -125,7 +125,7 @@ local git_status = function(bufno, opts)
   local run_it = function()
     if vim.g.loaded_fugitive then
       local git_str = vim.call("fugitive#statusline")
-      if git_str == "" then
+      if not git_str or git_str == "" then
         return nil
       end
       return table.concat {opts.extras_hl, string.match(git_str, "%[Git%((.+)%)%]")}
@@ -274,7 +274,7 @@ local one_time_setup = function()
   end
   M._opts._loaded = true
   vim.o.laststatus = 3
-  vim.o.winbar = [[%{%luaeval("require'core.sb'.title()")%}]]
+  vim.o.winbar = [[%{%luaeval("require'statusbar'.title()")%}]]
   setup_colors()
   local g = vim.api.nvim_create_augroup("MySB", { clear = true })
   vim.api.nvim_create_autocmd({"ColorScheme"}, { callback = setup_colors, group = g, desc = "Statusbar reset colors" })

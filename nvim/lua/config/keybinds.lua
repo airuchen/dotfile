@@ -65,11 +65,7 @@ nm("<leader><leader>s", ":setlocal spell!<CR>")
 -- prev misspelled word [s
 -- next misspelled word ]s
 -- show suggestions z=
--- Or denite:
---nnoremap <silent> <leader>s :Denite -wincol=`&columns / 4` -winwidth=`&columns * 1 / 4` -winrow=`&lines / 2 - 20` -winheight=40 spell<CR>
 -- add to word list zg
-
-nm("<leader><leader>r", ":source ~/config/nvim/init.lua<CR>", {desc = "Reload init.lua"})
 
 -- Undotree
 nm("<leader>ut", function() vim.cmd.UndotreeToggle(); vim.cmd.UndotreeFocus() end, {silent = true, desc = "Toggle Undotree"})
