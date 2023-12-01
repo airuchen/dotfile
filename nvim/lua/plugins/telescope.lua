@@ -99,7 +99,7 @@ local telescope_settings = function()
   telescope.load_extension('lsp_handlers')
   telescope.load_extension('heading')
   telescope.load_extension('ui-select')
-  telescope.load_extension('dap')
+  -- telescope.load_extension('dap') -- set up in debugger.lua
   telescope.load_extension('orgmode')
 
   local heading = require('telescope').extensions.heading

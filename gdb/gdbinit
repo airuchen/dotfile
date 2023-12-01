@@ -14,11 +14,14 @@ set demangle-style auto
 # Pretty printers
 python
 import sys
-sys.path.insert(0, '/usr/share/gcc/python')
-from libstdcxx.v6.printers import register_libstdcxx_printers
-sys.path.insert(0, '/home/felix/config/gdb')
+import os;
+cfg_dir = os.path.expanduser("~/.config/gdb")
+sys.path.insert(0, cfg_dir)
 from printers import register_eigen_printers
 
-register_libstdcxx_printers(None)
+# should be loaded by default
+# from libstdcxx.v6.printers import register_libstdcxx_printers
+# register_libstdcxx_printers(None)
+
 register_eigen_printers(None)
 end

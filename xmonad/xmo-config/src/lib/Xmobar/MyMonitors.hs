@@ -280,7 +280,7 @@ commonMonitors rate cpulow cpuhigh =
   , Run $ myAlsa
   , Run $ myDiskU
   , Run $ myDiskIO
-  , Run $ Com (myHome ++ "/config/scripts/pres_mode") [] "pmode" 100
+  , Run $ PipeReader "?:${HOME}/.local/state/presmode" "pmode"
   , Run $ XPropertyLog "_XMONAD_PAD"
   , Run $ PipeReader "?:${HOME}/.local/state/gammastep" "gammastep"
   ]
@@ -305,7 +305,7 @@ ninesMonitors =
   ]
 
 togglePresModeCmd :: String
-togglePresModeCmd = "xfconf-query -c xfce4-power-manager -p /xfce4-power-manager/presentation-mode -T"
+togglePresModeCmd = myHome ++ "/config/scripts/pres_mode toggle"
 
 gammaStep :: String
 gammaStep = "<action=`pkill -USR1 '^gammastep$'`><fn=3>%gammastep%</fn></action>"

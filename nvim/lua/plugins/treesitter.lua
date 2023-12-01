@@ -1,5 +1,6 @@
 local config_treesitter = function()
   require('orgmode').setup_ts_grammar()
+  require('nvim-dap-repl-highlights').setup()
 
   local tsconf = require('nvim-treesitter.configs')
 
@@ -22,6 +23,7 @@ local config_treesitter = function()
       "cmake",
       "cpp",
       "css",
+      "dap_repl",
       "diff",
       "dockerfile",
       "doxygen",
@@ -148,6 +150,8 @@ return {
       'nvim-treesitter/nvim-treesitter-context',
       -- Add treesitter based text objects
       'nvim-treesitter/nvim-treesitter-textobjects',
+      -- Highlighting for the DAP UI repl
+      'LiadOz/nvim-dap-repl-highlights',
       -- Dependency here because we need to set up the orgmode grammar
       'nvim-orgmode/orgmode'
     },

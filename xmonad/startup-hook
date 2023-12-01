@@ -19,6 +19,9 @@ pgrep '^gammastep$' || gammastep&
 
 pgrep picom || picom --config ~/config/xmonad/picom.conf &
 
+# presentation mode indicator for xmobar
+~/config/scripts/pres_mode init
+
 # app launcher
 #pgrep kupfer || kupfer --no-splash &
 

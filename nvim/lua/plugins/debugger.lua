@@ -5,6 +5,7 @@ local setup_dap = function()
 
   -- https://github.com/mfussenegger/nvim-dap/wiki/Debug-Adapter-installation
 
+  -- run lldb comands with ` in the REPL
   dap.adapters.lldb = {
     type = 'executable',
     command = '/usr/bin/lldb-vscode', -- adjust as needed, must be absolute path
@@ -81,6 +82,9 @@ local setup_dap = function()
     dapui.close()
   end
 
+
+  local telescope = require('telescope')
+  telescope.load_extension('dap')
 
   vim.keymap.set("n", "<leader>lc", dap.continue, { silent = true, desc="DAP  Continue" })
   vim.keymap.set("n", "<leader>lC", dap.run_to_cursor, { silent = true, desc="DAP  Run to cursor" })

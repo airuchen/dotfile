@@ -56,15 +56,16 @@ local default_tox_py_env = "py311"
 -- Set up tox bind
 if lsputil then
   local pyproject_pattern = lsputil.root_pattern("pyproject.toml")
-  local asyncrun_opts = {mode="term", focus=false, listed=false, cwd=cwd}
 
-  local function bind_tox_test()
-    local bufno = vim.api.nvim_get_current_buf()
-    local fname = vim.api.nvim_buf_get_name(bufno)
+  local function bind_tox_test(opts)
+    local fname = vim.api.nvim_buf_get_name(opts.buf)
+    local proj_root = pyproject_pattern(vim.fs.normalize(fname))
 
-    if not fname or not pyproject_pattern(fname) then
+    if not proj_root then
       return
     end
+
+    local asyncrun_opts = { focus=false, listed=false, cwd=proj_root}
 
     local tox_command = "tox"
     local parts = vim.split(fname, "/")
@@ -80,33 +81,34 @@ if lsputil then
       -- also add a bind for running all tests
       vim.keymap.set("n", "<leader>bT", function()
         vim.call("asyncrun#run", "", asyncrun_opts, "tox")
-      end, { buffer = bufno, desc="Run tox tests" })
+      end, { buffer = opts.buf, desc="Run tox tests" })
     end
 
     vim.keymap.set("n", "<leader>bt", function()
       vim.call("asyncrun#run", "", asyncrun_opts, tox_command)
-    end, { buffer = bufno, desc=desc })
+    end, { buffer = opts.buf, desc=desc })
 
     vim.keymap.set("n", "<leader>bm", function()
       vim.call("asyncrun#run", "", asyncrun_opts, "tox -e mypy")
-    end, { buffer = bufno, desc="Run mypy" })
+    end, { buffer = opts.buf, desc="Run mypy" })
 
     vim.keymap.set("n", "<leader>bd", function()
       vim.call("asyncrun#run", "", asyncrun_opts, "tox -e docs")
-    end, { buffer = bufno, desc="Build docs" })
+    end, { buffer = opts.buf, desc="Build docs" })
   end
 
-  local function bind_tox_docs()
-    local bufno = vim.api.nvim_get_current_buf()
-    local fname = vim.api.nvim_buf_get_name(bufno)
+  local function bind_tox_docs(opts)
+    local fname = vim.api.nvim_buf_get_name(opts.buf)
+    local proj_root = pyproject_pattern(vim.fs.normalize(fname))
 
-    if not fname or not pyproject_pattern(fname) then
+    if not proj_root then
       return
     end
+    local asyncrun_opts = { focus=false, listed=false, cwd=proj_root}
 
     vim.keymap.set("n", "<leader>b", function()
       vim.call("asyncrun#run", "", asyncrun_opts, "tox -e docs")
-    end, { buffer = bufno, desc="Build docs" })
+    end, { buffer = opts.buf, desc="Build docs" })
   end
 
   vim.api.nvim_create_autocmd({"FileType"}, {
@@ -115,6 +117,7 @@ if lsputil then
     group = ft_group,
     desc = "Bind tox runner"
   })
+
   vim.api.nvim_create_autocmd({"FileType"}, {
     pattern = "rst",
     callback = bind_tox_docs,
@@ -128,18 +131,21 @@ if lsputil then
 
   vim.api.nvim_create_autocmd({"FileType"}, {
     pattern = {"cpp", "cmake"},
-    callback = function(opts) 
+    callback = function(opts)
       if vim.fn.executable("ros2") == 1 or vim.fn.executable("rosrun") == 1 then
         return
       end
       local fname = vim.api.nvim_buf_get_name(opts.buf)
       local root = cmake_pattern(vim.fs.normalize(fname))
-      if not root then
-        return
+      local build_cmd = "clang++ -std=c++20 -ggdb -Wall -Wextra -pedantic -o $(VIM_FILENOEXT) $(VIM_FILEPATH)"
+      local cwd = "$(VIM_FILEDIR)"
+      if root then
+        cwd = root
+        build_cmd = "cmake --build build"
       end
-      local asyncrun_opts = {mode="term", focus=false, listed=false, cwd=root}
+      local asyncrun_opts = { focus=false, listed=false, cwd=cwd}
       vim.keymap.set("n", "<leader>b", function()
-        vim.call("asyncrun#run", "", asyncrun_opts, "cmake --build build")
+        vim.call("asyncrun#run", "", asyncrun_opts, build_cmd)
       end, { buffer = opts.buf, desc="cmake --build build" })
     end,
     group = ft_group,
@@ -150,7 +156,7 @@ end
 local function setup_rust_binds()
   local function bind_cargo_fun(key, cmd, desc)
     vim.keymap.set("n", key, function()
-      local asyncrun_opts = {mode="term", focus=false, listed=false, cwd=cwd}
+      local asyncrun_opts = { focus=false, listed=false, cwd="<root>"}
       vim.call("asyncrun#run", "", asyncrun_opts, cmd)
     end, { buffer = bufno, desc=desc })
   end
@@ -175,6 +181,15 @@ end
 vim.api.nvim_create_autocmd({"FileType"}, {
   pattern = {"python", "cpp"},
   callback = set_install_space_ro,
+  group = ft_group,
+  desc = "Mark ros install-space files readonly"
+})
+
+vim.api.nvim_create_autocmd({"FileType"}, {
+  pattern = {"qf"},
+  callback = function()
+    vim.wo[0].wrap=false
+  end,
   group = ft_group,
   desc = "Mark ros install-space files readonly"
 })

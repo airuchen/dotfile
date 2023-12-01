@@ -1,5 +1,10 @@
 #!/bin/sh
-# 💻🖵 ✓ ❌ ✔ 🗔 📽󰐯
-# Nerdfont version
-[ "$(xfconf-query  -c xfce4-power-manager -p /xfce4-power-manager/presentation-mode -v)" = "true" ] && echo "󰹑  " ||  echo "󰹑  "
-# [ "$(xfconf-query  -c xfce4-power-manager -p /xfce4-power-manager/presentation-mode -v)" = "true" ] && echo "來冷" ||  echo ""
+case $1 in
+  'init')
+    mkfifo ~/.local/state/presmode 2>/dev/null || true
+    ;;
+  'toggle')
+    xfconf-query -c xfce4-power-manager -p /xfce4-power-manager/presentation-mode -T
+    ;;
+esac
+[ "$(xfconf-query  -c xfce4-power-manager -p /xfce4-power-manager/presentation-mode -v)" = "true" ] && (echo "󰹑  " >> ~/.local/state/presmode) ||  (echo "󰹑  " >> ~/.local/state/presmode)
