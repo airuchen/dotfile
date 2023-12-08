@@ -5,10 +5,6 @@ vim.g.editorconfig_enable = false
 -- nvim >= 0.9
 vim.g.editorconfig = false
 
--- Required if we want to use nvim-tree
--- vim.g.loaded_netrw = 1
--- vim.g.loaded_netrwPlugin = 1
-
 -- Lazy bootstrap
 local lazypath = vim.fn.stdpath("data") .. "/lazy/lazy.nvim"
 if not vim.loop.fs_stat(lazypath) then
@@ -24,7 +20,19 @@ end
 vim.opt.rtp:prepend(lazypath)
 
 -- Merge all plugin specs from lua/plugins
-require("lazy").setup("plugins")
+require("lazy").setup("plugins", {
+  dev = {
+    path = "~/git",
+  },
+  performance = {
+    rtp = {
+      disabled_plugins = {
+        "editorconfig",
+        "netrwPlugin", -- also needed if running NeoTree
+      },
+    },
+  },
+})
 
 require("config.options")
 require("config.keybinds")

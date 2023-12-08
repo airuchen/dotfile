@@ -8,7 +8,8 @@ o.background = "dark"
 
 -- Misc settings
 -- Listmode chars, tab, trailing spaces, long lines, end-of-line
-o.listchars = "tab:>-,trail:.,extends:>,eol:$"
+vim.opt.listchars = { tab = ">-" , trail = ".", extends = ">", eol = "$"}
+vim.opt.fillchars:append { diff = "╱" } -- nicer diff fillchar
 
 -- Don't treat 04 as octal
 o.nrformats = "bin,hex"
@@ -49,8 +50,8 @@ o.mousemodel = "extend"
 o.selection = "inclusive"
 o.backspace = "indent,eol,start"
 
--- o.whichwrap = nil -- prevent infinite appending
-o.whichwrap = o.whichwrap .. "<,>,h,l"
+-- make h, l wrap lines
+-- vim.opt.whichwrap:append("<,>,h,l")
 -- no delay on esc
 -- This breaks arrow keys and stuff in insert, use ttimeoutlen instead
 -- set noesckeys
@@ -114,11 +115,11 @@ g.netrw_list_hide = "netrw_gitignore#Hide()"
 
 -- :find settings
 -- Search in ros workspace if it's there
-if vim.env.ROS_WORKSPACE then
-  o.path = o.path .. vim.env.ROS_WORKSPACE .. "/src/**"
-else
-  o.path = o.path .. "**"
-end
+-- if vim.env.ROS_WORKSPACE then
+--   o.path = o.path .. vim.env.ROS_WORKSPACE .. "/src/**"
+-- else
+--   o.path = o.path .. "**"
+-- end
 
 -- GUI
 if vim.fn.has("gui_running") == 1 then

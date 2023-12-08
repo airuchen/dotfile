@@ -48,6 +48,7 @@ local config_treesitter = function()
       "rust",
       "toml",
       "typescript",
+      "vimdoc",
       "xml",
       "yaml",
     },
