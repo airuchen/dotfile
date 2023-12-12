@@ -42,13 +42,14 @@ local config_treesitter = function()
       "markdown_inline",
       "org",
       "python",
+      "query", -- treesitter query
       "regex",
       "requirements",
       "rst",
       "rust",
       "toml",
       "typescript",
-      "vimdoc",
+      "vimdoc", -- help files
       "xml",
       "yaml",
     },

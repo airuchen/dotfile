@@ -19,6 +19,12 @@ return {
       'skywind3000/asyncrun.vim',
     },
     opts = {
+      options = {
+        launcher = function(cmd, cwd)
+          local asyncrun_opts = { cwd = cwd }
+          vim.call("asyncrun#run", "", asyncrun_opts, cmd)
+        end
+      },
       keys = {
         build = "<leader>b",
         test = "<leader>bt",
@@ -26,8 +32,8 @@ return {
       systems = {
         colcon = {
           opts = {
-            cmake_args = {"-DCMAKE_CXX_FLAGS=-ggdb"},
-            mixins = {"compile-commands", "ccache"},
+            cmake_args = { "-DCMAKE_CXX_FLAGS=-ggdb" },
+            mixins = { "compile-commands", "ccache" },
             build = { "--symlink-install" },
           },
         },

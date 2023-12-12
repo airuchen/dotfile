@@ -23,6 +23,7 @@ o.ignorecase = true
 o.smartcase = true
 o.incsearch = true
 o.hlsearch = true
+o.inccommand = "split" -- show preview of offscreen substitute commands
 
 -- UI settings
 o.title = true -- Set terminal title

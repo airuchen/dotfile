@@ -89,6 +89,14 @@ return {
         ["gitlab.com"] = "https://gitlab.com/${owner}/${repository}/merge_requests/new?merge_request[source_branch]=${branch_name}",
         ["gitlab.node%-robotics.com"] = "https://gitlab.node-robotics.com/${owner}/${repository}/merge_requests/new?merge_request[source_branch]=${branch_name}",
       },
+      ignored_settings = {
+        "NeogitPushPopup--force-with-lease",
+        "NeogitPushPopup--force",
+        "NeogitPullPopup--rebase",
+        "NeogitCommitPopup--allow-empty",
+        "NeogitCommitPopup--no-verify",
+        "NeogitRevertPopup--no-edit",
+      },
       commit_editor = {
         kind = "split_above",
         disable_line_numbers = false,

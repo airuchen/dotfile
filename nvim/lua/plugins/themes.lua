@@ -15,6 +15,7 @@ return {
       vim.cmd("colorscheme tokyonight")
     end
   },
-  {'ellisonleao/gruvbox.nvim', lazy = true},
-  {"rebelot/kanagawa.nvim", lazy = true},
+  { 'ellisonleao/gruvbox.nvim',       lazy = true, config = true },
+  { "rebelot/kanagawa.nvim",          lazy = true, config = true },
+  { "craftzdog/solarized-osaka.nvim", lazy = true, config = true }
 }
