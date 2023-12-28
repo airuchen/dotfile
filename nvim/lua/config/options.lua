@@ -179,3 +179,10 @@ vim.api.nvim_create_autocmd({"InsertEnter"}, {
 -- autocmd InsertEnter * match Error /\s\+\%#\@<!$/
 -- autocmd InsertLeave * match Error /\s\+$/
 -- autocmd BufWinLeave * call clearmatches()
+vim.api.nvim_set_keymap('t', '<Esc>', '<C-\\><C-n>', { noremap = true, silent = true })
+ 
+-- Maximize the current window vertically and horizontally
+vim.api.nvim_set_keymap('n', 'Zz', '<C-w>_<C-w>|', { noremap = true, silent = true })
+
+-- Make all windows equal size
+vim.api.nvim_set_keymap('n', 'Zo', '<C-w>=', { noremap = true, silent = true })

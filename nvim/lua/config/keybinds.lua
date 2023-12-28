@@ -53,6 +53,11 @@ nm("<C-H>", ":nohl<CR>", {silent = true, desc = "Clear hlsearch"})
 --inoremap <C-Space>	<C-n>
 -- Terminal
 --inoremap <Nul>	<C-n>
+nm("<space>t", ":belowright split | terminal<CR>", {silent = true, desc = "Open terminal"})
+-- Maximize the current window vertically and horizontally
+nm("<space>Z", "<C-w>_<C-w>|", { noremap = true, silent = true })
+-- Make all windows equal size
+nm("<space>z", "<C-w>=", { noremap = true, silent = true })
 
 -- Header <-> Source
 --noremap <F4> :A<CR>
