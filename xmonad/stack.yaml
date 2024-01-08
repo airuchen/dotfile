@@ -1,4 +1,4 @@
-resolver: lts-20.16
+resolver: lts-21.24
 flags:
   xmobar:
     with_xrender: true
@@ -7,6 +7,7 @@ flags:
     with_alsa: true
   xmonad-contrib:
     use_xft: true
+
 packages:
   - xmonad/
   - xmonad-contrib/
@@ -16,3 +17,8 @@ packages:
 ghc-options:
   xmonad-contrib: '-j'
   xmobar: '-j'
+
+extra-deps:
+  - libmpd-0.9.3.0
+
+allow-newer: true

@@ -7,4 +7,8 @@ case $1 in
     xfconf-query -c xfce4-power-manager -p /xfce4-power-manager/presentation-mode -T
     ;;
 esac
-[ "$(xfconf-query  -c xfce4-power-manager -p /xfce4-power-manager/presentation-mode -v)" = "true" ] && (echo "󰹑  " >> ~/.local/state/presmode) ||  (echo "󰹑  " >> ~/.local/state/presmode)
+if [ "$(xfconf-query  -c xfce4-power-manager -p /xfce4-power-manager/presentation-mode -v)" = "true" ]; then
+  echo "󰹑  " > ~/.local/state/presmode
+else
+  echo "󰹑  " > ~/.local/state/presmode
+fi

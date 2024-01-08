@@ -73,6 +73,12 @@ local telescope_settings = function()
         i = {
           ["<C-k>"] = actions.cycle_history_next,
           ["<C-j>"] = actions.cycle_history_prev,
+          -- map actions.which_key to <C-h> (default: <C-/>)
+          -- actions.which_key shows the mappings for your picker,
+          -- e.g. git_{create, delete, ...}_branch for the git_branches picker
+          -- ["<C-h>"] = "which_key"
+          --
+          -- M-q sends only selection to quickfix
         }
       },
     },
@@ -112,12 +118,6 @@ local telescope_settings = function()
     local opts = { silent = true, remap = false, desc = desc }
     vim.keymap.set('n', key, rhs, opts)
   end
-
-  -- LSP references
-  nm("<leader>r", builtins.lsp_references, "LSP references")
-
-  -- Code actions
-  nm("<leader>f", vim.lsp.buf.code_action, "LSP code actions")
 
   -- Spell suggest
   nm("<leader>s", function() builtins.spell_suggest(themes.get_cursor({})) end, "Spell suggest")

@@ -20,7 +20,9 @@ end
 vim.opt.rtp:prepend(lazypath)
 
 -- Merge all plugin specs from lua/plugins
-require("lazy").setup("plugins", {
+require("lazy").setup({
+  spec = "plugins",
+  change_detection = { notify = false },
   dev = {
     path = "~/git",
   },

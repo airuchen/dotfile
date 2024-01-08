@@ -22,6 +22,11 @@ pgrep picom || picom --config ~/config/xmonad/picom.conf &
 # presentation mode indicator for xmobar
 ~/config/scripts/pres_mode init
 
+pkill -USR1 '^gammastep$'
+sleep 1
+# toggle gammastep twice to update the icon
+pkill -USR1 '^gammastep$'
+
 # app launcher
 #pgrep kupfer || kupfer --no-splash &
 

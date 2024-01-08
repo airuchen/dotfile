@@ -6,16 +6,6 @@ end
 
 M.as_hilight_str = as_hilight_str
 
--- TODO better values for these highlights
--- TODO whoami root stuff here?
--- User1          xxx ctermfg=8 ctermbg=0 guifg=#928374 guibg=#282828
--- User3          xxx ctermfg=14 ctermbg=0 guifg=#8ec07c guibg=#282828
--- percent, filetype, git (todo, not proper colour yet)
--- User2          xxx ctermfg=4 ctermbg=0 guifg=#458588 guibg=#282828
-
-
-local ds = vim.diagnostic.severity
-
 local box_it = function(opts, elem, left, right)
   left = left or "[ "
   right = right or " ]"
@@ -30,7 +20,7 @@ end
 
 local value_sep = function(opts, elems, sep)
   local elems_filtered = {}
-  for _ ,v in pairs(elems) do
+  for _, v in pairs(elems) do
     if v then
       table.insert(elems_filtered, v)
     end
@@ -38,40 +28,46 @@ local value_sep = function(opts, elems, sep)
   return table.concat(elems_filtered, opts.sep_hl .. sep)
 end
 
+-- List of LSP elements, in order
+local ds = vim.diagnostic.severity
+local lsp_elems = {
+  { t = "E", sev = ds.ERROR, hl = as_hilight_str("DiagnosticError") },
+  { t = "W", sev = ds.WARN,  hl = as_hilight_str("DiagnosticWarn") },
+  { t = "I", sev = ds.INFO,  hl = as_hilight_str("DiagnosticInfo") },
+  { t = "H", sev = ds.HINT,  hl = as_hilight_str("DiagnosticHint") }
+}
+local lsp_ok = as_hilight_str("DiagnosticInfo") .. "✔"
+
+-- Dynamic
 local lsp_status = function(bufno, short, opts)
   if vim.tbl_isempty(vim.lsp.get_clients({ bufnr = bufno })) then
     -- No LSP available
     return nil
   end
+  local counts = vim.diagnostic.count(bufno)
   local get_element_if = function(prefix, severity, hilight)
-    local count = vim.tbl_count(vim.diagnostic.get(bufno, {severity = severity}))
-    if count == 0 then
+    local count = counts[severity]
+    if not count or count == 0 then
       return nil
     end
     if short then
       return table.concat {
-        as_hilight_str(hilight),
+        hilight,
         count,
       }
     end
     return table.concat {
-      as_hilight_str(hilight),
+      hilight,
       prefix,
       opts.sep_hl,
       ":",
-      as_hilight_str(hilight),
+      hilight,
       count,
     }
   end
 
-  local elems = {
-    { t = "E", sev = ds.ERROR, hl = "DiagnosticError"},
-    { t = "W", sev = ds.WARN,  hl = "DiagnosticWarn"},
-    { t = "I", sev = ds.INFO,  hl = "DiagnosticInfo"},
-    { t = "H", sev = ds.HINT,  hl = "DiagnosticHint"}
-  }
   local rendered = {}
-  for _, v in pairs(elems) do
+  for _, v in pairs(lsp_elems) do
     local res = get_element_if(v.t, v.sev, v.hl)
     if res then
       table.insert(rendered, res)
@@ -80,31 +76,43 @@ local lsp_status = function(bufno, short, opts)
 
   if vim.tbl_isempty(rendered) then
     -- No warnings, etc
-    return as_hilight_str("DiagnosticInfo") .. "✔"
+    return lsp_ok
   end
   return value_sep(opts, rendered, ", ")
 end
 
+-- Cache for static parts
+M._cache = {}
+
 local ftstr = function(opts)
-  return opts.extras_hl .. "%Y%M%R"
+  if not M._cache.ftstr then
+    M._cache.ftstr = opts.extras_hl .. "%Y%M%R"
+  end
+  return M._cache.ftstr
 end
 
 local file_percent = "%p%%"
 
 -- TODO highlights
 local line_stats = function(opts)
-  local cur_col = opts.val_hl .. "%v"
-  local cur_line = opts.val_hl .. "%l"
-  local total_lines = opts.val_hl .. "%L"
-  local perc = opts.extras_hl .. file_percent
-  return value_sep(opts, {
-      value_sep(opts, {cur_col, cur_line}, " : "),
-      value_sep(opts, {total_lines, box_it(opts, perc, "(", ")") }, " ")
+  if not M._cache.line_stats then
+    local cur_col = opts.val_hl .. "%v"
+    local cur_line = opts.val_hl .. "%l"
+    local total_lines = opts.val_hl .. "%L"
+    local perc = opts.extras_hl .. file_percent
+    M._cache.line_stats = value_sep(opts, {
+      value_sep(opts, { cur_col, cur_line }, " : "),
+      value_sep(opts, { total_lines, box_it(opts, perc, "(", ")") }, " ")
     }, " / ")
+  end
+  return M._cache.line_stats
 end
 
 local short_line_stats = function(opts)
-  return box_it(opts, opts.extras_hl .. file_percent, "(", ")")
+  if not M._cache.short_line_stats then
+    M._cache.short_line_stats = box_it(opts, opts.extras_hl .. file_percent, "(", ")")
+  end
+  return M._cache.short_line_stats
 end
 
 local rhs_sep = "%= "
@@ -118,33 +126,37 @@ local buffers = function(bufno, opts)
   if num_bufs == 1 then
     return curr_buff
   end
-  return value_sep(opts, {curr_buff, opts.val_hl .. num_bufs}, " / ")
+  return value_sep(opts, { curr_buff, opts.val_hl .. num_bufs }, " / ")
 end
 
 local git_status = function(bufno, opts)
-  local run_it = function()
-    if vim.g.loaded_fugitive then
-      local git_str = vim.call("fugitive#statusline")
-      if not git_str or git_str == "" then
-        return nil
-      end
-      return table.concat {opts.extras_hl, string.match(git_str, "%[Git%((.+)%)%]")}
-    end
+  -- Needs gitsigns to be running
+  local git_status = vim.b[bufno].gitsigns_status_dict
+  if not git_status then
     return nil
   end
-  return vim.api.nvim_buf_call(bufno, run_it)
+  local parts = { opts.extras_hl, git_status.head }
+  if not git_status.changed then
+    -- unsaved new file
+    table.insert(parts, ",+") -- like the file type modification status
+  elseif git_status.changed > 0 or git_status.added > 0 or git_status.removed > 0 then
+    -- changed
+    table.insert(parts, ",*") -- like the file type modification status
+  end
+  return table.concat(parts)
 end
 
 local file_info = function(bufno, opts)
   local ros_info = vim.b[bufno].ros_builder_package_name
-  local run_it = function()
-    if ros_info then
-      local filename = vim.fn.expand('%:t')
-      return table.concat { opts.val_hl, ros_info, opts.sep_hl, " | ", opts.val_hl, filename }
-    end
-    return table.concat { opts.val_hl, "%f"}
+  if ros_info then
+  -- foo_pkg | baz.cpp
+    return table.concat { opts.val_hl, ros_info, opts.sep_hl, " | ", opts.val_hl, "%t" }
   end
-  return vim.api.nvim_buf_call(bufno, run_it)
+  if not M._cache.static_file_info then
+    -- foo/bar/baz.cpp
+    M._cache.static_file_info = table.concat { opts.val_hl, "%f" }
+  end
+  return M._cache.static_file_info
 end
 
 local not_nil = function(x)
@@ -163,7 +175,7 @@ local line = function(bufno)
     lsp_status(bufno, true, theme),
     line_stats(theme)
   }), " | ")
-  return box_it(theme, table.concat(vim.tbl_flatten({left_elems, rhs_sep, right_elems})))
+  return table.concat(vim.tbl_flatten({ box_it(theme, left_elems), rhs_sep, box_it(theme, right_elems) }))
 end
 
 local title = function(bufno, active)
@@ -171,7 +183,7 @@ local title = function(bufno, active)
   if active then
     theme = M._opts.title
   end
-  return table.concat({theme.bg, "%=", file_info(bufno, theme), theme.extras_hl, "%M%R%="})
+  return table.concat({ theme.bg, "%=", file_info(bufno, theme), theme.extras_hl, "%M%R%=" })
 end
 
 local lineInactive = function(bufno)
@@ -184,33 +196,33 @@ local lineInactive = function(bufno)
   local right_elems = value_sep(theme, vim.tbl_filter(not_nil, {
     short_line_stats(theme)
   }), " | ")
-  return box_it(theme, table.concat(vim.tbl_flatten({left_elems, rhs_sep, right_elems})))
+  return box_it(theme, table.concat(vim.tbl_flatten({ left_elems, rhs_sep, right_elems })))
 end
 
 M._opts = {
-  active = {
-    sep_hl       = as_hilight_str("MySBSep"),
-    val_hl       = as_hilight_str("MySBVal"),
-    extras_hl    = as_hilight_str("MySBExtra")
+  active         = {
+    sep_hl    = as_hilight_str("MySBSep"),
+    val_hl    = as_hilight_str("MySBVal"),
+    extras_hl = as_hilight_str("MySBExtra")
   },
   inactive       = {
-    sep_hl       = as_hilight_str("MySBSepInactive"),
-    val_hl       = as_hilight_str("MySBValInactive"),
-    extras_hl    = as_hilight_str("MySBExtraInactive")
+    sep_hl    = as_hilight_str("MySBSepInactive"),
+    val_hl    = as_hilight_str("MySBValInactive"),
+    extras_hl = as_hilight_str("MySBExtraInactive")
   },
   title          = {
-    sep_hl       = as_hilight_str("MySBTitleSep"),
-    val_hl       = as_hilight_str("MySBTitleVal"),
-    extras_hl    = as_hilight_str("MySBTitleExtra"),
-    bg           = as_hilight_str("MySBTitleBG")
+    sep_hl    = as_hilight_str("MySBTitleSep"),
+    val_hl    = as_hilight_str("MySBTitleVal"),
+    extras_hl = as_hilight_str("MySBTitleExtra"),
+    bg        = as_hilight_str("MySBTitleBG")
   },
   inactive_title = {
-    sep_hl       = as_hilight_str("MySBTitleSepInactive"),
-    val_hl       = as_hilight_str("MySBTitleValInactive"),
-    extras_hl    = as_hilight_str("MySBTitleExtraInactive"),
-    bg           = as_hilight_str("MySBTitleInactiveBG")
+    sep_hl    = as_hilight_str("MySBTitleSepInactive"),
+    val_hl    = as_hilight_str("MySBTitleValInactive"),
+    extras_hl = as_hilight_str("MySBTitleExtraInactive"),
+    bg        = as_hilight_str("MySBTitleInactiveBG")
   },
-  _loaded = false
+  _loaded        = false
 }
 
 M.active = function(buf)
@@ -253,19 +265,26 @@ local setup_colors = function()
   vimc("highlight default link MySBExtraInactive  Identifier")
 
 
-  vimc("highlight default MySBTitleSep cterm               = none ctermbg = 0 ctermfg = 8 guibg  = " .. title_bg .. " guifg     = #7c6f64")
-  vimc("highlight default MySBTitleVal   cterm             = none ctermbg = 0 ctermfg = 14 guibg = " .. title_bg .. " guifg     = " .. title_fg)
-  vimc("highlight default MySBTitleExtra   cterm           = none ctermbg = 0 ctermfg = 4 guibg  = " .. title_bg .. " guifg     = #458588")
-  vimc("highlight default MySBTitleBG   cterm         = none ctermbg = 0 ctermfg = 4 guibg  = " .. title_bg)
+  vimc("highlight default MySBTitleSep   cterm = none ctermbg = 0 ctermfg = 8 guibg  = " .. title_bg .. " guifg = #7c6f64")
+  vimc("highlight default MySBTitleVal   cterm = none ctermbg = 0 ctermfg = 14 guibg = " .. title_bg .. " guifg = " .. title_fg)
+  vimc("highlight default MySBTitleExtra cterm = none ctermbg = 0 ctermfg = 4 guibg  = " .. title_bg .. " guifg = #458588")
+  vimc("highlight default MySBTitleBG    cterm = none ctermbg = 0 ctermfg = 4 guibg  = " .. title_bg)
   -- vimc("highlight default link MySBTitleSep Comment")
   -- vimc("highlight default link MySBTitleVal CursorLine")
   -- vimc("highlight default link MySBTitleExtra Include")
   -- vimc("highlight default link MySBTitleBG CursorLineNr")
 
-  vimc("highlight default link MySBTitleSepInactive Comment")
-  vimc("highlight default link MySBTitleValInactive Identifier")
+  vimc("highlight default link MySBTitleSepInactive   Comment")
+  vimc("highlight default link MySBTitleValInactive   Identifier")
   vimc("highlight default link MySBTitleExtraInactive Include")
-  vimc("highlight default link MySBTitleInactiveBG Identifier")
+  vimc("highlight default link MySBTitleInactiveBG    Identifier")
+end
+
+local update_bar = function()
+  local curwin = vim.api.nvim_get_current_win()
+  local buf = vim.api.nvim_win_get_buf(curwin)
+  local bar = M.active(buf)
+  vim.wo.statusline = bar
 end
 
 local one_time_setup = function()
@@ -273,16 +292,18 @@ local one_time_setup = function()
     return
   end
   M._opts._loaded = true
-  vim.o.laststatus = 3
+  vim.o.laststatus = 3 -- Use global status line
   vim.o.winbar = [[%{%luaeval("require'statusbar'.title()")%}]]
   setup_colors()
   local g = vim.api.nvim_create_augroup("MySB", { clear = true })
-  vim.api.nvim_create_autocmd({"ColorScheme"}, { callback = setup_colors, group = g, desc = "Statusbar reset colors" })
-  vim.api.nvim_create_autocmd({"WinEnter", "BufWinEnter"}, { callback = function()
-    local buf = tonumber(vim.fn.expand("<abuf>"))
-    local bar = M.active(buf)
-    vim.wo.statusline = bar
-  end, group = g, desc = "Set active window statusbar" })
+  vim.api.nvim_create_autocmd({ "ColorScheme" }, { callback = setup_colors, group = g, desc = "Statusbar reset colors" })
+  vim.api.nvim_create_autocmd({ "WinEnter", "BufWinEnter", "LspAttach" }, {
+    callback = function()
+      update_bar()
+    end,
+    group = g,
+    desc = "Set active window statusbar"
+  })
   -- vim.api.nvim_create_autocmd("WinLeave", { callback = function()
   --   local buf = tonumber(vim.fn.expand("<abuf>"))
   --   local win = vim.api.nvim_get_current_win()
@@ -293,6 +314,10 @@ local one_time_setup = function()
   --     end
   --   end)
   -- end, group = "MySB", desc = "Set inactive window statusbar" })
+  local timer = vim.uv.new_timer()
+  timer:start(500, 500, vim.schedule_wrap(function()
+    update_bar()
+  end))
 end
 
 M.setup = function(opts)

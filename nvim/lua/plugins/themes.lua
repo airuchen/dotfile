@@ -12,7 +12,7 @@ return {
         light_style = "day",
         day_brightness = 0.5
       })
-      vim.cmd("colorscheme tokyonight")
+      vim.cmd.colorscheme("tokyonight")
     end
   },
   { 'ellisonleao/gruvbox.nvim',       lazy = true, config = true },

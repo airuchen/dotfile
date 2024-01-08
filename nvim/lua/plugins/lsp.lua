@@ -23,7 +23,10 @@ vim.api.nvim_create_autocmd('LspAttach', {
 
     nm('<c-]>', vim.lsp.buf.definition, "Jump to definition")
     nm('<leader>h', vim.lsp.buf.hover, "LSP hover")
-    nm('<leader>H', function() vim.lsp.inlay_hint(ev.buf, nil) end, "Toggle inlay hints")
+    nm('<leader>H', function()
+      local hints_on = vim.lsp.inlay_hint.is_enabled(ev.buf)
+      vim.lsp.inlay_hint.enable(ev.buf, not hints_on)
+    end, "Toggle inlay hints")
     -- Using inc-rename instead
     -- nm('<leader>cr', vim.lsp.buf.rename, "LSP Rename")
     nm('<leader>d', vim.diagnostic.open_float, "LSP current diagnostic")
@@ -32,9 +35,9 @@ vim.api.nvim_create_autocmd('LspAttach', {
     nm('[d', vim.diagnostic.goto_prev, "Next diagnostic")
     nm(']d', vim.diagnostic.goto_next, "Prev diagnostic")
 
-    -- Telescope handles those
-    -- nm('<leader>f', vim.lsp.buf.code_action, "LSP code actions")
-    -- nm('<leader>r', vim.lsp.buf.references, "LSP code References")
+    -- If telescope is installed these will use telescope
+    nm('<leader>ca', vim.lsp.buf.code_action, "LSP code actions")
+    nm('<leader>r', vim.lsp.buf.references, "LSP references")
 
     vm('<leader>cf', function() vim.lsp.buf.range_formatting(vim.lsp.util.make_range_params()) end, "Format range")
   end
@@ -123,42 +126,11 @@ function setup_lsp()
     end,
     capabilities = capabilities
   }
-
-
-
-  local rt = require("rust-tools")
-
-  -- Install rustup
-  -- rustup component add rust-analyzer
-  rt.setup({
-    -- rust-tools options
-    tools = {
-      inlay_hints = {
-        auto = false,
-      }
-    },
-    server = {
-      cmd = { "rustup", "run", "nightly", "rust-analyzer" },
-      on_attach = function(_, bufnr)
-        -- Hover actions
-        -- vim.keymap.set("n", "<C-space>", rt.hover_actions.hover_actions, { buffer = bufnr })
-        -- Code action groups
-        -- vim.keymap.set("n", "<Leader>a", rt.code_action_group.code_action_group, { buffer = bufnr })
-      end,
-    },
-    dap = {
-      adapter = {
-        type = "executable",
-        command = "lldb-vscode",
-        name = "rt_lldb",
-      }
-    },
-  })
 end
 
 return {
   -- Haskell syntax checker
-  {'neovimhaskell/haskell-vim', lazy = true, ft = {'haskell'} },
+  { 'neovimhaskell/haskell-vim', lazy = true, ft = { 'haskell' } },
 
   -- Basic LSP config
   -- Needs clangd, pip3 install python-language-server cmake-language-server
@@ -167,11 +139,19 @@ return {
     dependencies = {
       'p00f/clangd_extensions.nvim',
       'hrsh7th/cmp-nvim-lsp',
-      'simrat39/rust-tools.nvim',
       'ray-x/lsp_signature.nvim',
       -- TODO consider haskell-tools.nvim
     },
     config = setup_lsp,
+  },
+
+  -- Install rustup
+  -- rustup component add rust-analyzer
+  -- Defaults should be fine, uses the attach autocmd
+  {
+    'mrcjkb/rustaceanvim',
+    -- version = '^3', -- Recommended
+    ft = { 'rust' },
   },
 
   {
@@ -194,7 +174,7 @@ return {
       -- Only run linters named in ale_linters settings
       vim.g.ale_linters_explicit = 1
       -- Explicitly specify which linters to use
-      vim.g.ale_linters = { sh = {'shellcheck'} }
+      vim.g.ale_linters = { sh = { 'shellcheck' } }
     end
   },
 

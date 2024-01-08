@@ -41,8 +41,8 @@ vim.api.nvim_create_autocmd('FileType', {
 add_ft_opt("plantuml", "nnoremap <buffer> <leader>bv :AsyncRun plantuml % && feh $(VIM_PATHNOEXT).png<CR>")
 
 -- turn off the character limit in fugitive buffers
-add_ft_opt({"fugitive", "NeogitStatus"}, "setlocal colorcolumn=0")
-add_ft_opt({"NeogitCommitMessage", "gitcommit"}, "setlocal colorcolumn=73")
+add_ft_opt({"fugitive", "NeogitStatus"}, "setlocal colorcolumn=0 | setlocal number | setlocal relativenumber")
+add_ft_opt({"NeogitCommitMessage", "gitcommit"}, "setlocal colorcolumn=73 | setlocal number | setlocal relativenumber")
 
 local function prequire(...)
   local status, lib = pcall(require, ...)

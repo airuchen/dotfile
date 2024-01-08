@@ -82,6 +82,8 @@ return {
       kind = "split_above",
       disable_line_numbers = false,
       disable_context_highlighting = true, -- no annoying flickering
+      disable_insert_on_commit = true, -- don't start in insert mode in commit editor
+      disable_signs = true, -- no signs for collapsed things
       graph_style = "unicode", -- make log view look nicer
       git_services = {
         ["github.com"] = "https://github.com/${owner}/${repository}/compare/${branch_name}?expand=1",
