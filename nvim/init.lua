@@ -38,3 +38,8 @@ require("config.options")
 require("config.keybinds")
 require("config.ft")
 require("statusbar").setup()
+require('oil').setup({
+    view_options = {
+        show_hidden = true,
+    },
+})
