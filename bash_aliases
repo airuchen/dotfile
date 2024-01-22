@@ -2,24 +2,24 @@
 alias ..='cd ..'
 alias ...='cd ../..'
 alias v='vim'
-alias nv='neovide --multigrid'
+# alias nv='neovide --multigrid'
 alias g='git'
 alias grep='grep --color=auto'
 alias gdb='gdb -q'
-alias feh="feh --scale-down"
+# alias feh="feh --scale-down"
 alias diff='diff --color=auto'
 alias cp='cp -i'
 alias mv='mv -i'
-alias mpvs='mpv --shuffle -- '
-alias ncal3='ncal -3 -w'
-alias cal='cal -m'
-alias ytdl720="yt-dlp -f 'bestvideo[height<=720]+bestaudio'"
-alias ytdlhd="yt-dlp -f 'bestvideo[width<=1920]+bestaudio'"
-alias ytdl_it='yt-dlp --no-mtime --no-call-home'
+# alias mpvs='mpv --shuffle -- '
+# alias ncal3='ncal -3 -w'
+# alias cal='cal -m'
+# alias ytdl720="yt-dlp -f 'bestvideo[height<=720]+bestaudio'"
+# alias ytdlhd="yt-dlp -f 'bestvideo[width<=1920]+bestaudio'"
+# alias ytdl_it='yt-dlp --no-mtime --no-call-home'
 command -v fdfind > /dev/null && alias fd='fdfind'
-alias pmode_toggle='xfconf-query -c xfce4-power-manager -p /xfce4-power-manager/presentation-mode -T && echo "Presentation mode is $(xfconf-query  -c xfce4-power-manager -p /xfce4-power-manager/presentation-mode -v)"'
+# alias pmode_toggle='xfconf-query -c xfce4-power-manager -p /xfce4-power-manager/presentation-mode -T && echo "Presentation mode is $(xfconf-query  -c xfce4-power-manager -p /xfce4-power-manager/presentation-mode -v)"'
 # Load loopback module for monitoring inputs
-alias paloop='pactl load-module module-loopback'
+# alias paloop='pactl load-module module-loopback'
 
 # Apt
 alias sau='sudo apt update && apt list --upgradable'
