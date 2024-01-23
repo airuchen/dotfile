@@ -146,11 +146,15 @@ local git_status = function(bufno, opts)
   return table.concat(parts)
 end
 
-local file_info = function(bufno, opts)
+local file_info = function(bufno, opts, skip_cache)
   local ros_info = vim.b[bufno].ros_builder_package_name
   if ros_info then
   -- foo_pkg | baz.cpp
     return table.concat { opts.val_hl, ros_info, opts.sep_hl, " | ", opts.val_hl, "%t" }
+  end
+  -- We call this from statusbar, where the color changes
+  if skip_cache then
+    return table.concat { opts.val_hl, "%f" }
   end
   if not M._cache.static_file_info then
     -- foo/bar/baz.cpp
@@ -183,7 +187,7 @@ local title = function(bufno, active)
   if active then
     theme = M._opts.title
   end
-  return table.concat({ theme.bg, "%=", file_info(bufno, theme), theme.extras_hl, "%M%R%=" })
+  return table.concat({ theme.bg, "%=", file_info(bufno, theme, true), theme.extras_hl, "%M%R%=" })
 end
 
 local lineInactive = function(bufno)
@@ -234,6 +238,7 @@ end
 M.title = function()
   local buf = vim.api.nvim_get_current_buf()
   local win = vim.api.nvim_get_current_win()
+  -- print(buf, win, tonumber(vim.g.actual_curwin), win == tonumber(vim.g.actual_curwin))
   if buf and vim.api.nvim_buf_is_valid(buf) then
     return title(buf, win == tonumber(vim.g.actual_curwin))
   end

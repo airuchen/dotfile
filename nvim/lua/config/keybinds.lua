@@ -18,20 +18,20 @@ nm("N", "Nzz")
 -- Fast navigation
 --set splitbelow
 vim.o.splitright = true
-nm("<space>h", "<C-w>h", {desc = "[^] Window up"})
-nm("<space>j", "<C-w>j", {desc = "[v] Window down"})
-nm("<space>k", "<C-w>k", {desc = "[<] Window right"})
-nm("<space>l", "<C-w>l", {desc = "[>] Window right"})
-nm("<space>x", "<C-w>c", {desc = "[x] Close window"}) -- used to be space c but that is accident prone with shift-c
-nm("<space>o", "<C-w>o", {desc = "[X] Close all other windows"})
-nm("<space>=", "<C-w>=", {desc = "[=] Equally resize windows"})
-nm("<space>s", ":vspl<CR>", {desc = "VSplit window"})
-nm("<space>-", ":spl<CR>", {desc = "HSplit window"})
+nm("<space>h", "<C-w>h", { desc = "[^] Window up" })
+nm("<space>j", "<C-w>j", { desc = "[v] Window down" })
+nm("<space>k", "<C-w>k", { desc = "[<] Window right" })
+nm("<space>l", "<C-w>l", { desc = "[>] Window right" })
+nm("<space>x", "<C-w>c", { desc = "[x] Close window" }) -- used to be space c but that is accident prone with shift-c
+nm("<space>o", "<C-w>o", { desc = "[X] Close all other windows" })
+nm("<space>=", "<C-w>=", { desc = "[=] Equally resize windows" })
+nm("<space>s", ":vspl<CR>", { desc = "VSplit window" })
+nm("<space>-", ":spl<CR>", { desc = "HSplit window" })
 -- nm("<space>v", ":spl<CR>") -- too annoying with shift and space on the same key
 --Open file under cursor in split, use this for errors, etc
-nm("<space>f", "<C-w>f", {desc = "Open file under cursor in split"})
+nm("<space>f", "<C-w>f", { desc = "Open file under cursor in split" })
 --Open file under cursor in split and jump to given line, use this for errors, etc
-nm("<space>F", "<C-w>F", {desc = "Open file under cursor in split at line"})
+nm("<space>F", "<C-w>F", { desc = "Open file under cursor in split at line" })
 --use clangd for alternate file
 --nnoremap <space>A :AV<CR>
 --nnoremap <space>a :A<CR>
@@ -43,7 +43,7 @@ nm("<space>F", "<C-w>F", {desc = "Open file under cursor in split at line"})
 -- vnoremap k	:m'<-2<cr>`>mzgv`yo`z
 
 -- Hide hilights from hlsearch
-nm("<C-H>", ":nohl<CR>", {silent = true, desc = "Clear hlsearch"})
+nm("<C-H>", ":nohl<CR>", { silent = true, desc = "Clear hlsearch" })
 
 -- Type ß with alt - on UK layout :)
 -- vim.keymap.set("i", "<leader>-", "ß") -- too annoying
@@ -67,14 +67,18 @@ nm("<leader><leader>s", ":setlocal spell!<CR>")
 -- show suggestions z=
 -- add to word list zg
 
--- Undotree
-nm("<leader>ut", function() vim.cmd.UndotreeToggle(); vim.cmd.UndotreeFocus() end, {silent = true, desc = "Toggle Undotree"})
-nm("<leader>uf", vim.cmd.UndotreeFocus, {silent = true, desc = "Focus Undotree"})
-
--- Telescope: ctrl-q sends stuff to quickfix, bindings to jump between results
--- faster
-nm("<space>q", ":cnext<CR>", {silent = true, desc = "Next quickfix item"})
-nm("<space>Q", ":cprev<CR>", {silent = true, desc = "Prev quickfix item"})
+-- Send diagnostics of current file to quickfix
+nm("<leader>E", function()
+    vim.diagnostic.setqflist({title = "Diagnostics for " .. vim.fn.expand("%")})
+  end,
+  { silent = true, desc = "Open diagnostics" }
+)
+-- Telescope: ctrl-q sends stuff to quickfix, bindings to jump between results faster
+nm("<space>n", ":cnext<CR>", { silent = true, desc = "Next quickfix item" })
+nm("<space>q", ":cprev<CR>", { silent = true, desc = "Prev quickfix item" })
+-- These are restricted to current buffer
+nm("<space><c-n>", ":cafter<CR>", { silent = true, desc = "Quickfix item above" })
+nm("<space><c-q>", ":cbefore<CR>", { silent = true, desc = "Quickfix item below" })
 
 
 -- Building
@@ -93,7 +97,7 @@ nm("<leader>S", "vip:sort<CR>", { desc = "Sort block" })
 
 -- Macros
 -- convert <arg name="foo" default="bar"/> to <arg name="foo" value="$(arg foo)" />
-nm("<leader>a", [[0"byi"Wcevaluef"ci"$(arg" "bpa)j0]], { desc = "Convert xml <arg default> to <arg value>"})
+nm("<leader>a", [[0"byi"Wcevaluef"ci"$(arg" "bpa)j0]], { desc = "Convert xml <arg default> to <arg value>" })
 nm("<leader>A", [[0"byi"f/i" value="$(rg "bpa)"j0]])
 nm("<leader>p", [[p<<$s{}<ESC>4kf(Bi"::<ESC>bi]])
 
@@ -107,7 +111,7 @@ if vim.g.neovide then
     change_scale_factor(1.1)
   end)
   vim.keymap.set("n", "<C-Down>", function()
-    change_scale_factor(1/1.1)
+    change_scale_factor(1 / 1.1)
   end)
   vim.keymap.set("n", "<C-=>", function()
     vim.g.neovide_scale_factor = 1

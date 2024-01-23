@@ -2,7 +2,7 @@
 alias ..='cd ..'
 alias ...='cd ../..'
 alias v='vim'
-alias nv='neovide --multigrid'
+alias nv='neovide'
 alias g='git'
 alias grep='grep --color=auto'
 alias gdb='gdb -q'
@@ -53,7 +53,12 @@ alias coredumpsoff='ulimit -c 0'
 #setxkbmap to reset kb layout
 
 # Docker
-alias kaniko='docker run --rm -v$(pwd):/context:ro gcr.io/kaniko-project/executor:debug --context /context'
+if command -v docker &> /dev/null ; then
+  alias kaniko='docker run --rm -v$(pwd):/context:ro gcr.io/kaniko-project/executor:debug --context /context'
+  # Docker image inspection tool
+  alias dive='docker run --rm -it -v /var/run/docker.sock:/var/run/docker.sock wagoodman/dive:latest'
+fi
+
 
 
 # Workspaces
@@ -525,6 +530,16 @@ function kill_named_pythons {
     kill -9 $(pgrep -f "python.*${1}")
   fi
 }
+
+function jqdiff {
+  if [ $# -ne 2 ]; then
+    echo "Usage: jqdiff base candidate"
+    return;
+  fi
+
+  diff <(jq --sort-keys . "${1}") <(jq --sort-keys . "${2}")
+}
+
 
 # Transferring GPG keys
 # gpg --export-secret-key KeyId | ssh user@remote gpg --allow-secret-key-import --import

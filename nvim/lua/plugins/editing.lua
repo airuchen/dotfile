@@ -23,7 +23,13 @@ return {
   'tpope/vim-repeat',
 
   -- Undo tree
-  {'mbbill/undotree', lazy = true, cmd = {'UndotreeToggle', 'UndotreeFocus'}},
+  {
+    'mbbill/undotree',
+    keys = {
+      { "<leader>ut", function() vim.cmd.UndotreeToggle(); vim.cmd.UndotreeFocus() end, desc = "Toggle Undotree" },
+      { "<leader>uf", vim.cmd.UndotreeFocus, desc = "Focus Undotree" },
+    }
+  },
 
   -- Vim Be Good movement training
   {'ThePrimeagen/vim-be-good', lazy = true, cmd = "VimBeGood"},

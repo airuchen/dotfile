@@ -1,5 +1,5 @@
-o = vim.o
-g = vim.g
+local o = vim.o
+local g = vim.g
 
 -- Syntax and colors
 o.termguicolors = true
@@ -146,7 +146,8 @@ end
 
 -- Set up folds based on treesitter
 o.foldmethod = "expr"
-o.foldexpr = "nvim_treesitter#foldexpr()"
+o.foldexpr = "v:lua.vim.treesitter.foldexpr()"
+o.foldtext = "v:lua.vim.treesitter.foldtext()"
 o.foldlevel = 999
 
 -- Highlight yanked text

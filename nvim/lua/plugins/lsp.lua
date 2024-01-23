@@ -37,13 +37,14 @@ vim.api.nvim_create_autocmd('LspAttach', {
 
     -- If telescope is installed these will use telescope
     nm('<leader>ca', vim.lsp.buf.code_action, "LSP code actions")
+    nm('<leader>f', vim.lsp.buf.code_action, "LSP code actions")
     nm('<leader>r', vim.lsp.buf.references, "LSP references")
 
     vm('<leader>cf', function() vim.lsp.buf.range_formatting(vim.lsp.util.make_range_params()) end, "Format range")
   end
 })
 
-function setup_lsp()
+local setup_lsp = function()
   local nvim_lsp = require('lspconfig')
   local capabilities = require('cmp_nvim_lsp').default_capabilities()
 
@@ -152,6 +153,40 @@ return {
     'mrcjkb/rustaceanvim',
     -- version = '^3', -- Recommended
     ft = { 'rust' },
+    config = function()
+      vim.g.rustaceanvim = {
+        tools = {
+        },
+        -- LSP configuration
+        server = {
+          on_attach = function(client, bufnr)
+            vim.keymap.set("n", "<leader>bT", vim.cmd.RustTest, { buffer = bufnr, desc = "Run test under cursor" })
+            vim.keymap.set("n", "<leader>bt", "<CMD>RustTest!<CR>",
+              { buffer = bufnr, desc = "Run tests" })
+            vim.keymap.set("n", "<leader>br", function() vim.cmd.RustLsp { 'runnables', 'last' } end,
+              { buffer = bufnr, desc = "Re-run rust runnable" })
+          end,
+          settings = {
+            -- rust-analyzer language server configuration
+            ['rust-analyzer'] = {
+              cargo = {
+                allFeatures = true,
+                loadOutDirsFromCheck = true,
+                runBuildScripts = true,
+              },
+              checkOnSave = {
+                allFeatures = true,
+                command = "clippy",
+                extraArgs = { "--no-deps" },
+              },
+            },
+          },
+        },
+        -- DAP configuration
+        dap = {
+        },
+      }
+    end
   },
 
   {

@@ -132,11 +132,6 @@ local telescope_settings = function()
   nm("<leader>dg", ros_pickers.grep_string, "Grep word under cursor")
   nm("<leader>g", ros_pickers.live_grep, "Live grep in package")
 
-  -- LSP Errors
-  nm("<leader>E", function()
-    vim.diagnostic.setloclist({ open = false });
-    builtins.loclist {}
-  end, "LSP Errors to loclist")
   nm("<leader>e", builtins.diagnostics, "LSP diagnostics")
 
   -- Buffers
@@ -173,7 +168,7 @@ return {
       {'nvim-telescope/telescope-fzf-native.nvim', build = "make"},
       'gbrlsnchs/telescope-lsp-handlers.nvim',
       'crispgm/telescope-heading.nvim',
-      'joaomsa/telescope-orgmode.nvim'
+      'joaomsa/telescope-orgmode.nvim',
     },
     config = telescope_settings,
   },
