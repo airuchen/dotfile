@@ -1,4 +1,6 @@
 -- Filetype settings
+require("config.ft_plantuml")
+
 local ft_group = vim.api.nvim_create_augroup("ft_settings", { clear = true })
 
 
@@ -28,7 +30,7 @@ set_indent({ "xml", "yaml", "CMakeLists.txt", "javascript", "html" }, 2)
 set_indent({ "python" }, 4)
 
 -- Select foo::bar as 2 words
-add_ft_opt({"cpp", "rust"}, "setlocal iskeyword-=:")
+add_ft_opt({ "cpp", "rust" }, "setlocal iskeyword-=:")
 
 -- spellcheck in comments
 add_ft_opt({ "org", "rst", "tex", "cpp", "python", "haskell", "xml", "lua" }, "setlocal spell")
@@ -43,21 +45,6 @@ vim.api.nvim_create_autocmd('FileType', {
     vim.opt.concealcursor = 'nc'
     vim.keymap.set('n', '<leader>or', require('telescope').extensions.orgmode.refile_heading)
   end,
-})
-
-vim.api.nvim_create_autocmd({"BufRead"}, {
-  pattern = {"*.puml", "*.uml"},
-  callback = function(opts)
-    vim.keymap.set("n", "<leader>b", function()
-      vim.cmd.write()
-      local asyncrun_opts = { focus = false, listed = false, cwd = cwd }
-      local build_cmd = "plantuml -stdrpt:2 -tpng % && feh $(VIM_PATHNOEXT).png"
-      vim.call("asyncrun#run", "", asyncrun_opts, build_cmd)
-    end, { buffer = opts.buf, desc = "Plantuml preview"})
-    vim.bo[opts.buf].filetype = "plantuml"
-  end,
-  group = ft_group,
-  desc = "Apply plantuml filetype"
 })
 
 -- turn off the character limit in fugitive buffers
@@ -139,14 +126,14 @@ if lsputil then
     desc = "Bind tox runner"
   })
 
-  vim.api.nvim_create_autocmd({"BufRead"}, {
+  vim.api.nvim_create_autocmd({ "BufRead" }, {
     pattern = "pyproject.toml",
     callback = bind_tox_test,
     group = ft_group,
     desc = "Bind tox runner"
   })
 
-  vim.api.nvim_create_autocmd({"FileType"}, {
+  vim.api.nvim_create_autocmd({ "FileType" }, {
     pattern = "rst",
     callback = bind_tox_docs,
     group = ft_group,
