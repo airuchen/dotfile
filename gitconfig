@@ -14,3 +14,13 @@
   defaultBranch = main
 [rebase]
   autosquash = true
+[rerere]
+	enabled = true
+[column]
+  # Columns for UI
+	ui = auto
+[branch]
+  # Sort branches by reverse committer date
+	sort = -committerdate
+[fetch]
+	writeCommitGraph = true

@@ -45,7 +45,20 @@ vim.api.nvim_create_autocmd('FileType', {
   end,
 })
 
-add_ft_opt("plantuml", "nnoremap <buffer> <leader>bv :AsyncRun plantuml % && feh $(VIM_PATHNOEXT).png<CR>")
+vim.api.nvim_create_autocmd({"BufRead"}, {
+  pattern = {"*.puml", "*.uml"},
+  callback = function(opts)
+    vim.keymap.set("n", "<leader>b", function()
+      vim.cmd.write()
+      local asyncrun_opts = { focus = false, listed = false, cwd = cwd }
+      local build_cmd = "plantuml -stdrpt:2 -tpng % && feh $(VIM_PATHNOEXT).png"
+      vim.call("asyncrun#run", "", asyncrun_opts, build_cmd)
+    end, { buffer = opts.buf, desc = "Plantuml preview"})
+    vim.bo[opts.buf].filetype = "plantuml"
+  end,
+  group = ft_group,
+  desc = "Apply plantuml filetype"
+})
 
 -- turn off the character limit in fugitive buffers
 add_ft_opt({ "fugitive", "NeogitStatus" }, "setlocal colorcolumn=0 | setlocal number | setlocal relativenumber")

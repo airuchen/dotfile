@@ -154,16 +154,24 @@ return {
     -- version = '^3', -- Recommended
     ft = { 'rust' },
     config = function()
+      local executors = require("rustaceanvim.executors")
       vim.g.rustaceanvim = {
         tools = {
+          executor = executors.quickfix,
+          -- runs in background and adds failures as diagnostics
+          test_executor = executors.background,
         },
         -- LSP configuration
         server = {
           on_attach = function(client, bufnr)
+            local asyncrun_opts = { focus = false, listed = false, cwd = cwd }
+            vim.keymap.set("n", "<leader>b",
+              function() vim.call("asyncrun#run", "", asyncrun_opts, "cargo build") end,
+              { buffer = bufnr, desc = "Cargo build" })
             vim.keymap.set("n", "<leader>bT", vim.cmd.RustTest, { buffer = bufnr, desc = "Run test under cursor" })
-            vim.keymap.set("n", "<leader>bt", "<CMD>RustTest!<CR>",
+            vim.keymap.set("n", "<leader>bt", function() vim.cmd.RustLsp { 'testables', bang = true } end,
               { buffer = bufnr, desc = "Run tests" })
-            vim.keymap.set("n", "<leader>br", function() vim.cmd.RustLsp { 'runnables', 'last' } end,
+            vim.keymap.set("n", "<leader>br", function() vim.cmd.RustLsp { 'runnables', bang = true } end,
               { buffer = bufnr, desc = "Re-run rust runnable" })
           end,
           settings = {

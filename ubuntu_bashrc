@@ -104,8 +104,10 @@ else
     GIT_PS1_SHOWDIRTYSTATE=1
     GIT_PS1_SHOWCOLORHINTS=1
     GIT_PS1_SHOWUPSTREAM="auto"
+    GIT_PS1_STATESEPARATOR=""
     # Note: this must be single-quoted to prevent expansion of $?
-    PROMPT_COMMAND='print_prompt_notifications $?;echo -ne "\033]0;${USER} @ `hostname -s` : `dirs`\007";__git_ps1 "${prompt_pre_part}" "${prompt_post_part}"'
+    # nerdfont icons: \ue725 \uf418 \ueafc
+    PROMPT_COMMAND='print_prompt_notifications $?;echo -ne "\033]0;${USER} @ `hostname -s` : `dirs`\007";__git_ps1 "${prompt_pre_part}" "${prompt_post_part}" " \ueafc %s"'
   fi
   #[user@host:working/dir]
   #PS1="\[\e[0;32m\][\[\e[1;37m\]\u\[\e[0;32m\]@\[\e[m\]\h\[\e[0;32m\]:\[\e[1;32m\]\w\[\e[0;32m\]]\[\e[0m\] "

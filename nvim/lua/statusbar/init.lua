@@ -91,6 +91,14 @@ local ftstr = function(opts)
   return M._cache.ftstr
 end
 
+local macro_rec = function()
+  local reg = vim.fn.reg_recording()
+  if reg == "" then
+    return nil
+  end
+  return table.concat { as_hilight_str("DiagnosticError"), "⏺ ", reg }
+end
+
 local file_percent = "%p%%"
 
 -- TODO highlights
@@ -149,7 +157,7 @@ end
 local file_info = function(bufno, opts, skip_cache)
   local ros_info = vim.b[bufno].ros_builder_package_name
   if ros_info then
-  -- foo_pkg | baz.cpp
+    -- foo_pkg | baz.cpp
     return table.concat { opts.val_hl, ros_info, opts.sep_hl, " | ", opts.val_hl, "%t" }
   end
   -- We call this from statusbar, where the color changes
@@ -172,6 +180,7 @@ local line = function(bufno)
   local left_elems = value_sep(theme, vim.tbl_filter(not_nil, {
     buffers(bufno, theme),
     ftstr(theme),
+    macro_rec(),
     git_status(bufno, theme),
     file_info(bufno, theme),
   }), " | ")
@@ -270,9 +279,12 @@ local setup_colors = function()
   vimc("highlight default link MySBExtraInactive  Identifier")
 
 
-  vimc("highlight default MySBTitleSep   cterm = none ctermbg = 0 ctermfg = 8 guibg  = " .. title_bg .. " guifg = #7c6f64")
-  vimc("highlight default MySBTitleVal   cterm = none ctermbg = 0 ctermfg = 14 guibg = " .. title_bg .. " guifg = " .. title_fg)
-  vimc("highlight default MySBTitleExtra cterm = none ctermbg = 0 ctermfg = 4 guibg  = " .. title_bg .. " guifg = #458588")
+  vimc("highlight default MySBTitleSep   cterm = none ctermbg = 0 ctermfg = 8 guibg  = " ..
+    title_bg .. " guifg = #7c6f64")
+  vimc("highlight default MySBTitleVal   cterm = none ctermbg = 0 ctermfg = 14 guibg = " ..
+    title_bg .. " guifg = " .. title_fg)
+  vimc("highlight default MySBTitleExtra cterm = none ctermbg = 0 ctermfg = 4 guibg  = " ..
+    title_bg .. " guifg = #458588")
   vimc("highlight default MySBTitleBG    cterm = none ctermbg = 0 ctermfg = 4 guibg  = " .. title_bg)
   -- vimc("highlight default link MySBTitleSep Comment")
   -- vimc("highlight default link MySBTitleVal CursorLine")
@@ -299,6 +311,7 @@ local one_time_setup = function()
   M._opts._loaded = true
   vim.o.laststatus = 3 -- Use global status line
   vim.o.winbar = [[%{%luaeval("require'statusbar'.title()")%}]]
+  vim.opt.shortmess:append("q") -- Don't show "recording @" message
   setup_colors()
   local g = vim.api.nvim_create_augroup("MySB", { clear = true })
   vim.api.nvim_create_autocmd({ "ColorScheme" }, { callback = setup_colors, group = g, desc = "Statusbar reset colors" })
