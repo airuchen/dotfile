@@ -202,6 +202,7 @@ return {
     config = function()
       require("inc_rename").setup()
     end,
+    cond = false,
     keys = {
       { "<leader>cr", ":IncRename ", desc = "LSP Rename" }
     }

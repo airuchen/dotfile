@@ -24,7 +24,9 @@ nm("<space>k", "<C-w>k", { desc = "[<] Window right" })
 nm("<space>l", "<C-w>l", { desc = "[>] Window right" })
 nm("<space>x", "<C-w>c", { desc = "[x] Close window" }) -- used to be space c but that is accident prone with shift-c
 nm("<space>o", "<C-w>o", { desc = "[X] Close all other windows" })
-nm("<space>=", "<C-w>=", { desc = "[=] Equally resize windows" })
+nm("<space>=", "<C-w>=", { desc = "Equally resize windows" })
+nm("<space>_", "<C-w>_", { desc = "Maximize vertically" })
+nm("<space>|", "<C-w>|", { desc = "Maximize horizontally" })
 nm("<space>s", ":vspl<CR>", { desc = "VSplit window" })
 nm("<space>-", ":spl<CR>", { desc = "HSplit window" })
 -- nm("<space>v", ":spl<CR>") -- too annoying with shift and space on the same key

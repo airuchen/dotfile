@@ -1,5 +1,4 @@
 local config_treesitter = function()
-  require('orgmode').setup_ts_grammar()
   require('nvim-dap-repl-highlights').setup()
 
   local tsconf = require('nvim-treesitter.configs')
@@ -56,7 +55,6 @@ local config_treesitter = function()
     highlight = {
       enable = true,
       disable = ts_disable_func,
-      additional_vim_regex_highlighting = { 'org' },
     },
     -- in visual mode, select by tree
     incremental_selection = {

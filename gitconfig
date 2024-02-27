@@ -2,7 +2,7 @@
 	name = Felix
 	email = felix@fzeltner.de
 [core]
-	excludesfile = /home/felix/config/gitignore
+	excludesfile = ~/config/gitignore
 [clangFormat]
   binary = clang-format
 [alias]
@@ -23,4 +23,7 @@
   # Sort branches by reverse committer date
 	sort = -committerdate
 [fetch]
-	writeCommitGraph = true
+  # Issues for LazyNvim
+	writeCommitGraph = false
+[includeIf "gitdir:~/git"]
+  path = ~/config/gitconfig_extra

@@ -1,3 +1,6 @@
+-- https://codeberg.org/xmobar/xmobar/src/branch/master/doc/plugins.org
+-- nerdfonts: \int(whatever)
+
 module Xmobar.MyMonitors where
 
 import XMonad.CustomColors
@@ -11,7 +14,7 @@ baseConfig fontsize pos =
     , additionalFonts =
         [ "DejaVu Sans Mono Bold " ++ show fontsize
         , "Symbola Bold " ++ show (fontsize + 1)
-        , "DejaVuSansMono Nerd Font Bold " ++ show fontsize
+        , "DejaVuSansMono Nerd Font Bold " ++ show (fontsize + 2)
         ]
     , iconRoot     = myHome ++ "/config/xmonad/icons"
     , bgColor      = xmbBg myTheme
@@ -50,7 +53,7 @@ buildArgs' args extra = args ++ colArgs' ++ ["--"] ++ extra
 commonNetOpts :: [String]
 commonNetOpts =
   buildArgs
-    [ "--template" , "<action=`nm-connection-editor`><icon=net.xpm/><fn=1><tx></fn>↑ <fn=1><rx></fn>↓kB/s</action>" ++ sep
+    [ "--template" , "<action=`nm-connection-editor`><fn=3>\983831</fn><fn=1><tx></fn>↑ <fn=1><rx></fn>↓kB/s</action>" ++ sep
     , "--Low" , "10240" -- units: B/s
     , "--High" , "55120" -- units: B/s
     , "--minwidth" , "5"
@@ -151,13 +154,20 @@ myMPD =
     50
 
 
--- 📁 📂 🗀 󰋊
+-- 📁 📂 🗀 󰋊 
 -- 🗁
 
+-- "⚪◔◑◕●" -- TODO use icons?
+--  
+-- empty to full
+circleBar = "\62634\985758\985759\985760\985761\985762\985763\985764\985765"
+-- full to empty
+circleBarRev = "\985765\985764\985763\985762\985761\985760\985759\985758\62634"
+
 myDiskU :: Monitors
-myDiskU = DiskU [("/", "<fn=2>🗁</fn> <fn=1><free></fn> <fn=1><freep></fn>%")]
+myDiskU = DiskU [("/", "<fn=3>\61600 <freebar>  </fn><fn=1><free></fn> ")]
                   (buildArgs'
-                  [ "-f", "⚪◔◑◕●" -- TODO use icons?
+                  [ "-f", circleBarRev
                   , "-W", "0"
                   ]
                   [])
@@ -202,38 +212,38 @@ myBat2 dev = BatteryN [dev] (commonBatSettings ", <acstatus>") 300 "bat2"
 --   Volume
 --     "default"
 --     "Master"
---     [ "-t" , "<status><fn=1><volume></fn>%"
+--     [ "-t" , "<fn=3><status></fn><fn=1><volume></fn>%"
 --     , "--ppad" , "3"
 --     , "--"
---     , "--on" , "<fn=2>🔊</fn>"
---     , "--off" , "<fn=2>🔇</fn>"
+--     , "--on"  , "\984446"
+--     , "--off" , "\984449"
 --     , "--onc" , monitorLow myTheme
 --     , "--offc" , monitorHigh myTheme
 --     ]
 --     rate
 
 myAlsa =
-  Alsa 
+  Alsa
     "default"
     "Master"
-    [ "-t" , "<status><fn=1><volume></fn>%"
+    [ "-t" , "<fn=3><status></fn><fn=1><volume></fn>%"
     , "--ppad" , "3"
     , "--"
-    , "--on" , "<fn=2>🔊</fn>"
-    , "--off" , "<fn=2>🔇</fn>"
+    , "--on"  , "\984446"
+    , "--off" , "\984449"
     , "--onc" , monitorLow myTheme
-    , "--offc" , monitorHigh myTheme
+    , "--offc", monitorHigh myTheme
     , "--alsactl=/usr/sbin/alsactl"
     ]
 
 -- Can show if mic is muted or not, but can't see if anyone is actually using a recording stream
 -- alsaMic =
---   Alsa 
+--   Alsa
 --     "default"
 --     "Capture"
---     [ "-t" , "<status>" 
+--     [ "-t" , "<status>"
 --     , "--"
---     , "--on" , "<fn=2>⏺</fn>" 
+--     , "--on" , "<fn=2>⏺</fn>"
 --     , "--off" , "<fn=2> </fn>"
 --     , "--onc" , monitorLow myTheme
 --     , "--offc" , monitorHigh myTheme
@@ -251,6 +261,8 @@ myAMDBl rate =
     ["--template", " <fn=1><percent></fn>%", "--", "-D", "amdgpu_bl0"]
     rate
 
+myPodman = Com (myHome ++ "/config/scripts/container_count.sh") [] "pods" 100
+
 volPart :: String
 volPart = "<action=`xdotool key XF86AudioMute` button=1><action=`killall pavucontrol || pavucontrol` button=23>%alsa:default:Master%</action></action>"
 
@@ -267,7 +279,8 @@ templateTail nwtag temptag =
   "%" ++
   nwtag ++
   "%" ++
-  cpuPart temptag ++ sep ++ "%disku% %diskio%" ++ sep ++ volPart ++ sep ++ gammaStep ++ sep ++ presPart ++ sep ++ "%date%" ++ sep ++ "%_XMONAD_PAD%"
+  cpuPart temptag ++ sep ++ "<fn=3>\985192 </fn><fn=1>%pods%</fn>" ++ sep ++ "%disku% %diskio%" ++ sep ++ volPart ++ sep ++ gammaStep ++ sep ++ presPart ++ sep ++ "%date%" ++ sep ++ "%_XMONAD_PAD%"
+--  🐋🦭
 
 commonMonitors rate cpulow cpuhigh =
   [ Run XMonadLog
@@ -283,6 +296,7 @@ commonMonitors rate cpulow cpuhigh =
   , Run $ PipeReader "?:${HOME}/.local/state/presmode" "pmode"
   , Run $ XPropertyLog "_XMONAD_PAD"
   , Run $ PipeReader "?:${HOME}/.local/state/gammastep" "gammastep"
+  , Run myPodman
   ]
 
 ikarusTemplate = "%XMonadLog% }{ %mpd%" ++ sep ++ templateTail "dynnetwork" "k10temp"
@@ -291,7 +305,7 @@ ikarusMonitors =
   commonMonitors 20 3 4 ++
   [ Run myMPD
   , Run $ myDynNetwork 20
-                 -- CPU temp ryzen
+   -- CPU temp ryzen
   , Run $ myAmdTemp 20
   ]
 

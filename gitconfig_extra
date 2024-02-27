@@ -1,0 +1,4 @@
+# Stuff conditionally applied inside of ~/git
+
+[fetch]
+	writeCommitGraph = true
