@@ -5,13 +5,14 @@ return {
   -- bunch of [ ] mappings
   -- yo<x> toggles option x, yos is spellchecking
   -- =p pastes below with autoindent
-  'tpope/vim-unimpaired',
+  -- Produces conflicting keybinds with at least next/prev hunk
+  -- 'tpope/vim-unimpaired',
 
   -- Align stuff
   { 'godlygeek/tabular',          lazy = true, cmd = "Tabularize" },
 
   -- toggle with <leader>tm
-  { 'dhruvasagar/vim-table-mode', ft = {"rst", "markdown"}},
+  { 'dhruvasagar/vim-table-mode', ft = {"rst", "markdown", "org"}},
 
   -- Add text objects for separated lists, function arguments
   'wellle/targets.vim',

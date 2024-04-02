@@ -187,10 +187,19 @@ centeredFloating = customFloating $ W.RationalRect (1/6) (1/6) (4/6) (4/6)
 smallFloating :: ManageHook
 smallFloating = customFloating $ W.RationalRect (1/4) (1/4) (2/4) (2/4)
 
+-- Scratchpad with st and title
+myNS :: String -> String -> String -> String -> [String] -> ManageHook -> NamedScratchpad
+myNS name term termTitle app args layout = NS name termCmd (title =? termTitle) layout
+  where
+    termCmd = term ++ " -t \"" ++ termTitle ++ "\" -e " ++ app ++ argsExpanded args
+    argsExpanded [] = ""
+    argsExpanded a = " " ++ unwords a
+
 scratchpads :: [NamedScratchpad]
-scratchpads = [ NS "htop" (lightWeightTerm ++ " -t htop -e htop") (title =? "htop") centeredFloating
-              , NS "ncmpcpp" (lightWeightTerm ++ " -t ncmpcpp -e ncmpcpp") (title =? "ncmpcpp") centeredFloating
-              , NS "ghci" (myTerminal ++ " -t ghci -e stack --silent ghci --no-load") (title =? "ghci") smallFloating
+scratchpads = [ myNS "htop"    lightWeightTerm "htop" "htop" [] centeredFloating
+              , myNS "ncmpcpp" lightWeightTerm "\986296 ncmpcpp" "ncmpcpp" [] centeredFloating
+              , myNS "ghci"    myTerminal      "\59255 GHCi" "stack" ["--silent", "ghci", "--no-load"] smallFloating
+              , myNS "bpython" myTerminal      "\59196 Python" "bpython" [] smallFloating
               ]
 
 -- Match strings prefixed with space
@@ -261,6 +270,26 @@ passXPWorkConfig = passXPConfig { borderColor = "#5ae2d4"
                                 , defaultText = "work/"
                                 }
 
+orgRoot :: String
+orgRoot = myHome ++ "/Documents/org/"
+
+-- Refile location
+orgRefileFile :: String
+orgRefileFile = orgRoot ++ "0_refile.org"
+
+-- Capture command for neovim
+-- We set a custom title for a center-hook, and increase the size a bit with the geometry
+orgNvimCapture :: [String]
+orgNvimCapture = ["-t", "org-capture", "-g", "120x40", "-e", "nvim", "-c", "cd " ++ orgRoot, "-c", "lua require('orgmode').capture:prompt()"]
+
+-- Opens nvim in org folder
+orgNvimOpen :: [String]
+orgNvimOpen = ["-e", "nvim", "-c", "cd " ++ orgRoot, orgRoot]
+
+-- Opens refile file
+orgNvimRefile :: [String]
+orgNvimRefile = ["-e", "nvim", "-c", "cd " ++ orgRoot, orgRefileFile]
+
 -- Orgmode prompts
 orgXPConfig :: XPConfig
 orgXPConfig = myXPConfig { position = CenteredAt 0.1 0.95
@@ -300,9 +329,9 @@ myKeys mandb conf@XConfig {XMonad.modMask = modMask} =
     , ("M-S-c", kill1) -- %! Removes a copy of the focused window or closes it if it's the last one.
     , ("M-f", safeSpawnProg "firefox") -- %! Launch firefox
     , ("M-S-f", safeSpawnProg "thunar") -- %! Launch thunar
+    , ("M-S-b", safeSpawn lightWeightTerm ["-t", "Newsboat", "-e", "sh", "-c", "newsboat"])
     , ("M-v", safeSpawn lightWeightTerm ["-e", myEditor]) -- %! Launch vim
-    , ("M-S-v", safeSpawn lightWeightTerm ["-e", myEditor, "-c", "cd " ++ myHome ++ "/Documents/org/", myHome ++ "/Documents/org"]) -- %! Launch vim
-    , ("M-p", safeSpawn myTerminal ["-e", "bpython"]) -- %! Launch a bpython3
+    , ("M-S-v", safeSpawn lightWeightTerm orgNvimOpen) -- %! Open orgmode directory in nvim
     , ("M-s", saferSshPrompt (myHome ++ "/.ssh/config") myXPConfig) -- %! SSH prompt
     , ("M-S-s", saferSftpPrompt (myHome ++ "/.ssh/config") myXPConfig) -- %! SFTP prompt
     , ("M-S-m", saferManPrompt mandb myXPConfig) -- %! man prompt
@@ -315,18 +344,26 @@ myKeys mandb conf@XConfig {XMonad.modMask = modMask} =
     , ("M-M1-p p", passPrompt passXPWorkConfig)
     , ("M-M1-p u", passUserPrompt passXPWorkConfig)
     , ("M-M1-p o", passOpenUrlPrompt passXPWorkConfig)
-    , ("M-o", orgPrompt orgXPConfig "NOTE" $ myHome ++ "/Documents/org/refile.org")
-    , ("M-S-o", orgPromptPrimary orgXPConfig "NOTE" $ myHome ++ "/Documents/org/refile.org")
+    , ("M-o o", orgPrompt orgXPConfig "NOTE" orgRefileFile)
+    , ("M-o s-o", orgPromptPrimary orgXPConfig "NOTE" orgRefileFile)
+    , ("M-o n", orgPrompt orgXPConfig "NOTE" orgRefileFile)
+    , ("M-o s-n", orgPromptPrimary orgXPConfig "NOTE" orgRefileFile)
+    , ("M-o t", orgPrompt orgXPConfig "TODO" orgRefileFile)
+    , ("M-o s-t", orgPromptPrimary orgXPConfig "TODO" orgRefileFile)
+    , ("M-o c", safeSpawn lightWeightTerm orgNvimCapture)
+    , ("M-o r", safeSpawn lightWeightTerm orgNvimRefile)
     , ("M-c", changeDir myXPConfig)
 
     -- Scratchpads
     , ("M-S-t"       , namedScratchpadAction scratchpads "htop")
-    , ("M-a", namedScratchpadAction scratchpads "ghci")
-    , ("M-S-b", safeSpawn lightWeightTerm ["-t", "Newsboat", "-e", "sh", "-c", "newsboat"])
+    , ("M-a"         , namedScratchpadAction scratchpads "ghci")
+    , ("M-p"         , namedScratchpadAction scratchpads "bpython")
 
     , ("M-S-C-n"     , namedScratchpadAction scratchpads "ncmpcpp") -- for xdotool
     , ("M-n n"       , namedScratchpadAction scratchpads "ncmpcpp")
     , ("M-n M-n"     , namedScratchpadAction scratchpads "ncmpcpp")
+
+    -- MPD control
     , ("M-n <Space>" , safeSpawn "mpc" ["toggle"])
     , ("M-n ."       , safeSpawn "mpc" ["next"])
     , ("M-n ,"       , safeSpawn "mpc" ["prev"])
@@ -467,6 +504,7 @@ myLayout = smartBorders $ renamed [CutWordsLeft 2] $ spacings $ maximizeWithPadd
 myManageHook = composeAll . concat $
   [ [ className =? c --> doCenterFloat | c <- classCenter       ]
   , [ className =? c --> doFloat       | c <- classFloat        ]
+  , [ title     =? "org-capture" --> doCenterFloat              ]
   , [ title     =? t --> doFloat       | t <- titleFloats       ]
   , [ title     =? t --> doFullFloat   | t <- titleFullscreen   ]
   , [ className =? c --> doFullFloat   | c <- classFullscreen   ]

@@ -32,20 +32,10 @@ set_indent({ "python" }, 4)
 -- Select foo::bar as 2 words
 add_ft_opt({ "cpp", "rust" }, "setlocal iskeyword-=:")
 
--- spellcheck in comments
-add_ft_opt({ "org", "rst", "tex", "cpp", "python", "haskell", "xml", "lua" }, "setlocal spell")
+add_ft_opt({"rust"}, "setlocal colorcolumn=100")
 
--- Refile with telescope
-vim.api.nvim_create_autocmd('FileType', {
-  pattern = 'org',
-  group = vim.api.nvim_create_augroup('orgmode_telescope_nvim', { clear = true }),
-  callback = function()
-    -- Hides links
-    vim.opt.conceallevel = 2
-    vim.opt.concealcursor = 'nc'
-    vim.keymap.set('n', '<leader>or', require('telescope').extensions.orgmode.refile_heading)
-  end,
-})
+-- spellcheck in comments
+add_ft_opt({ "org", "rst", "tex", "cpp", "python", "haskell", "xml", "lua", "plantuml" }, "setlocal spell")
 
 -- turn off the character limit in fugitive buffers
 add_ft_opt({ "fugitive", "NeogitStatus" }, "setlocal colorcolumn=0 | setlocal number | setlocal relativenumber")

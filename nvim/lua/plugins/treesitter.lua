@@ -39,7 +39,6 @@ local config_treesitter = function()
       "make",
       "markdown",
       "markdown_inline",
-      "org",
       "python",
       "query", -- treesitter query
       "regex",
@@ -48,6 +47,7 @@ local config_treesitter = function()
       "rust",
       "toml",
       "typescript",
+      "vim",
       "vimdoc", -- help files
       "xml",
       "yaml",
@@ -55,6 +55,9 @@ local config_treesitter = function()
     highlight = {
       enable = true,
       disable = ts_disable_func,
+    },
+    indent = {
+      enable = true,
     },
     -- in visual mode, select by tree
     incremental_selection = {
@@ -152,8 +155,6 @@ return {
       'nvim-treesitter/nvim-treesitter-textobjects',
       -- Highlighting for the DAP UI repl
       'LiadOz/nvim-dap-repl-highlights',
-      -- Dependency here because we need to set up the orgmode grammar
-      'nvim-orgmode/orgmode'
     },
     config = config_treesitter,
     build = function()

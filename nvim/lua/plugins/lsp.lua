@@ -28,7 +28,7 @@ vim.api.nvim_create_autocmd('LspAttach', {
       vim.lsp.inlay_hint.enable(ev.buf, not hints_on)
     end, "Toggle inlay hints")
     -- Using inc-rename instead
-    -- nm('<leader>cr', vim.lsp.buf.rename, "LSP Rename")
+    nm('<leader>cr', vim.lsp.buf.rename, "LSP Rename")
     nm('<leader>d', vim.diagnostic.open_float, "LSP current diagnostic")
     nm('<leader>cf', vim.lsp.buf.format, "Format file")
     nm('<space>a', '<cmd>ClangdSwitchSourceHeader<CR>', "Source <-> Header")
@@ -46,7 +46,8 @@ vim.api.nvim_create_autocmd('LspAttach', {
 
 local setup_lsp = function()
   local nvim_lsp = require('lspconfig')
-  local capabilities = require('cmp_nvim_lsp').default_capabilities()
+  local capabilities = vim.lsp.protocol.make_client_capabilities()
+  capabilities = vim.tbl_deep_extend('force', capabilities, require('cmp_nvim_lsp').default_capabilities())
 
 
   -- pip install "python-lsp-server[all]" pyls-mypy python-lsp-black

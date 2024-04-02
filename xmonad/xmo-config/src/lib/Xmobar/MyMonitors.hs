@@ -186,23 +186,30 @@ myDiskIO = DiskIO [("/", "<fn=1><read></fn>↑ <fn=1><write></fn>↓")]
                   [])
                   100
 
+chargingProgress = "\985247\985244\983174\983175\983176\985245\983177\985246\983178\983179\983173"
+
+dischargingProgress = "\983182\983162\983163\983164\983165\983166\983167\983168\983169\983170\983161"
+
 commonBatSettings :: String -> [String]
 commonBatSettings template =
   buildArgs'
     [ "--template" , template
     , "--Low" , "15" -- units: %
     , "--High" , "60" -- units: %
+    , "-f", dischargingProgress
+    , "-W", "0"
     ]
-    [ "-o" , "<fn=1><left></fn>% (<fn=1><timeleft></fn>)" -- discharge status
+    -- AC off
+    [ "-o" , "<fn=3><leftbar></fn> <fn=1><left></fn>% <fn=1><timeleft></fn>" -- discharge status
     -- AC "on" status
-    , "-O" , "<fn=1><left></fn>% (<fn=2>🔌</fn> <fn=1><timeleft></fn>)"
-    -- charged status
-    , "-i" , "<fn=1><left></fn>%"
+    , "-O" , "<fn=3><leftbar>\988171</fn> <fn=1><left></fn>% <fn=1><timeleft></fn>"
+    -- charged status (AC idle)
+    , "-i" , "<fn=3>\60205</fn> <fn=1><left></fn>%"
     ]
 
 myBat1 :: String -> Monitors
 myBat1 dev =
-  BatteryN [dev] (commonBatSettings "Bat: <acstatus>") 300 "bat1"
+  BatteryN [dev] (commonBatSettings "<acstatus>") 300 "bat1"
 
 myBat2 :: String -> Monitors
 myBat2 dev = BatteryN [dev] (commonBatSettings ", <acstatus>") 300 "bat2"

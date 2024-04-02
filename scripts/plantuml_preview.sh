@@ -18,4 +18,4 @@ plantuml -p -stdrpt:2 -tpng < "${1}" 2> >(sed -e "s=^string=${1}=" >&2) > "${out
 # Check whether preview is already running
 pgrep --full '^feh .*plantuml_preview' > /dev/null && exit 0
 # Detached
-feh --class plantuml_preview -B '#303030' "${output_file}"&
+feh --class plantuml_preview -B '#303030' --scale-down -Z "${output_file}"&
