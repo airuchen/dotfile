@@ -551,3 +551,4 @@ export ROS_MASTER_URI=http://localhost:11311
 # Keep ros2 on localhost
 export ROS_AUTOMATIC_DISCOVERY_RANGE=LOCALHOST
 export RMW_IMPLEMENTATION=rmw_cyclonedds_cpp
+export ROS_PYTHON_CHECK_FIELDS=1

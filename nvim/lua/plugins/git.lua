@@ -76,6 +76,7 @@ return {
   -- Git plugin, similar to fugitive
   {
     "NeogitOrg/neogit",
+    branch = "nightly",
     lazy = true,
     cmd = "Neogit",
     opts = {

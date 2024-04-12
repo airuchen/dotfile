@@ -25,6 +25,7 @@ return {
         opts = {},
       },
     },
+    ft = 'org',
     event = 'VeryLazy',
     config = function()
       require('orgmode').setup({
@@ -34,12 +35,12 @@ return {
         -- org_startup_folded = "content",
         -- We have a telescope plugin for this
         mappings = {
+          -- Auto-inserts bullet points, etc
           org_return_uses_meta_return = true,
           capture = {
             org_capture_refile = false,
           },
           org = {
-            org_return = false, -- buggy
             org_refile = false
           },
         }

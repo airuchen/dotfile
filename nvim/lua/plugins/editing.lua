@@ -18,6 +18,7 @@ return {
   'wellle/targets.vim',
 
   -- Toggle comments (use gcc)
+  -- TODO: gc is native in nvim 0.10.0
   { 'numToStr/Comment.nvim',    opts = {} },
 
   -- Make . work with commands that support it
