@@ -19,6 +19,12 @@ if not vim.loop.fs_stat(lazypath) then
 end
 vim.opt.rtp:prepend(lazypath)
 
+-- paste with the yank content
+vim.api.nvim_set_keymap('n', 'p', '"0p', {noremap = true, silent = true})
+vim.api.nvim_set_keymap('n', 'P', '"0P', {noremap = true, silent = true})
+vim.api.nvim_set_keymap('x', 'p', '"0p', {noremap = true, silent = true})
+vim.api.nvim_set_keymap('x', 'P', '"0P', {noremap = true, silent = true})
+
 -- Merge all plugin specs from lua/plugins
 require("lazy").setup("plugins", {
   dev = {
