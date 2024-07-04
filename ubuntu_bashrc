@@ -89,12 +89,18 @@ OS=$(uname) # to avoid spawning multiple uname processes
 
 # │┤
 
+
+prompt_hostname_part='\[\e[0;92m\]┌[ \[\e[0;94m\]\u\[\e[0;32m\] @ \[\e[0;93m\]\h\[\e[0;32m\] :'
+if [ -e /.dockerenv ]; then
+  prompt_hostname_part='\[\e[0;92m\]┌[ \[\e[0;94m\]\u\[\e[0;32m\] @ \[\e[0;93m\]\h\[\e[0;32m\] 🐋 :'
+fi
+
 # prompt
 if [ "$USER" = "root" ] ; then
   PS1="${debian_chroot:+($debian_chroot)}\[\e[0;31m\][\[\e[1;37m\]\u\[\e[0;31m\]@\[\e[m\]\h\[\e[0;31m\]:\[\e[1;31m\]\w\[\e[0;31\]]\[\e[0m\] "
   PS2="\[\e[0;31\]]\[\e[0m\] "
 else
-  prompt_pre_part='\[\e[0;92m\]┌[ \[\e[0;94m\]\u\[\e[0;32m\] @ \[\e[0;93m\]\h\[\e[0;32m\] : \[\e[0;94m\]\w\[\e[0m\]${debian_chroot:+ [chroot: $debian_chroot]}${IN_NIX_SHELL:+ \[\e[0;35m\]nix\[\e[0m\]}${VIRTUAL_ENV:+ \[\e[0;35m\]🐍$(basename ${VIRTUAL_ENV})\[\e[0m\]}'
+  prompt_pre_part="$prompt_hostname_part"' \[\e[0;94m\]\w\[\e[0m\]${debian_chroot:+ [chroot: $debian_chroot]}${IN_NIX_SHELL:+ \[\e[0;35m\]nix\[\e[0m\]}${VIRTUAL_ENV:+ \[\e[0;35m\]🐍$(basename ${VIRTUAL_ENV})\[\e[0m\]}'
   prompt_post_part=" \[\e[0;92m\]]\n└>\[\e[0m\] "
   PS1="${prompt_pre_part}${prompt_post_part}"
   PS2="\[\e[0;92m\]~>\[\e[0m\] "
