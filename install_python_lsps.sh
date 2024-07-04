@@ -15,4 +15,4 @@ python3 -m venv --clear ~/venvs/esbonio/
 
 echo "Installing pylsp..."
 python3.10 -m venv --clear ~/venvs/pylsp/
-~/venvs/pylsp/bin/python -m pip install "python-lsp-server[all]" pyls-mypy python-lsp-black
+~/venvs/pylsp/bin/python -m pip install "python-lsp-server[all]" pyls-mypy python-lsp-black pyright

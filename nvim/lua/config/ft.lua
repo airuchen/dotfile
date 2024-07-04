@@ -44,6 +44,7 @@ add_ft_opt({ "rust" }, "setlocal colorcolumn=100")
 
 -- spellcheck in comments
 add_ft_opt({ "org", "rst", "tex", "cpp", "python", "haskell", "xml", "lua", "plantuml" }, "setlocal spell")
+add_ft_opt({"xacro"}, "setlocal filetype=xml")
 
 -- turn off the character limit in fugitive buffers
 add_ft_opt({ "fugitive", "NeogitStatus" }, "setlocal colorcolumn=0 | setlocal number | setlocal relativenumber")

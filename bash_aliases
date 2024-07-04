@@ -540,6 +540,15 @@ function jqdiff {
   diff <(jq --sort-keys . "${1}") <(jq --sort-keys . "${2}")
 }
 
+function devenv {
+  if [ -e "pyproject.toml" ] || [ -e "tox.ini" ]; then
+    tox devenv
+    source venv/bin/activate
+  else
+    echo "No pyproject.toml/tox.ini found"
+  fi
+}
+
 
 # Transferring GPG keys
 # gpg --export-secret-key KeyId | ssh user@remote gpg --allow-secret-key-import --import

@@ -69,6 +69,11 @@ local setup_lsp = function()
     }
   }
 
+  nvim_lsp.pyright.setup {
+    cmd = { vim.loop.os_homedir() .. "/venvs/pylsp/bin/pyright-langserver", "--stdio" },
+    capabilities = capabilities,
+  }
+
   -- TODO write something that finds the build dir using catkin/colcon/$ROS_WORKSPACE if it exists
   -- https://github.com/regen100/cmake-language-server
   -- Can in theory format with cmake-format, but that's not in the PATH since it's in the venv, so it doesn't find it
