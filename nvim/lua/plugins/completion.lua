@@ -8,22 +8,22 @@ local setup_completion = function()
     update_events = 'TextChanged,TextChangedI'
   }
   )
-  vim.keymap.set({"i", "s"}, "<c-k>", function()
+  vim.keymap.set({ "i", "s" }, "<c-k>", function()
     if luasnip.expand_or_jumpable() then
       luasnip.expand_or_jump()
     end
-  end, { silent = true })
+  end, { silent = true, desc = "Snippet jump/expand" })
 
-  vim.keymap.set({"i", "s"}, "<c-j>", function()
+  vim.keymap.set({ "i", "s" }, "<c-j>", function()
     if luasnip.jumpable(-1) then
       luasnip.jump(-1)
     end
-  end, { silent = true })
-  vim.keymap.set({"i"}, "<c-l>", function()
+  end, { silent = true, desc = "Snippet jump back" })
+  vim.keymap.set({ "i" }, "<c-l>", function()
     if luasnip.choice_active() then
       luasnip.change_choice(1)
     end
-  end)
+  end, { silent = true, desc = "Snippet choice" })
 
 
   -- Gets all visible buffers for the buffer completion source
@@ -36,7 +36,7 @@ local setup_completion = function()
   end
 
   -- Completion
-  vim.opt.wildmenu = true -- Show completion menu
+  -- vim.opt.wildmenu = true -- Show completion menu
 
   -- Ignore files
   vim.opt.wildignore = {
@@ -58,62 +58,69 @@ local setup_completion = function()
 
   -- Always show autocomplete menu
   -- set completeopt+=menuone
-  vim.opt.completeopt = {"menu", "menuone", "noselect"}
+  vim.opt.completeopt = { "menu", "menuone", "noselect" }
 
   -- Don't show ins-completion-menu messages
   -- vim.o.shortmess = nil
   -- vim.opt.shortmess["c"] = true
-
 
   local cmp = require("cmp")
 
   cmp.setup({
     -- nvim-cmp by defaults disables autocomplete for prompt buffers
     -- enabled = function ()
-      --   return vim.api.nvim_buf_get_option(0, "buftype") ~= "prompt"
-      --     or require("cmp_dap").is_dap_buffer()
-      -- end,
-      snippet = {
-        expand = function(args)
-          require('luasnip').lsp_expand(args.body) -- For `luasnip` users.
-        end,
-      },
-      mapping = cmp.mapping.preset.insert( {
-        ['<C-d>'] = cmp.mapping.scroll_docs(-4),
-        ['<C-f>'] = cmp.mapping.scroll_docs(4),
-        ['<C-Space>'] = cmp.mapping.complete(),
-        ['<C-y>'] = cmp.mapping.confirm({ select = true }),
-      }),
-      sources = cmp.config.sources({
-        { name = 'nvim_lsp' },
-        { name = 'luasnip' },
-        { name = 'nvim_lua' },
-        { name = 'path' },
-        { name = 'orgmode' },
-        -- { name = 'dap' },
-        { name = 'buffer', options = {get_bufnrs = get_bufnrs} },
-      }),
-      experimental = {
-        ghost_text = true,
-      }
-    })
+    --   return vim.api.nvim_buf_get_option(0, "buftype") ~= "prompt"
+    --     or require("cmp_dap").is_dap_buffer()
+    -- end,
+    snippet = {
+      expand = function(args)
+        require('luasnip').lsp_expand(args.body)   -- For `luasnip` users.
+      end,
+    },
+    mapping = cmp.mapping.preset.insert({
+      ['<C-d>'] = cmp.mapping.scroll_docs(-4),
+      ['<C-f>'] = cmp.mapping.scroll_docs(4),
+      ['<C-Space>'] = cmp.mapping.complete(),
+      ['<C-y>'] = cmp.mapping.confirm({ select = true }),
+    }),
+    sources = cmp.config.sources({
+      { name = 'nvim_lsp' },
+      { name = 'luasnip' },
+      { name = 'nvim_lua' },
+      { name = 'path' },
+      { name = 'orgmode' },
+      -- { name = 'dap' },
+      { name = 'buffer',  options = { get_bufnrs = get_bufnrs } },
+    }),
+    experimental = {
+      ghost_text = true,
+    },
+    enabled = function()
+      local bufname = vim.api.nvim_buf_get_name(0)
+      if bufname:match("org%-roam%-select$") ~= nil then
+        return false
+      end
+      return true
+    end
+  })
 
-    -- `/` cmdline setup.
-    cmp.setup.cmdline({'/', '?'}, {
-      mapping = cmp.mapping.preset.cmdline(),
-      sources = {
-        { name = 'buffer' }
-      }
-    })
-    -- `:` cmdline setup.
-    cmp.setup.cmdline(':', {
-      mapping = cmp.mapping.preset.cmdline(),
-      sources = cmp.config.sources({
-        { name = 'path' }
-      }, {
-        { name = 'cmdline' }
-      })
-    })
+  -- `/` cmdline setup.
+  cmp.setup.cmdline({ '/', '?' }, {
+    mapping = cmp.mapping.preset.cmdline(),
+    sources = {
+      { name = 'buffer' }
+    }
+  })
+  -- `:` cmdline setup.
+  cmp.setup.cmdline(':', {
+    mapping = cmp.mapping.preset.cmdline(),
+    sources = cmp.config.sources({
+      { name = 'path' }
+    }, {
+      { name = 'cmdline' }
+    }),
+    matching = { disallow_symbol_nonprefix_matching = false }
+  })
 end
 
 return {
@@ -121,7 +128,8 @@ return {
     'L3MON4D3/LuaSnip',
     lazy = true,
     event = "InsertEnter",
-    config = function() require("snippets") end
+    config = function() require("snippets") end,
+    build = "make install_jsregexp"
   },
   {
     'hrsh7th/nvim-cmp',

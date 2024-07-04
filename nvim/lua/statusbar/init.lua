@@ -258,8 +258,6 @@ M.inactive = function(buf)
   return lineInactive(buf)
 end
 
-local vimc = vim.api.nvim_command
-
 local setup_colors = function()
   local active_bg = "#282828"
   local title_bg = "#1d2021"
@@ -269,32 +267,29 @@ local setup_colors = function()
   local title_fg = "#d56d0e"
   local inactive_fg = "#689d6a"
 
-  vimc("highlight default link MySBSep LineNr")
-  vimc("highlight default link MySBVal  Include")
-  vimc("highlight default link MySBExtra  Identifier")
+  vim.api.nvim_set_hl(0, "MySBSep", { link = "LineNr" })
+  vim.api.nvim_set_hl(0, "MySBVal", { link = "Include" })
+  vim.api.nvim_set_hl(0, "MySBExtra", { link = "Identifier" })
 
 
-  vimc("highlight default link MySBSepInactive LineNr")
-  vimc("highlight default link MySBValInactive  Include")
-  vimc("highlight default link MySBExtraInactive  Identifier")
+  vim.api.nvim_set_hl(0, "MySBSepInactive", { link = "LineNr" })
+  vim.api.nvim_set_hl(0, "MySBValInactive", { link = "Include" })
+  vim.api.nvim_set_hl(0, "MySBExtraInactive", { link = "Identifier" })
 
 
-  vimc("highlight default MySBTitleSep   cterm = none ctermbg = 0 ctermfg = 8 guibg  = " ..
-    title_bg .. " guifg = #7c6f64")
-  vimc("highlight default MySBTitleVal   cterm = none ctermbg = 0 ctermfg = 14 guibg = " ..
-    title_bg .. " guifg = " .. title_fg)
-  vimc("highlight default MySBTitleExtra cterm = none ctermbg = 0 ctermfg = 4 guibg  = " ..
-    title_bg .. " guifg = #458588")
-  vimc("highlight default MySBTitleBG    cterm = none ctermbg = 0 ctermfg = 4 guibg  = " .. title_bg)
-  -- vimc("highlight default link MySBTitleSep Comment")
-  -- vimc("highlight default link MySBTitleVal CursorLine")
-  -- vimc("highlight default link MySBTitleExtra Include")
-  -- vimc("highlight default link MySBTitleBG CursorLineNr")
+  vim.api.nvim_set_hl(0, "MySBTitleSep", { ctermbg = 0, ctermfg = 8, bg = title_bg, fg = "#7c6f64" })
+  vim.api.nvim_set_hl(0, "MySBTitleVal", { ctermbg = 0, ctermfg = 14, bg = title_bg, fg = title_fg })
+  vim.api.nvim_set_hl(0, "MySBTitleExtra", { ctermbg = 0, ctermfg = 4, bg = title_bg, fg = "#458588" })
+  vim.api.nvim_set_hl(0, "MySBTitleBG", { ctermbg = 0, ctermfg = 4, bg = title_bg })
+  -- vim.api.nvim_set_hl(0, "MySBTitleSep", {link ="Comment"})
+  -- vim.api.nvim_set_hl(0, "MySBTitleVal", {link ="CursorLine"})
+  -- vim.api.nvim_set_hl(0, "MySBTitleExtra", {link ="Include"})
+  -- vim.api.nvim_set_hl(0, "MySBTitleBG", {link ="CursorLineNr"})
 
-  vimc("highlight default link MySBTitleSepInactive   Comment")
-  vimc("highlight default link MySBTitleValInactive   Identifier")
-  vimc("highlight default link MySBTitleExtraInactive Include")
-  vimc("highlight default link MySBTitleInactiveBG    Identifier")
+  vim.api.nvim_set_hl(0, "MySBTitleSepInactive", { link = "Comment" })
+  vim.api.nvim_set_hl(0, "MySBTitleValInactive", { link = "Identifier" })
+  vim.api.nvim_set_hl(0, "MySBTitleExtraInactive", { link = "Include" })
+  vim.api.nvim_set_hl(0, "MySBTitleInactiveBG", { link = "Identifier" })
 end
 
 local update_bar = function()
@@ -309,7 +304,7 @@ local one_time_setup = function()
     return
   end
   M._opts._loaded = true
-  vim.o.laststatus = 3 -- Use global status line
+  vim.o.laststatus = 3          -- Use global status line
   vim.o.winbar = [[%{%luaeval("require'statusbar'.title()")%}]]
   vim.opt.shortmess:append("q") -- Don't show "recording @" message
   setup_colors()

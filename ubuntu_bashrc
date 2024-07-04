@@ -51,7 +51,7 @@ elif [ ! -r "$HOME/.inputrc" ]; then
 fi
 
 # prints notifications above the prompt if needed/applicable
-print_prompt_notifications() {
+_print_prompt_notifications() {
   # if a process exits with an error exit status, display it above the prompt
   if [ "$1" -gt 256 ]; then # these codes will not be returned on bash >= 4
     echo "[31m[ [1mbash internal error [0m[31m: [0m${1} [31m][0m"
@@ -107,7 +107,7 @@ else
     GIT_PS1_STATESEPARATOR=""
     # Note: this must be single-quoted to prevent expansion of $?
     # nerdfont icons: \ue725 \uf418 \ueafc
-    PROMPT_COMMAND='print_prompt_notifications $?;echo -ne "\033]0;${USER} @ `hostname -s` : `dirs`\007";__git_ps1 "${prompt_pre_part}" "${prompt_post_part}" " \ueafc %s"'
+    PROMPT_COMMAND='_print_prompt_notifications $?;echo -ne "\033]0;${USER} @ `hostname -s` : `dirs`\007";__git_ps1 "${prompt_pre_part}" "${prompt_post_part}" " \ueafc %s"'
   fi
   #[user@host:working/dir]
   #PS1="\[\e[0;32m\][\[\e[1;37m\]\u\[\e[0;32m\]@\[\e[m\]\h\[\e[0;32m\]:\[\e[1;32m\]\w\[\e[0;32m\]]\[\e[0m\] "
@@ -210,15 +210,7 @@ type-diff=01;32"
 
 # prints a theme-colored message on the form "[$1] $2"
 print_message() {
-  # default to cyan if no color has been set
-  if [ ! "$BASH_THEME_COLOR" ]; then
-    export BASH_THEME_COLOR="0;36"
-  fi
-  if [ ! $HIGHLIGHT_COLOR ]; then
-    export HIGHLIGHT_COLOR="1;36"
-  fi
-
-  echo "[${BASH_THEME_COLOR}m[[${HIGHLIGHT_COLOR}m$1[${BASH_THEME_COLOR}m] [0m$2"
+  echo "[0;36m[[${HIGHLIGHT_COLOR}m$1[0;36m] [0m$2"
 }
 
 if [ -f ~/config/bash_aliases ] && [ -r ~/config/bash_aliases ] ; then
@@ -237,7 +229,7 @@ command -v fd > /dev/null && export FZF_DEFAULT_COMMAND='fd --type f'
 export FZF_DEFAULT_OPTS='--layout=reverse'
 
 _INTERNAL_FZF_ERROR="fzf not found!"
-for fzf_conf in "${XDG_CONFIG_HOME:-$HOME/.config}"/fzf/fzf.bash /usr/share/doc/fzf/examples/key-bindings.bash /usr/share/bash-completion/completions/fzf-key-bindings; do
+for fzf_conf in "${XDG_CONFIG_HOME:-$HOME/.config}"/fzf/fzf.bash /usr/share/fzf/shell/completion.bash /usr/share/doc/fzf/examples/key-bindings.bash /usr/share/bash-completion/completions/fzf-key-bindings; do
   if [ -f "${fzf_conf}" ]; then
     source "${fzf_conf}"
     unset _INTERNAL_FZF_ERROR
@@ -261,9 +253,9 @@ case $- in
     if [ -n "$_INTERNAL_FZF_ERROR" ]; then
       print_message "!" "$_INTERNAL_FZF_ERROR"
     fi
-    # if [ -n "$_INTERNAL_UMASK_ERROR" ]; then
-    #    print_message "!" "$_INTERNAL_UMASK_ERROR"
-    # fi
+    if [ -n "$_INTERNAL_UMASK_ERROR" ]; then
+       print_message "!" "$_INTERNAL_UMASK_ERROR"
+    fi
     if [ -z "$TERM" ] || [ "$TERM" = "dumb" ]; then
       print_message "!" "\$TERM missing or running inside a dumb terminal"
     fi
@@ -277,6 +269,7 @@ unset _INTERNAL_VIM_ERROR
 unset _INTERNAL_LESS_ERROR
 unset _INTERNAL_READLINE_ERROR
 unset _INTERNAL_UMASK_ERROR
+unset -f print_message
 unset OS
 
 # if login shell, display stuff
@@ -292,12 +285,12 @@ if shopt -q login_shell; then
 fi
 
 # Set up lf icons
-if [ -e ~/config/lf/lficons ]; then
+if command -v lf > /dev/null && [ -e ~/config/lf/lficons ]; then
   LF_ICONS=$(cat ~/config/lf/lficons)
   export LF_ICONS
 fi
 
 # Add rust binaries to path
-#if [[ ! "$PATH" == */home/felix/.cargo/bin* ]]; then
-#  export PATH="${PATH:+${PATH}:}/home/felix/.cargo/bin"
-#fi
+if [ -e ~/.cargo/bin ] && [[ ! "$PATH" == *${HOME}/.cargo/bin* ]]; then
+  export PATH="${PATH:+${PATH}:}${HOME}/.cargo/bin"
+fi

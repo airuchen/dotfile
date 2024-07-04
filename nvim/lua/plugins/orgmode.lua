@@ -1,18 +1,3 @@
-vim.api.nvim_create_autocmd('FileType', {
-  pattern = 'org',
-  group = vim.api.nvim_create_augroup('orgmode_telescope_nvim', { clear = true }),
-  callback = function(opts)
-    -- Hides links
-    vim.opt.conceallevel = 2
-    -- disable this to edit links sensibly
-    vim.opt.concealcursor = 'nc'
-    -- Refile with telescope
-    vim.keymap.set('n', '<leader>or', require('telescope').extensions.orgmode.refile_heading,
-      { buffer = opts.buf, desc = "org refile" })
-  end,
-})
-
-
 return {
   {
     'nvim-orgmode/orgmode',
@@ -34,6 +19,7 @@ return {
         org_startup_indented = true,
         -- org_startup_folded = "content",
         -- We have a telescope plugin for this
+        org_id_link_to_org_use_id = true,
         mappings = {
           -- Auto-inserts bullet points, etc
           org_return_uses_meta_return = true,
@@ -43,8 +29,65 @@ return {
           org = {
             org_refile = false
           },
+        },
+        org_capture_templates = {
+          t = {
+            description = 'Task',
+            template = '* TODO %?\n  %u',
+          },
+          c = {
+            description = "Clipboard",
+            template = "* %?\n\n%x",
+          },
         }
       })
     end,
   },
+
+  {
+    "chipsenkbeil/org-roam.nvim",
+    -- dir = "~/git/org-roam.nvim",
+    dependencies = {
+      {
+        "nvim-orgmode/orgmode",
+      },
+    },
+    -- cond = false,
+    event = 'VeryLazy',
+    config = function()
+      require("org-roam").setup({
+        directory = "~/Documents/org/roam",
+        bindings = {
+          prefix = "<localleader>r"
+        },
+        templates = {
+          d = {
+            description = "Default",
+            template = "%?",
+            target = "%<%Y%m%d%H%M%S>-%[slug].org",
+          },
+          l = {
+            description = "Learning",
+            template = "#+filetags: learning\n\n* Context\n%?\n\n* Description\n",
+            target = "%<%Y%m%d%H%M%S>-%[slug].org",
+          },
+          b = {
+            description = "Bug",
+            template = "#+filetags: bug\n\n* Symptoms\n%?\n* Cause\n\n* Solution\n",
+            target = "%<%Y%m%d%H%M%S>-%[slug].org",
+          },
+          t = {
+            description = "Task",
+            template = "* TODO %?",
+            target = "tasks/%<%Y%m%d%H%M%S>-%[slug].org",
+          },
+          c = {
+            description = "Clipboard",
+            template = "* %?\n\n%x",
+            target = "%<%Y%m%d%H%M%S>-%[slug].org",
+          },
+        },
+      })
+    end
+  }
 }

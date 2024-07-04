@@ -168,7 +168,7 @@ return {
       {'nvim-telescope/telescope-fzf-native.nvim', build = "make"},
       'gbrlsnchs/telescope-lsp-handlers.nvim',
       'crispgm/telescope-heading.nvim',
-      'lyz-code/telescope-orgmode.nvim',
+      'nvim-orgmode/telescope-orgmode.nvim',
     },
     config = telescope_settings,
   },

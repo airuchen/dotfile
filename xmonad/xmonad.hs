@@ -49,6 +49,8 @@ import XMonad.Util.Run
 import XMonad.Util.WorkspaceCompare (getSortByXineramaPhysicalRule)
 import XMonad.Util.NamedScratchpad
 import XMonad.Util.EZConfig
+import XMonad.Util.Hacks (fixSteamFlicker)
+import XMonad.Util.XUtils (WindowConfig(..))
 
 import XMonad.Prompt
 import XMonad.Prompt.SaferPrompts
@@ -143,7 +145,7 @@ myConfig mandb = def { terminal           = myTerminal
                                --, logHook            = historyHook
                                -- Versions with transparency
                      , logHook            = fadeWindowsLogHook myFadeHook <+> historyHook
-                     , handleEventHook    = fadeWindowsEventHook <+> myTrayEventHook <+> swallowEventHook swallowParents windowsToSwallow
+                     , handleEventHook    = fadeWindowsEventHook <+> myTrayEventHook <+> swallowEventHook swallowParents windowsToSwallow <+> fixSteamFlicker
                      , startupHook        = spawn "~/.xmonad/startup-hook"
                      }
 
@@ -217,7 +219,7 @@ tabBarTheme = def { activeBorderColor = borderFocused myCol
                   , inactiveColor = borderNormal myCol
                   , urgentColor = urgent myCol
                   , urgentBorderColor = urgentBorder myCol
-                  , fontName = "xft:DejaVu Sans Mono:size=10:medium:antialias=true"
+                  , fontName = myFont 10
                   , activeTextColor = focusedText myCol
                   , inactiveTextColor = unfocusedText myCol
                   , urgentTextColor = focusedText myCol
@@ -228,8 +230,11 @@ withColemakKeys :: EasyMotionConfig -> EasyMotionConfig
 withColemakKeys conf = if not hasColemak then conf
         else conf { sKeys = AnyKeys [xK_n, xK_e, xK_i, xK_r, xK_s, xK_t] }
 
+myFont :: Int -> String
+myFont sz = "xft:DejaVu Sans Mono:size=" ++ show sz ++ ":medium:antialias=true"
+
 emConfig :: EasyMotionConfig
-emConfig = withColemakKeys def { emFont = "xft:DejaVu Sans Mono:size=100:medium:antialias=true"
+emConfig = withColemakKeys def { emFont = myFont 100
                                , cancelKey = xK_Escape
                                , borderPx = 8
                                , overlayF = proportional (0.5 :: Double)
@@ -242,7 +247,7 @@ emConfig = withColemakKeys def { emFont = "xft:DejaVu Sans Mono:size=100:medium:
 -- Prompt config
 myXPConfig :: XPConfig
 myXPConfig  = def { position = CenteredAt 0.1 0.9
-                  , font = "xft:DejaVu Sans Mono:size=13:medium:antialias=true"
+                  , font = myFont 13
                   , height = 40
                   , promptBorderWidth = 1
                   , borderColor = promptBorder myCol
@@ -281,6 +286,8 @@ orgRefileFile = orgRoot ++ "0_refile.org"
 -- We set a custom title for a center-hook, and increase the size a bit with the geometry
 orgNvimCapture :: [String]
 orgNvimCapture = ["-t", "org-capture", "-g", "120x40", "-e", "nvim", "-c", "cd " ++ orgRoot, "-c", "lua require('orgmode').capture:prompt()"]
+orgRoamNvimCapture :: [String]
+orgRoamNvimCapture = ["-t", "org-capture", "-g", "120x40", "-e", "nvim", "-c", "cd " ++ orgRoot, "-c", "lua require('org-roam').api.capture_node()"]
 
 -- Opens nvim in org folder
 orgNvimOpen :: [String]
@@ -318,6 +325,25 @@ toggleFloat w = windows (\s -> if M.member w (W.floating s)
                                then W.sink w s
                                else W.float w (W.RationalRect (1/8) (1/8) (6/8) (6/8)) s)
 
+submapHintCfg :: WindowConfig
+submapHintCfg = def
+  {
+    winFont = myFont 30
+  , winBg = promptBG myCol
+  , winFg = promptFG myCol
+  }
+
+captureMappings :: [(String, X ())]
+captureMappings = [("M-o", visualSubmap submapHintCfg $ M.fromList $ map (\(k, s, a) -> (k, (s, a)))
+    [ ((0, xK_n), "Roam Note", safeSpawn lightWeightTerm orgRoamNvimCapture)
+    , ((0, xK_c), "Capture", safeSpawn lightWeightTerm orgNvimCapture)
+    , ((0, xK_o), "Quick Note", orgPrompt orgXPConfig "NOTE" orgRefileFile)
+    , ((shiftMask, xK_o), "Note + PS", orgPromptPrimary orgXPConfig "NOTE" orgRefileFile)
+    , ((0, xK_t), "Quick Task", orgPrompt orgXPConfig "TODO" orgRefileFile)
+    , ((shiftMask, xK_t), "Task + PS", orgPromptPrimary orgXPConfig "TODO" orgRefileFile)
+    , ((0, xK_r), "Refile", safeSpawn lightWeightTerm orgNvimRefile)
+    ])]
+
 -- M is Mod
 -- M1 is Alt
 myKeys :: [ManEntry] -> XConfig Layout -> [(String, X())]
@@ -344,14 +370,6 @@ myKeys mandb conf@XConfig {XMonad.modMask = modMask} =
     , ("M-M1-p p", passPrompt passXPWorkConfig)
     , ("M-M1-p u", passUserPrompt passXPWorkConfig)
     , ("M-M1-p o", passOpenUrlPrompt passXPWorkConfig)
-    , ("M-o o", orgPrompt orgXPConfig "NOTE" orgRefileFile)
-    , ("M-o s-o", orgPromptPrimary orgXPConfig "NOTE" orgRefileFile)
-    , ("M-o n", orgPrompt orgXPConfig "NOTE" orgRefileFile)
-    , ("M-o s-n", orgPromptPrimary orgXPConfig "NOTE" orgRefileFile)
-    , ("M-o t", orgPrompt orgXPConfig "TODO" orgRefileFile)
-    , ("M-o s-t", orgPromptPrimary orgXPConfig "TODO" orgRefileFile)
-    , ("M-o c", safeSpawn lightWeightTerm orgNvimCapture)
-    , ("M-o r", safeSpawn lightWeightTerm orgNvimRefile)
     , ("M-c", changeDir myXPConfig)
 
     -- Scratchpads
@@ -376,7 +394,6 @@ myKeys mandb conf@XConfig {XMonad.modMask = modMask} =
     ++
     [ ("M-n " ++ [key], safeSpawn "mpc" ["volume", show (10 * v)]) | (key, v) <- zip "qwfpbjluy;" [1..] ]
     ++
-
 
     -- Layouts
     [ ("M-S-<Space>"  , sendMessage NextLayout) -- %! Rotate through the available layout algorithms
@@ -457,6 +474,8 @@ myKeys mandb conf@XConfig {XMonad.modMask = modMask} =
 
     , ("M-d", safeSpawnProg "xfce4-display-settings")
     ]
+    ++
+      captureMappings
     ++
     -- mod-[1..9] %! Switch to workspace N
     -- mod-shift-[1..9] %! Move client to workspace N

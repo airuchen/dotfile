@@ -26,6 +26,14 @@ require("lazy").setup({
   dev = {
     path = "~/git",
   },
+  pkg = {
+    sources = {
+      "lazy"
+    }
+  },
+  rocks = {
+    enabled = false
+  },
   performance = {
     rtp = {
       disabled_plugins = {

@@ -113,6 +113,7 @@ return {
     lazy = true,
     dependencies = {
       'theHamsta/nvim-dap-virtual-text',
+      'nvim-neotest/nvim-nio', -- dependency of dap-ui
       'rcarriga/nvim-dap-ui',
       'nvim-telescope/telescope-dap.nvim'
       -- Plug 'rcarriga/cmp-dap'

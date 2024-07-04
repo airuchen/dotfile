@@ -76,10 +76,11 @@ return {
   -- Git plugin, similar to fugitive
   {
     "NeogitOrg/neogit",
-    branch = "nightly",
+    branch = "master",
     lazy = true,
     cmd = "Neogit",
     opts = {
+      disable_hint = true,
       kind = "split_above",
       disable_line_numbers = false,
       disable_context_highlighting = true, -- no annoying flickering
@@ -102,22 +103,19 @@ return {
       },
       commit_editor = {
         kind = "split_above",
-        disable_line_numbers = false,
       },
-      disable_hint = true,
-      telescope_sorter = function()
-        return require("telescope").extensions.fzf.native_fzf_sorter()
-      end,
       mappings = {
+        --[[
         popup = {
           -- keep regular b motion
           ["b"] = false,
           ["B"] = "BranchPopup",
         },
+        ]]
         status = {
           [">"] = "Toggle",
           ["<"] = "Toggle",
-          ["o"] = "SplitOpen",
+          -- ["o"] = "SplitOpen",
           -- more like fugitive
           -- ["x"] = false,
           -- ["X"] = "Discard",

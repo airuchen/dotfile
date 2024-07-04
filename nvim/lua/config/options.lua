@@ -140,21 +140,41 @@ vim.api.nvim_create_autocmd("TextYankPost", {
     callback = function() on_yank({timeout = 50}) end
   })
 
+local ignored_for_ws = function(match)
+  if string.find(match, "Neogit") then
+    return true
+  end
+  if string.find(match, "org%-roam%-select$") then
+    return true
+  end
+  if string.find(match, "lazy$") then
+    return true
+  end
+end
+
 local ws_group = vim.api.nvim_create_augroup("whitespace", { clear = true })
 vim.api.nvim_create_autocmd({"BufWinEnter", "InsertLeave", "BufEnter"}, {
   pattern = "*",
   group = ws_group,
   desc = "highlight trailing whitespace",
-  callback = function()
+  callback = function(opts)
+    if ignored_for_ws(opts.match) then
+      return
+    end
     vim.cmd([[match Error /\s\+$/]])
-  end})
+  end}
+)
 vim.api.nvim_create_autocmd({"InsertEnter"}, {
   pattern = "*",
   group = ws_group,
   desc = "highlight trailing whitespace",
-  callback = function()
+  callback = function(opts)
+    if ignored_for_ws(opts.match) then
+      return
+    end
     vim.cmd([[match Error /\s\+\%#\@<!$/]])
-  end})
+  end}
+)
 -- Hilight trailing spaces while not in insert
 -- autocmd BufWinEnter * match Error /\s\+$/
 -- autocmd InsertEnter * match Error /\s\+\%#\@<!$/
