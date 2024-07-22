@@ -97,11 +97,6 @@ nm("<space><c-q>", ":cbefore<CR>", { silent = true, desc = "Quickfix item below"
 
 nm("<leader>S", "vip:sort<CR>", { desc = "Sort block" })
 
--- Macros
--- convert <arg name="foo" default="bar"/> to <arg name="foo" value="$(arg foo)" />
-nm("<leader>a", [[0"byi"Wcevaluef"ci"$(arg" "bpa)j0]], { desc = "Convert xml <arg default> to <arg value>" })
-nm("<leader>A", [[0"byi"f/i" value="$(rg "bpa)"j0]])
-nm("<leader>p", [[p<<$s{}<ESC>4kf(Bi"::<ESC>bi]])
 
 -- Neovide text size
 if vim.g.neovide then
