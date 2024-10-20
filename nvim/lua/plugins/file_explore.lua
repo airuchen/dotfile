@@ -2,18 +2,17 @@ local setup_harpoon = function()
   local harpoon = require("harpoon")
   harpoon:setup()
 
-  vim.keymap.set("n", "<space>m", function() harpoon:list():add() end, { desc = "Add to harpoon"})
-  vim.keymap.set("n", "<leader>p", function() harpoon.ui:toggle_quick_menu(harpoon:list()) end, { desc = "Harpoon menu"})
+  vim.keymap.set("n", "<space>m", function() harpoon:list():add() end, { desc = "Add to harpoon" })
+  vim.keymap.set("n", "<leader>p", function() harpoon.ui:toggle_quick_menu(harpoon:list()) end, { desc = "Harpoon menu" })
 
-  -- TODO; this overlaps with illuminate
-  vim.keymap.set("n", "<m-n>", function() harpoon:list():select(1) end, { desc = "Harpoon 1"})
-  vim.keymap.set("n", "<m-e>", function() harpoon:list():select(2) end, { desc = "Harpoon 2"})
-  vim.keymap.set("n", "<m-i>", function() harpoon:list():select(3) end, { desc = "Harpoon 3"})
-  vim.keymap.set("n", "<m-o>", function() harpoon:list():select(4) end, { desc = "Harpoon 4"})
+  vim.keymap.set("n", "<m-n>", function() harpoon:list():select(1) end, { desc = "Harpoon 1" })
+  vim.keymap.set("n", "<m-e>", function() harpoon:list():select(2) end, { desc = "Harpoon 2" })
+  vim.keymap.set("n", "<m-i>", function() harpoon:list():select(3) end, { desc = "Harpoon 3" })
+  vim.keymap.set("n", "<m-o>", function() harpoon:list():select(4) end, { desc = "Harpoon 4" })
 
   -- Toggle previous & next buffers stored within Harpoon list
-  vim.keymap.set("n", "<C-P>", function() harpoon:list():prev() end, { desc = "Harpoon prev"})
-  vim.keymap.set("n", "<C-B>", function() harpoon:list():next() end, { desc = "Harpoon next"})
+  vim.keymap.set("n", "<C-P>", function() harpoon:list():prev() end, { desc = "Harpoon prev" })
+  vim.keymap.set("n", "<C-B>", function() harpoon:list():next() end, { desc = "Harpoon next" })
 end
 
 return {
@@ -41,7 +40,13 @@ return {
     event = "VeryLazy",
     cond = false, -- Oil is nicer, set to true to enable
     keys = {
-      { "<leader>T", function() local api = require('nvim-tree.api'); api.tree.toggle() end, desc = "Toggle NvimTree" }
+      {
+        "<leader>T",
+        function()
+          local api = require('nvim-tree.api'); api.tree.toggle()
+        end,
+        desc = "Toggle NvimTree"
+      }
     },
     opts = {
       view = {
@@ -64,11 +69,27 @@ return {
       },
     }
   },
-
   {
     "ThePrimeagen/harpoon",
     branch = "harpoon2",
     dependencies = { "nvim-lua/plenary.nvim" },
     config = setup_harpoon
-  }
+  },
+  {
+    "christoomey/vim-tmux-navigator",
+    cmd = {
+      "TmuxNavigateLeft",
+      "TmuxNavigateDown",
+      "TmuxNavigateUp",
+      "TmuxNavigateRight",
+      "TmuxNavigatePrevious",
+    },
+    keys = {
+      { "<c-h>",  "<cmd><C-U>TmuxNavigateLeft<cr>" },
+      { "<c-j>",  "<cmd><C-U>TmuxNavigateDown<cr>" },
+      { "<c-k>",  "<cmd><C-U>TmuxNavigateUp<cr>" },
+      { "<c-l>",  "<cmd><C-U>TmuxNavigateRight<cr>" },
+      { "<c-\\>", "<cmd><C-U>TmuxNavigatePrevious<cr>" },
+    },
+  },
 }

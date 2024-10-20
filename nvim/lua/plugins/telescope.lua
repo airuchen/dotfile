@@ -51,7 +51,7 @@ local telescope_settings = function()
   local ros_pickers = require('telescope').extensions.ros
 
   local find_colcon = function()
-    for _, e in ipairs({"cols", vim.loop.os_homedir() .. "/.cargo/bin/cols", vim.loop.os_homedir() .. "/venvs/colcon/bin/colcon", "colcon"}) do
+    for _, e in ipairs({ "cols", vim.loop.os_homedir() .. "/.cargo/bin/cols", vim.loop.os_homedir() .. "/venvs/colcon/bin/colcon", "colcon" }) do
       if vim.fn.executable(e) == 1 then
         return e
       end
@@ -84,10 +84,10 @@ local telescope_settings = function()
     },
     extensions = {
       fzf = {
-        fuzzy = true,                    -- false will only do exact matching
+        fuzzy = true,                   -- false will only do exact matching
         override_generic_sorter = true, -- override the generic sorter
-        override_file_sorter = true,     -- override the file sorter
-        case_mode = "smart_case",        -- or "ignore_case" or "respect_case"
+        override_file_sorter = true,    -- override the file sorter
+        case_mode = "smart_case",       -- or "ignore_case" or "respect_case"
         -- the default case_mode is "smart_case"
       },
       ros = {
@@ -106,8 +106,6 @@ local telescope_settings = function()
   telescope.load_extension('heading')
   telescope.load_extension('ui-select')
   -- telescope.load_extension('dap') -- set up in debugger.lua
-  telescope.load_extension('orgmode')
-  telescope.load_extension('org_roam')
 
   local heading = require('telescope').extensions.heading
   local ros_builder = require('ros-builder')
@@ -154,12 +152,6 @@ local telescope_settings = function()
   -- Headers
   nm("<leader>H", heading.heading, "Jump to headings")
 
-  -- Orgmode headings
-  nm("<leader>oh", telescope.extensions.orgmode.search_headings, "Search Org Headings")
-
-  -- org-roam
-  nm("<leader>rf", telescope.extensions.org_roam.find_nodes, "Finds node and move to it")
-  nm("<leader>rq", function() telescope.extensions.org_roam.links({links=true, backlinks=true}) end, "Links and Backlinks")
 end
 
 return {
@@ -170,12 +162,10 @@ return {
       'nvim-lua/plenary.nvim',
       'nvim-telescope/telescope-ui-select.nvim',
       'bi0ha2ard/telescope-ros.nvim',
-      'bi0ha2ard/telescope-org_roam.nvim',
-      -- { dir = "~/git/telescope-org-roam.nvim" },
-      {'nvim-telescope/telescope-fzf-native.nvim', build = "make"},
+      { 'nvim-telescope/telescope-fzf-native.nvim', build = "make" },
       'gbrlsnchs/telescope-lsp-handlers.nvim',
       'crispgm/telescope-heading.nvim',
-      'nvim-orgmode/telescope-orgmode.nvim',
+      -- 'lyz-code/telescope-orgmode.nvim',
     },
     config = telescope_settings,
   },

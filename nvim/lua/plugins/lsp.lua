@@ -24,8 +24,8 @@ vim.api.nvim_create_autocmd('LspAttach', {
     nm('<c-]>', vim.lsp.buf.definition, "Jump to definition")
     nm('<leader>h', vim.lsp.buf.hover, "LSP hover")
     nm('<leader>H', function()
-      local hints_on = vim.lsp.inlay_hint.is_enabled({bufnr=ev.buf})
-      vim.lsp.inlay_hint.enable(not hints_on, {bufnr=ev.buf})
+      local hints_on = vim.lsp.inlay_hint.is_enabled({ bufnr = ev.buf })
+      vim.lsp.inlay_hint.enable(not hints_on, { bufnr = ev.buf })
     end, "Toggle inlay hints")
     -- Using inc-rename instead
     nm('<leader>cr', vim.lsp.buf.rename, "LSP Rename")
@@ -108,6 +108,8 @@ local setup_lsp = function()
   require("clangd_extensions").setup {}
 
   nvim_lsp.clangd.setup {
+    -- cmd = { "docker", "exec", "ros2_jazzy_virtualized", "clangd", "--log=error", "--background-index", "--clang-tidy", "--header-insertion=never", "-j=6", "--compile-commands-dir=/home/wen/node/dev_containers/jazzy_dev/workspaces/ros2_jazzy_virtualized/workspace/build", "--path-mappings=/home/wen/node/dev_containers/jazzy_dev/workspaces/ros2_jazzy_virtualized/workspace=/home/virtual/workspace" },
+    -- cmd = { "docker", "exec", "ros2_jazzy_virtualized", "clangd", "--log=error", "--background-index", "--clang-tidy", "--header-insertion=never", "-j=6"},
     cmd = { "clangd", "--log=error", "--background-index", "--clang-tidy", "--header-insertion=never", "-j=6" },
     capabilities = capabilities
   }
@@ -121,7 +123,7 @@ local setup_lsp = function()
         client.config.settings = vim.tbl_deep_extend('force', client.config.settings, {
           Lua = {
             diagnostics = {
-              globals = {'vim'}
+              globals = { 'vim' }
             },
             runtime = {
               -- Tell the language server which version of Lua you're using
@@ -141,7 +143,6 @@ local setup_lsp = function()
             }
           }
         })
-
         client.notify("workspace/didChangeConfiguration", { settings = client.config.settings })
       end
       return true
@@ -149,7 +150,32 @@ local setup_lsp = function()
     capabilities = capabilities
   }
 
-  nvim_lsp.hyprls.setup{}
+  nvim_lsp.hyprls.setup {}
+
+  nvim_lsp.yamlls.setup {
+    settings = {
+      yaml = {
+        schemas = {
+          ["https://json.schemastore.org/github-workflow"] = "/.github/workflows/*",
+          ["https://json.schemastore.org/github-action"] = "/.github/actions/*",
+          -- Add more schemas if needed
+        },
+        validate = true,
+        format = {
+          enable = true,
+        },
+        hover = true,
+        completion = true,
+      },
+    },
+  }
+
+  -- Needs vscode-langservers-extracted
+  -- npm i -g vscode-langservers-extracted
+  capabilities.textDocument.completion.completionItem.snippetSupport = true
+  nvim_lsp.jsonls.setup {
+    capabilities = capabilities
+  }
 end
 
 return {
@@ -214,9 +240,9 @@ return {
               procMacro = {
                 ignored = {
                   leptos_macro = {
-                  -- optional:
-                  -- "component",
-                  -- "server"
+                    -- optional:
+                    -- "component",
+                    -- "server"
                   }
                 }
               },

@@ -8,6 +8,9 @@ vim.keymap.set("i", "jj", "<Esc>")
 -- command mode
 vim.keymap.set("c", "jj", "<C-C>")
 
+-- exit terminal mode with esc
+vim.api.nvim_set_keymap('t', '<Esc>', '<C-\\><C-n>', { noremap = true, silent = true })
+
 -- Move over partial lines when wrapped
 nm("k", "gk")
 nm("j", "gj")
@@ -55,6 +58,8 @@ nm("<C-H>", ":nohl<CR>", { silent = true, desc = "Clear hlsearch" })
 --inoremap <C-Space>	<C-n>
 -- Terminal
 --inoremap <Nul>	<C-n>
+nm("<space>t", ":belowright split | terminal<CR>", {silent = true, desc = "Open terminal"})
+
 
 -- Header <-> Source
 --noremap <F4> :A<CR>
