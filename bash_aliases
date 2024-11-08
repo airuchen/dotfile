@@ -57,6 +57,10 @@ if command -v docker &> /dev/null ; then
   alias kaniko='docker run --rm -v$(pwd):/context:ro gcr.io/kaniko-project/executor:debug --context /context'
   # Docker image inspection tool
   alias dive='docker run --rm -it -v /var/run/docker.sock:/var/run/docker.sock wagoodman/dive:latest'
+  if command -f fzf &> /dev/null ; then
+  if command -v fzf &> /dev/null ; then
+    source ~/config/docker_fzf
+  fi
 elif command -v podman &> /dev/null ; then
   alias kaniko='podman run --rm -v$(pwd):/context:ro gcr.io/kaniko-project/executor:debug --context /context'
   # Docker image inspection tool
