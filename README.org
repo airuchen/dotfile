@@ -3,7 +3,7 @@
 * Dependencies
 
 #+BEGIN_SRC sh
-sudo apt install htop git curl scrot xdotool xclip fdfind fzf build-essential pass stalonetray ripgrep feh gammastep
+sudo apt install htop git curl scrot xdotool xclip fd-find fzf build-essential pass stalonetray ripgrep feh gammastep
 #+END_SRC
 
 Optional for laptop backlight control if regular hotkeys don't work:

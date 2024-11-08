@@ -43,7 +43,7 @@ add_ft_opt({ "cpp", "rust" }, "setlocal iskeyword-=:")
 add_ft_opt({ "rust" }, "setlocal colorcolumn=100")
 
 -- spellcheck in comments
-add_ft_opt({ "org", "rst", "tex", "cpp", "python", "haskell", "xml", "lua", "plantuml" }, "setlocal spell")
+add_ft_opt({ "org", "rst", "tex", "c", "cpp", "python", "haskell", "xml", "lua", "plantuml" }, "setlocal spell")
 add_ft_opt({"xacro"}, "setlocal filetype=xml")
 
 -- turn off the character limit in fugitive buffers
@@ -95,8 +95,7 @@ local function bind_tox_test(opts)
 end
 
 local function bind_tox_docs(opts)
-  local fname = vim.api.nvim_buf_get_name(opts.buf)
-  local proj_root = pyproject_pattern(vim.fs.normalize(fname))
+  local proj_root = vim.fs.root(opts.buf, {"pyproject.toml", "tox.ini"})
 
   if not proj_root then
     return

@@ -20,6 +20,9 @@ return {
         -- org_startup_folded = "content",
         -- We have a telescope plugin for this
         org_id_link_to_org_use_id = true,
+        org_todo_keywords = { 'TODO', 'DOING', '|', 'DONE' },
+        -- org_ellipsis = "…",
+        win_border = "rounded",
         mappings = {
           -- Auto-inserts bullet points, etc
           org_return_uses_meta_return = true,
@@ -58,7 +61,9 @@ return {
       require("org-roam").setup({
         directory = "~/Documents/org/roam",
         bindings = {
-          prefix = "<localleader>r"
+          prefix = "<localleader>r",
+          find_node = false, -- telescope
+          quickfix_backlinks = false, -- telescope
         },
         templates = {
           d = {

@@ -1,0 +1,5 @@
+#!/bin/bash
+# update OOM score before running
+echo 1000 > /proc/$$/oom_score_adj
+REAL_CT=/usr/bin/clang-tidy-18
+CTCACHE_DIR=/home/felix/.cache/ctc_18 /home/felix/venvs/ctcache/bin/clang-tidy-cache "${REAL_CT}" "${@}"

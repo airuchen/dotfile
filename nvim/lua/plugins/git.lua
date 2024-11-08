@@ -1,6 +1,9 @@
 return {
   -- Git integration
-  { 'tpope/vim-fugitive' },
+  {
+    cond = false,
+    'tpope/vim-fugitive'
+  },
 
   -- diff view for neogit
   {
@@ -84,14 +87,16 @@ return {
       kind = "split_above",
       disable_line_numbers = false,
       disable_context_highlighting = true, -- no annoying flickering
-      disable_insert_on_commit = true, -- don't start in insert mode in commit editor
-      disable_signs = true, -- no signs for collapsed things
-      graph_style = "unicode", -- make log view look nicer
+      disable_insert_on_commit = true,     -- don't start in insert mode in commit editor
+      disable_signs = true,                -- no signs for collapsed things
+      graph_style = "unicode",             -- make log view look nicer
       git_services = {
         ["github.com"] = "https://github.com/${owner}/${repository}/compare/${branch_name}?expand=1",
         ["bitbucket.org"] = "https://bitbucket.org/${owner}/${repository}/pull-requests/new?source=${branch_name}&t=1",
-        ["gitlab.com"] = "https://gitlab.com/${owner}/${repository}/merge_requests/new?merge_request[source_branch]=${branch_name}",
-        ["gitlab.node%-robotics.com"] = "https://gitlab.node-robotics.com/${owner}/${repository}/merge_requests/new?merge_request[source_branch]=${branch_name}",
+        ["gitlab.com"] =
+        "https://gitlab.com/${owner}/${repository}/merge_requests/new?merge_request[source_branch]=${branch_name}",
+        ["gitlab.node-robotics.com"] =
+        "https://gitlab.node-robotics.com/${owner}/${repository}/merge_requests/new?merge_request[source_branch]=${branch_name}",
       },
       ignored_settings = {
         "NeogitPushPopup--force-with-lease",

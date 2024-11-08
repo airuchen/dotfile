@@ -235,13 +235,18 @@ command -v fd > /dev/null && export FZF_DEFAULT_COMMAND='fd --type f'
 export FZF_DEFAULT_OPTS='--layout=reverse'
 
 _INTERNAL_FZF_ERROR="fzf not found!"
-for fzf_conf in "${XDG_CONFIG_HOME:-$HOME/.config}"/fzf/fzf.bash /usr/share/fzf/shell/completion.bash /usr/share/doc/fzf/examples/key-bindings.bash /usr/share/bash-completion/completions/fzf-key-bindings; do
-  if [ -f "${fzf_conf}" ]; then
-    source "${fzf_conf}"
+if [ -f /usr/share/fzf/shell/completion.bash -a -f /usr/share/fzf/shell/key-bindings.bash ]; then
+    source /usr/share/fzf/shell/completion.bash
+    source /usr/share/fzf/shell/key-bindings.bash
     unset _INTERNAL_FZF_ERROR
-    break;
-  fi
-done
+else
+  for fzf_conf in "${XDG_CONFIG_HOME:-$HOME/.config}"/fzf/fzf.bash /usr/share/doc/fzf/examples/key-bindings.bash /usr/share/bash-completion/completions/fzf-key-bindings; do
+    if [ -f "${fzf_conf}" ]; then
+      source "${fzf_conf}"
+      unset _INTERNAL_FZF_ERROR
+    fi
+  done
+fi
 
 # TODO make a generic _ERROR variable and append stuff separated by some char
 # display warnings if the shell is interactive

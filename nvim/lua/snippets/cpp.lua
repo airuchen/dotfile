@@ -43,5 +43,14 @@ ls.add_snippets("cpp", {
       "",
       "" }),
   }),
-  s({ trig = "nsp", condition = line_begin }, nsp_pattern)
+  s({ trig = "nsp", condition = line_begin }, nsp_pattern),
+  s({ trig = "fm"}, { t("fmt::format(FMT_COMPILE(\""), i(1), t("\"), "), i(2), t(")") }),
+  s({ trig = "sfmt", condition = line_begin }, {
+    t({ "template <>", "struct fmt::formatter<" }), i(1), t({ "> : fmt::formatter<std::string_view> {",
+    "  // format parsing is inherited", "  auto format(" }),
+    e.rep(1), t(" const& "), i(2, "t"), t(", format_context& ctx) const -> format_context::iterator {"),
+    t({ "", "    " }),
+    i(3),
+    t({ "", "  }", "};" })
+  }),
 })

@@ -150,7 +150,7 @@ myConfig mandb = def { terminal           = myTerminal
                      }
 
 hasColemak :: Bool
-hasColemak = elem myHostname ["ikarus"]
+hasColemak = elem myHostname ["ikarus", "ikarus-wrk"]
 
 isHomePc :: Bool
 isHomePc = elem myHostname ["ikarus", "nines"]

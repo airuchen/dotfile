@@ -107,6 +107,7 @@ local telescope_settings = function()
   telescope.load_extension('ui-select')
   -- telescope.load_extension('dap') -- set up in debugger.lua
   telescope.load_extension('orgmode')
+  telescope.load_extension('org_roam')
 
   local heading = require('telescope').extensions.heading
   local ros_builder = require('ros-builder')
@@ -154,7 +155,11 @@ local telescope_settings = function()
   nm("<leader>H", heading.heading, "Jump to headings")
 
   -- Orgmode headings
-  nm("<leader>do", telescope.extensions.orgmode.search_headings, "Search Org Headings")
+  nm("<leader>oh", telescope.extensions.orgmode.search_headings, "Search Org Headings")
+
+  -- org-roam
+  nm("<leader>rf", telescope.extensions.org_roam.find_nodes, "Finds node and move to it")
+  nm("<leader>rq", function() telescope.extensions.org_roam.links({links=true, backlinks=true}) end, "Links and Backlinks")
 end
 
 return {
@@ -165,6 +170,8 @@ return {
       'nvim-lua/plenary.nvim',
       'nvim-telescope/telescope-ui-select.nvim',
       'bi0ha2ard/telescope-ros.nvim',
+      'bi0ha2ard/telescope-org_roam.nvim',
+      -- { dir = "~/git/telescope-org-roam.nvim" },
       {'nvim-telescope/telescope-fzf-native.nvim', build = "make"},
       'gbrlsnchs/telescope-lsp-handlers.nvim',
       'crispgm/telescope-heading.nvim',

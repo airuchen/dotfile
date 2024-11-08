@@ -13,7 +13,7 @@ if vim.g.neovide then
   vim.g.neovide_remember_window_position = false
   vim.g.neovide_remember_window_size = false
   vim.g.neovide_scroll_animation_length = 0
-  vim.g.neovide_cursor_animation_length = 0.05
+  vim.g.neovide_cursor_animation_length = 0.0
   vim.g.neovide_cursor_trail_size = 0.1
   vim.g.neovide_cursor_vfx_mode = "railgun"
   vim.g.neovide_cursor_vfx_particle_lifetime = 0.5

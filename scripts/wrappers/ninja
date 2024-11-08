@@ -1,0 +1,4 @@
+#!/bin/bash
+# update OOM score before running
+echo 1000 > /proc/$$/oom_score_adj
+/usr/bin/ninja -l 12 "${@}"

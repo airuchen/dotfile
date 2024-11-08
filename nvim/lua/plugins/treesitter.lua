@@ -30,11 +30,12 @@ local config_treesitter = function()
       "gitattributes",
       "gitcommit",
       "gitignore",
+      "glsl",
       "haskell",
       "html",
       "javascript",
       "json",
-      "latex",
+      -- "latex", -- breaks illuminate for some reason
       "lua",
       "make",
       "markdown",

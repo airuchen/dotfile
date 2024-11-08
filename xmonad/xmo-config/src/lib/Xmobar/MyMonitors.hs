@@ -362,6 +362,11 @@ hostConfig "ikarus" =
     { template = ikarusTemplate
     , commands = ikarusMonitors
     }
+hostConfig "ikarus-wrk" =
+  (baseConfig 11 middleScreen)
+    { template = ikarusTemplate
+    , commands = ikarusMonitors
+    }
 hostConfig "nines" =
   (baseConfig 17 ninesPos)
     { template = ninesTemplate

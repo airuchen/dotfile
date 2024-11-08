@@ -2,12 +2,6 @@ return {
   -- Surround things
   'tpope/vim-surround',
 
-  -- bunch of [ ] mappings
-  -- yo<x> toggles option x, yos is spellchecking
-  -- =p pastes below with autoindent
-  -- Produces conflicting keybinds with at least next/prev hunk
-  -- 'tpope/vim-unimpaired',
-
   -- Align stuff
   { 'godlygeek/tabular',          lazy = true, cmd = "Tabularize" },
 

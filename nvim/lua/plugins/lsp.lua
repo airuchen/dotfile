@@ -24,8 +24,8 @@ vim.api.nvim_create_autocmd('LspAttach', {
     nm('<c-]>', vim.lsp.buf.definition, "Jump to definition")
     nm('<leader>h', vim.lsp.buf.hover, "LSP hover")
     nm('<leader>H', function()
-      local hints_on = vim.lsp.inlay_hint.is_enabled(ev.buf)
-      vim.lsp.inlay_hint.enable(ev.buf, not hints_on)
+      local hints_on = vim.lsp.inlay_hint.is_enabled({bufnr=ev.buf})
+      vim.lsp.inlay_hint.enable(not hints_on, {bufnr=ev.buf})
     end, "Toggle inlay hints")
     -- Using inc-rename instead
     nm('<leader>cr', vim.lsp.buf.rename, "LSP Rename")
@@ -36,7 +36,7 @@ vim.api.nvim_create_autocmd('LspAttach', {
     nm(']d', vim.diagnostic.goto_next, "Prev diagnostic")
 
     -- If telescope is installed these will use telescope
-    nm('<leader>ca', vim.lsp.buf.code_action, "LSP code actions")
+    nm('<leader>a', vim.lsp.buf.code_action, "LSP code actions")
     nm('<leader>f', vim.lsp.buf.code_action, "LSP code actions")
     nm('<leader>r', vim.lsp.buf.references, "LSP references")
 
@@ -74,12 +74,24 @@ local setup_lsp = function()
     capabilities = capabilities,
   }
 
-  -- TODO write something that finds the build dir using catkin/colcon/$ROS_WORKSPACE if it exists
   -- https://github.com/regen100/cmake-language-server
   -- Can in theory format with cmake-format, but that's not in the PATH since it's in the venv, so it doesn't find it
   nvim_lsp.cmake.setup {
     cmd = { vim.loop.os_homedir() .. "/venvs/cmake_lsp/bin/cmake-language-server" },
-    capabilities = capabilities
+    capabilities = capabilities,
+    on_new_config = function(new_config, new_root_dir)
+      -- Default, could potentially try some smarter things here
+      local build_dir = "build"
+
+      -- For ROS workspaces, we can set the actual build dir
+      if vim.env.ROS_WORKSPACE then
+        local it = vim.iter(vim.gsplit(new_root_dir, "/"))
+        build_dir = vim.env.ROS_WORKSPACE .. "/build/" .. it:last()
+      end
+      new_config.init_options = {
+        buildDirectory = build_dir
+      }
+    end
   }
 
   -- For sphinx documentation
@@ -108,6 +120,9 @@ local setup_lsp = function()
       if not vim.loop.fs_stat(path .. '/.luarc.json') and not vim.loop.fs_stat(path .. '/.luarc.jsonc') then
         client.config.settings = vim.tbl_deep_extend('force', client.config.settings, {
           Lua = {
+            diagnostics = {
+              globals = {'vim'}
+            },
             runtime = {
               -- Tell the language server which version of Lua you're using
               -- (most likely LuaJIT in the case of Neovim)
@@ -192,6 +207,16 @@ return {
                 allFeatures = true,
                 command = "clippy",
                 extraArgs = { "--no-deps" },
+              },
+              -- leptos things
+              procMacro = {
+                ignored = {
+                  leptos_macro = {
+                  -- optional:
+                  -- "component",
+                  -- "server"
+                  }
+                }
               },
             },
           },

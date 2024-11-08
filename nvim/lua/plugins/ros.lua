@@ -13,6 +13,7 @@ return {
 
   {
     "bi0ha2ard/ros-builder.nvim",
+    -- dir = "~/git/ros-builder.nvim/",
     dependencies = {
       'nvim-lua/plenary.nvim',
       -- to make sure the builder is there

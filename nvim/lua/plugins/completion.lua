@@ -74,7 +74,7 @@ local setup_completion = function()
     -- end,
     snippet = {
       expand = function(args)
-        require('luasnip').lsp_expand(args.body)   -- For `luasnip` users.
+        require('luasnip').lsp_expand(args.body) -- For `luasnip` users.
       end,
     },
     mapping = cmp.mapping.preset.insert({
@@ -100,6 +100,12 @@ local setup_completion = function()
       if bufname:match("org%-roam%-select$") ~= nil then
         return false
       end
+      if vim.api.nvim_buf_get_option(0, "buftype") == "prompt" then
+        return false
+      end
+      if require("cmp_dap").is_dap_buffer() then
+        return false
+      end
       return true
     end
   })
@@ -120,6 +126,12 @@ local setup_completion = function()
       { name = 'cmdline' }
     }),
     matching = { disallow_symbol_nonprefix_matching = false }
+  })
+
+  cmp.setup.filetype({ "dap-repl", "dapui_watches", "dapui_hover" }, {
+    sources = {
+      { name = "dap" },
+    },
   })
 end
 
@@ -143,6 +155,7 @@ return {
       'hrsh7th/cmp-buffer',
       'hrsh7th/cmp-cmdline',
       'saadparwaiz1/cmp_luasnip',
+      'rcarriga/cmp-dap',
     },
     config = setup_completion
   },

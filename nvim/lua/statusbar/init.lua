@@ -128,7 +128,9 @@ local rhs_sep = "%= "
 local buffers = function(bufno, opts)
   local curr_buff = opts.val_hl .. bufno
   local filter_loaded = function(buf)
-    return vim.api.nvim_buf_is_loaded(buf) and vim.bo[buf].bufhidden ~= "hide"
+    return vim.api.nvim_buf_is_loaded(buf) -- unloaded
+      and vim.bo[buf].bufhidden ~= "hide"  -- hidden
+      and vim.api.nvim_buf_get_name(buf) ~= ""  -- scratch buffers, created by treesitter-context for example
   end
   local num_bufs = vim.tbl_count(vim.tbl_filter(filter_loaded, vim.api.nvim_list_bufs()))
   if num_bufs == 1 then
@@ -188,7 +190,7 @@ local line = function(bufno)
     lsp_status(bufno, true, theme),
     line_stats(theme)
   }), " | ")
-  return table.concat(vim.tbl_flatten({ box_it(theme, left_elems), rhs_sep, box_it(theme, right_elems) }))
+  return vim.iter({ box_it(theme, left_elems), rhs_sep, box_it(theme, right_elems) }):flatten():join()
 end
 
 local title = function(bufno, active)
@@ -280,7 +282,8 @@ local setup_colors = function()
   vim.api.nvim_set_hl(0, "MySBTitleSep", { ctermbg = 0, ctermfg = 8, bg = title_bg, fg = "#7c6f64" })
   vim.api.nvim_set_hl(0, "MySBTitleVal", { ctermbg = 0, ctermfg = 14, bg = title_bg, fg = title_fg })
   vim.api.nvim_set_hl(0, "MySBTitleExtra", { ctermbg = 0, ctermfg = 4, bg = title_bg, fg = "#458588" })
-  vim.api.nvim_set_hl(0, "MySBTitleBG", { ctermbg = 0, ctermfg = 4, bg = title_bg })
+  vim.api.nvim_set_hl(0, "Winbar", { ctermbg = 0, ctermfg = 4, bg = title_bg })
+  vim.api.nvim_set_hl(0, "WinbarNC", { ctermbg = 0, ctermfg = 4, bg = title_bg })
   -- vim.api.nvim_set_hl(0, "MySBTitleSep", {link ="Comment"})
   -- vim.api.nvim_set_hl(0, "MySBTitleVal", {link ="CursorLine"})
   -- vim.api.nvim_set_hl(0, "MySBTitleExtra", {link ="Include"})
@@ -290,6 +293,8 @@ local setup_colors = function()
   vim.api.nvim_set_hl(0, "MySBTitleValInactive", { link = "Identifier" })
   vim.api.nvim_set_hl(0, "MySBTitleExtraInactive", { link = "Include" })
   vim.api.nvim_set_hl(0, "MySBTitleInactiveBG", { link = "Identifier" })
+  vim.api.nvim_set_hl(0, "Statusline", {}) -- clear statusbar highlight
+  vim.api.nvim_set_hl(0, "StatuslineNC", {}) -- clear statusbar highlight
 end
 
 local update_bar = function()

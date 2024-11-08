@@ -10,12 +10,13 @@ set print static-members on
 set print vtbl on
 set print demangle on
 set demangle-style auto
+set debuginfod enabled on
 
 # Pretty printers
 python
 import sys
 import os;
-cfg_dir = os.path.expanduser("~/.config/gdb")
+cfg_dir = os.path.expanduser("~/config/gdb")
 sys.path.insert(0, cfg_dir)
 from printers import register_eigen_printers
 

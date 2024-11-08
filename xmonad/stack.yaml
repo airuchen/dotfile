@@ -19,6 +19,7 @@ ghc-options:
   xmobar: '-j'
 
 extra-deps:
-  - libmpd-0.9.3.0
+  - libmpd-0.10.0.1
+  - alsa-mixer-0.3.0.1
 
 allow-newer: true

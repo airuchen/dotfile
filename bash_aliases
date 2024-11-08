@@ -57,13 +57,18 @@ if command -v docker &> /dev/null ; then
   alias kaniko='docker run --rm -v$(pwd):/context:ro gcr.io/kaniko-project/executor:debug --context /context'
   # Docker image inspection tool
   alias dive='docker run --rm -it -v /var/run/docker.sock:/var/run/docker.sock wagoodman/dive:latest'
+elif command -v podman &> /dev/null ; then
+  alias kaniko='podman run --rm -v$(pwd):/context:ro gcr.io/kaniko-project/executor:debug --context /context'
+  # Docker image inspection tool
+  # Needs systempct start --user podman.socket
+  alias dive='podman run --rm -it -v /var/run/user/${UID}/podman/podman.sock:/var/run/docker.sock wagoodman/dive:latest'
 fi
 
 
 
 # Workspaces
 alias cdnav='cdws nav'
-alias cdbmw='cdws bmwstr'
+# alias cdbmw='cdws bmwstr'
 # alias cdlearn='cdws learning'
 # alias source_ikos='export PATH=/home/fez/local/ikos/bin:$PATH'
 # alias tf_env='. ~/git/tensorflow-env/bin/activate'
@@ -158,97 +163,6 @@ add_ros_alias() {
 	}
 }
 
-add_ros2_alias() {
-	function colb {
-		is_ros_workspace && colcon --log-base "${ROS_WORKSPACE}/log" build --mixin compile-commands ccache --base-paths "${ROS_WORKSPACE}" --cmake-args -DENABLE_SANITIZER_ADDRESS=ON -DCMAKE_EXPORT_COMPILE_COMMANDS=1 "-DCMAKE_CXX_FLAGS=-ggdb -fdiagnostics-color=always" --build-base "${ROS_WORKSPACE}/build" --install-base ${ROS_WORKSPACE}/install $@
-	}
-	alias colt='is_ros_workspace && colcon --log-base "${ROS_WORKSPACE}/log" test --base-paths "${ROS_WORKSPACE}" --cmake-args -DCMAKE_EXPORT_COMPILE_COMMANDS=1 "-DCMAKE_CXX_FLAGS=-ggdb -fdiagnostics-color=always" --build-base "${ROS_WORKSPACE}/build" --install-base "${ROS_WORKSPACE}/install"'
-	alias colbthis='is_ros_workspace && colcon --log-base "${ROS_WORKSPACE}/log" build --mixin compile-commands ccache --cmake-args -DCMAKE_EXPORT_COMPILE_COMMANDS=1 "-DCMAKE_CXX_FLAGS=-ggdb -fdiagnostics-color=always" --build-base "${ROS_WORKSPACE}/build" --install-base "${ROS_WORKSPACE}/install"'
-	alias coltr='is_ros_workspace && colcon --log-base "${ROS_WORKSPACE}/log" test-result --test-result-base "${ROS_WORKSPACE}/build" --verbose'
-	alias colrelbuild='is_ros_workspace && colcon --log-base "${ROS_WORKSPACE}/log" build --mixin compile-commands ccache --base-paths "${ROS_WORKSPACE}" --cmake-args --DCMAKE_EXPORT_COMPILE_COMMANDS=1 DCMAKE_BUILD_TYPE=Release -DSANITIZE=OFF -DBUILD_TESTING=OFF -DCMAKE_CXX_FLAGS=-ggdb --build-base "${ROS_WORKSPACE}/build" --install-base "${ROS_WORKSPACE}/install"'
-
-	single_ros2test() {
-		if [ $# -lt 2 ]; then
-			echo "Need a package name and test name"
-			return;
-		fi
-		is_ros_workspace || return
-		function rostest_in_base {
-			# suppress cmake stuff
-			colb --packages-up-to "${1}" --symlink-install --cmake-target-skip-unavailable --cmake-target "${2}" > /dev/null || return
-			local test_executable
-			test_executable=$(find "${ROS_WORKSPACE}/build/${1}" -type f -iname "${2}") || return
-			# echo ${test_executable}
-			[ -x "${test_executable}" ] || return 1
-			${test_executable}
-		}
-		rostest_in_base "${1}" "${2}"
-	}
-
-	single_ros2test_gdb() {
-		if [ $# -lt 1 ]; then
-			echo "Need a test name"
-			return;
-		fi
-		is_ros_workspace || return
-		local test_executable
-		test_executable=$(find ${ROS_WORKSPACE}/build -type f -iname "${1}") || return
-		gdb ${test_executable}
-	}
-
-	# Takes filename to unit test and rebuilds it without dependencies + runs it
-	# Any extra arguments will be used as prefix for the test
-	single_ros2test_from_file_fast() {
-		test_executable=$1
-		shift
-		test_name=$(basename "${test_executable}")
-		# Account for /test subfolder
-		build_dir=$(dirname "$test_executable" | sed -e 's#/test$##')
-		pkg_name=$(basename "$build_dir")
-		#echo "Test executable: '${test_executable}', build dir: '${build_dir}', pkg name: '${pkg_name}'"
-		colb --packages-select "${pkg_name}" --cmake-target "${test_name}" && $@ ${test_executable}
-	}
-
-	# Takes filename to unit test and rebuilds + runs it
-	# Any extra arguments will be used as prefix for the test
-	single_ros2test_from_file() {
-		test_executable=$1
-		shift
-		test_name=$(basename "${test_executable}")
-		# Account for /test subfolder
-		build_dir=$(dirname "$test_executable" | sed -e 's#/test$##')
-		pkg_name=$(basename "$build_dir")
-		colb --packages-up-to "${pkg_name}" > /dev/null && $@ ${test_executable}
-	}
-
-	single_ros2test_from_source_file() {
-		is_ros_workspace || return
-		exe=$(basename $1 .cpp)
-		test_executable=$(find ${ROS_WORKSPACE}/build -type f -iname "${exe}") || return
-		single_ros2test_from_file_fast "$test_executable"
-	}
-
-	r2t() {
-		is_ros_workspace || return
-		local test_executable
-		test_executable=$(fd -t x '_test$' "${ROS_WORKSPACE}/build" | fzf) || return
-		single_ros2test_from_file "$test_executable" $@
-	}
-
-	release_ros2_pkg() {
-		if [ $# -lt 1 ]; then
-			echo "Need a pkg name"
-			return
-		fi
-		is_ros_workspace || return
-
-		tmpdir=$(mktemp -d)
-		colcon --log-base "${tmpdir}/log" build --base-paths "${ROS_WORKSPACE}" --executor parallel --merge-install --install-base "${tmpdir}/install" --build-base "${tmpdir}/build" --ament-cmake-args -DCMAKE_BUILD_TYPE=Release -DBUILD_TESTING=OFF --packages-up-to $@
-		echo -e "- Install ROS ${ROS_DISTRO}\n- Install dependencies \`rosdep install --ignore-src --from-path install/share\`\n- Source the workspace \`source install/setup.bash\`" > "${tmpdir}/SETUP.md"
-		tar -czf "/tmp/${1}_$(date --iso-8601).tar.gz" -C "${tmpdir}" SETUP.md install
-	}
-}
-
 function pandocslides {
 	if [ $# -ne 1 ]; then
 		echo "Usage: pandocslides source.org"
@@ -300,7 +214,8 @@ function ffmpeg_make_gif {
 
 function rsource_ros2_base {
   local ROS_ROOT
-  [ -d "/opt/ros/iron" ] && . /opt/ros/iron/setup.bash
+  [ -d "/opt/ros/jazzy" ] && . /opt/ros/jazzy/setup.bash
+  # [ -d "/opt/ros/iron" ] && . /opt/ros/iron/setup.bash
   [ -e /usr/share/colcon_argcomplete/hook/colcon-argcomplete.bash ]\
     && . /usr/share/colcon_argcomplete/hook/colcon-argcomplete.bash
   [ -e /usr/share/colcon_cd/function/colcon_cd.sh ]\
@@ -345,13 +260,12 @@ function cdws {
     export ROS_WORKSPACE=${workspace}
 		export RCUTILS_COLORIZED_OUTPUT=1
     cd "${workspace}/src/${1}" 2>/dev/null || cd "${workspace}/src/" || cd "${workspace}" || return
-    if [ -e "${workspace}/.built_by" ]; then
-			add_ros2_alias
+    # if [ -e "${workspace}/.built_by" ]; then
 			rsource_ros2_base
-		else
-			add_ros_alias
-			rsource
-		fi
+		# else
+		# 	add_ros_alias
+		# 	rsource
+		# fi
   fi
 }
 
@@ -549,6 +463,10 @@ function devenv {
   fi
 }
 
+function verbose_ros2console {
+  export RCUTILS_CONSOLE_OUTPUT_FORMAT="[{severity} {time}] [{name}] [{function_name} @ {file_name}:{line_number})]: {message}"
+}
+
 
 # Transferring GPG keys
 # gpg --export-secret-key KeyId | ssh user@remote gpg --allow-secret-key-import --import
@@ -561,3 +479,6 @@ export ROS_MASTER_URI=http://localhost:11311
 export ROS_AUTOMATIC_DISCOVERY_RANGE=LOCALHOST
 export RMW_IMPLEMENTATION=rmw_cyclonedds_cpp
 export ROS_PYTHON_CHECK_FIELDS=1
+export RCUTILS_COLORIZED_OUTPUT=1
+export CYCLONEDDS_URI="file:///${HOME}/config/cyclonedds.xml"
+export MAKEFLAGS="-j12 -l12"
