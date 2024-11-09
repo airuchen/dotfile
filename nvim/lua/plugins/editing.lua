@@ -3,10 +3,10 @@ return {
   'tpope/vim-surround',
 
   -- Align stuff
-  { 'godlygeek/tabular',          lazy = true, cmd = "Tabularize" },
+  { 'godlygeek/tabular',          lazy = true,                      cmd = "Tabularize" },
 
   -- toggle with <leader>tm
-  { 'dhruvasagar/vim-table-mode', ft = {"rst", "markdown", "org"}},
+  { 'dhruvasagar/vim-table-mode', ft = { "rst", "markdown", "org" } },
 
   -- Add text objects for separated lists, function arguments
   'wellle/targets.vim',
@@ -17,6 +17,25 @@ return {
 
   -- Make . work with commands that support it
   'tpope/vim-repeat',
+
+  --MarkdownPreview
+  {
+    -- Install markdown preview, use npx if available.
+    "iamcco/markdown-preview.nvim",
+    cmd = { "MarkdownPreviewToggle", "MarkdownPreview", "MarkdownPreviewStop" },
+    ft = { "markdown" },
+    build = function(plugin)
+      if vim.fn.executable "npx" then
+        vim.cmd("!cd " .. plugin.dir .. " && cd app && npx --yes yarn install")
+      else
+        vim.cmd [[Lazy load markdown-preview.nvim]]
+        vim.fn["mkdp#util#install"]()
+      end
+    end,
+    init = function()
+      if vim.fn.executable "npx" then vim.g.mkdp_filetypes = { "markdown" } end
+    end,
+  },
 
   -- Undo tree
   {
