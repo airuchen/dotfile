@@ -84,7 +84,7 @@ return {
     cmd = "Neogit",
     opts = {
       disable_hint = true,
-      kind = "split_above",
+      kind = "vsplit",
       disable_line_numbers = false,
       disable_context_highlighting = true, -- no annoying flickering
       disable_insert_on_commit = true,     -- don't start in insert mode in commit editor
@@ -105,6 +105,9 @@ return {
         "NeogitCommitPopup--allow-empty",
         "NeogitCommitPopup--no-verify",
         "NeogitRevertPopup--no-edit",
+      },
+      status = {
+        HEAD_folded = true,
       },
       commit_editor = {
         kind = "split_above",

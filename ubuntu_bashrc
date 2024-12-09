@@ -106,6 +106,8 @@ else
   PS2="\[\e[0;92m\]~>\[\e[0m\] "
   # Could also be already sourced
   [[ $(type -t __git_ps1) != function ]] && [ -e /usr/lib/git-core/git-sh-prompt ] && source /usr/lib/git-core/git-sh-prompt
+  # NixOS
+  [[ $(type -t __git_ps1) != function ]] && [ -e /run/current-system/sw/share/bash-completion/completions/git-prompt.sh ] && source /run/current-system/sw/share/bash-completion/completions/git-prompt.sh
   if [[ $(type -t __git_ps1) == function ]]; then
     GIT_PS1_SHOWDIRTYSTATE=1
     GIT_PS1_SHOWCOLORHINTS=1
@@ -146,7 +148,7 @@ unset LESS_PATH
 
 # make vim the preferred editor if available
 unalias vim 2> /dev/null
-VIM_PATH=$(which vim)
+VIM_PATH=$(command -v vim)
 NVIM_PATH=$(which nvim)
 if [ "$NVIM_PATH" ] && [ -x "$NVIM_PATH" ]; then
   export VISUAL=nvim
@@ -175,7 +177,7 @@ alias la='ls -A'
 alias multidl='curl -L -A "Mozilla/4.0" --remote-name-all'
 
 
-LSD_PATH=$(which lsd)
+LSD_PATH=$(command -v lsd)
 # gnuls colours
 export LS_COLORS="fi=00:di=94:ln=35:ex=32:or=05;38;41:mi=05;38;41" # gruvbox
 #export LS_COLORS="fi=00:di=36:ln=35:ex=32:or=05;37;41:mi=05;37;41" # solarized/default
@@ -246,6 +248,12 @@ else
       unset _INTERNAL_FZF_ERROR
     fi
   done
+fi
+# NixOS
+if command -v fzf-share >/dev/null; then
+  source "$(fzf-share)/key-bindings.bash"
+  source "$(fzf-share)/completion.bash"
+  unset _INTERNAL_FZF_ERROR
 fi
 
 # TODO make a generic _ERROR variable and append stuff separated by some char

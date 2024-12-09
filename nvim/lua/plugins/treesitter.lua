@@ -1,12 +1,21 @@
 local config_treesitter = function()
   require('nvim-dap-repl-highlights').setup()
 
+vim.filetype.add({
+  pattern = { [".*/hypr/.*%.conf"] = "hyprlang" },
+})
+
   local tsconf = require('nvim-treesitter.configs')
 
   -- Make it so we don't turn this on for huge files
   local ts_disable_func = function(lang, bufnr)
     local ok, stats = pcall(vim.loop.fs_stat, vim.api.nvim_buf_get_name(bufnr))
     if ok and stats and stats.size then
+      -- big files
+      if stats.size > 50 * 1024 then
+        return true
+      end
+      -- long lines
       local lc = vim.api.nvim_buf_line_count(bufnr)
       return (stats.size / lc) > 300
     end
@@ -32,6 +41,7 @@ local config_treesitter = function()
       "gitignore",
       "glsl",
       "haskell",
+      "hyprlang",
       "html",
       "javascript",
       "json",
@@ -59,6 +69,7 @@ local config_treesitter = function()
     },
     indent = {
       enable = true,
+      disable = ts_disable_func,
     },
     -- in visual mode, select by tree
     incremental_selection = {
@@ -120,8 +131,8 @@ local config_treesitter = function()
         enable = true,
         disable = ts_disable_func,
         peek_definition_code = {
-          ["<space>df"] = { query = "@function.outer", desc = "Go to next class" },
-          ["<space>dc"] = { query = "@class.outer", desc = "Go to next class" },
+          ["<space>df"] = { query = "@function.outer", desc = "Peek function definition" },
+          ["<space>dc"] = { query = "@class.outer", desc = "Peek class definition" },
         },
       },
     },

@@ -148,6 +148,8 @@ local setup_lsp = function()
     end,
     capabilities = capabilities
   }
+
+  nvim_lsp.hyprls.setup{}
 end
 
 return {

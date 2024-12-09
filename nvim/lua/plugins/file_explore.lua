@@ -2,7 +2,7 @@ local setup_harpoon = function()
   local harpoon = require("harpoon")
   harpoon:setup()
 
-  vim.keymap.set("n", "<leader>a", function() harpoon:list():add() end, { desc = "Add to harpoon"})
+  vim.keymap.set("n", "<space>m", function() harpoon:list():add() end, { desc = "Add to harpoon"})
   vim.keymap.set("n", "<leader>p", function() harpoon.ui:toggle_quick_menu(harpoon:list()) end, { desc = "Harpoon menu"})
 
   -- TODO; this overlaps with illuminate
@@ -13,7 +13,7 @@ local setup_harpoon = function()
 
   -- Toggle previous & next buffers stored within Harpoon list
   vim.keymap.set("n", "<C-P>", function() harpoon:list():prev() end, { desc = "Harpoon prev"})
-  vim.keymap.set("n", "<C-N>", function() harpoon:list():next() end, { desc = "Harpoon next"})
+  vim.keymap.set("n", "<C-B>", function() harpoon:list():next() end, { desc = "Harpoon next"})
 end
 
 return {

@@ -16,6 +16,7 @@ alias cal='cal -m'
 alias ytdl720="yt-dlp -f 'bestvideo[height<=720]+bestaudio'"
 alias ytdlhd="yt-dlp -f 'bestvideo[width<=1920]+bestaudio'"
 alias ytdl_it='yt-dlp --no-mtime --no-call-home'
+alias ytaudio='mpv --ytdl-format=bestaudio'
 command -v fdfind > /dev/null && alias fd='fdfind'
 alias pmode_toggle='xfconf-query -c xfce4-power-manager -p /xfce4-power-manager/presentation-mode -T && echo "Presentation mode is $(xfconf-query  -c xfce4-power-manager -p /xfce4-power-manager/presentation-mode -v)"'
 # Load loopback module for monitoring inputs
@@ -57,7 +58,6 @@ if command -v docker &> /dev/null ; then
   alias kaniko='docker run --rm -v$(pwd):/context:ro gcr.io/kaniko-project/executor:debug --context /context'
   # Docker image inspection tool
   alias dive='docker run --rm -it -v /var/run/docker.sock:/var/run/docker.sock wagoodman/dive:latest'
-  if command -f fzf &> /dev/null ; then
   if command -v fzf &> /dev/null ; then
     source ~/config/docker_fzf
   fi

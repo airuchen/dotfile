@@ -1,0 +1,10 @@
+default-timeout=20000
+font="DejaVu Sans 20"
+
+border-color=#8ec07c
+border-radius=5
+background-color=#3c3836
+text-color=#ebdbb2
+
+[urgency=high]
+ignore-timeout=1
