@@ -62,6 +62,10 @@ local telescope_settings = function()
   telescope.setup {
     defaults = {
       -- prompt_prefix = ">",
+      layout_strategy = "bottom_pane",
+      layout_config = {
+        height = 0.4,
+      },
       file_sorter = require 'telescope.sorters'.get_fuzzy_file,
       preview = preview_opts,
       path_display = { "truncate", },
