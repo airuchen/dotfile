@@ -131,14 +131,14 @@ o.foldtext = "v:lua.vim.treesitter.foldtext()"
 o.foldlevel = 999
 
 -- Highlight yanked text
-local yank = vim.api.nvim_create_augroup("yank_highlight", { clear = true })
-local on_yank = require('vim.highlight').on_yank
-vim.api.nvim_create_autocmd("TextYankPost", {
-    pattern = "*",
-    group = yank,
-    desc = "highlight on yank",
-    callback = function() on_yank({timeout = 50}) end
-  })
+vim.api.nvim_create_autocmd('TextYankPost', {
+  group = vim.api.nvim_create_augroup('highlight_yank', {}),
+  desc = 'Hightlight selection on yank',
+  pattern = '*',
+  callback = function()
+    vim.highlight.on_yank { higroup = 'IncSearch', timeout = 50 }
+  end,
+})
 
 local ignored_for_ws = function(match)
   if string.find(match, "Neogit") then
