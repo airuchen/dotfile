@@ -170,6 +170,9 @@ local setup_lsp = function()
     },
   }
 
+  nvim_lsp.ts_ls.setup {
+  }
+
   -- Needs vscode-langservers-extracted
   -- npm i -g vscode-langservers-extracted
   capabilities.textDocument.completion.completionItem.snippetSupport = true
@@ -223,6 +226,7 @@ return {
             vim.keymap.set("n", "<leader>br", function() vim.cmd.RustLsp { 'runnables', bang = true } end,
               { buffer = bufnr, desc = "Re-run rust runnable" })
           end,
+          -- -- Original setting
           settings = {
             -- rust-analyzer language server configuration
             ['rust-analyzer'] = {
