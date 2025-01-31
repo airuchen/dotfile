@@ -117,6 +117,7 @@ local telescope_settings = function()
 
   local heading = require('telescope').extensions.heading
   local ros_builder = require('ros-builder')
+  local action_state = require('telescope.actions.state')
 
   ----------
   -- Keybinds
@@ -125,6 +126,37 @@ local telescope_settings = function()
     local opts = { silent = true, remap = false, desc = desc }
     vim.keymap.set('n', key, rhs, opts)
   end
+
+  local function find_files_and_live_grep()
+    -- Step 1: Ask for a keyword
+    local keyword = vim.fn.input("File Keyword (e.g., lua, config, test): ")
+    if keyword == "" then return end
+
+    -- Step 2: Use ripgrep (rg) to find files containing the keyword
+    local output = vim.fn.systemlist("rg --files | grep " .. keyword)
+    local search_dirs = {}
+
+    -- Convert the output into a Lua table (instead of Quickfix)
+    for _, file_path in ipairs(output) do
+      if vim.fn.filereadable(file_path) == 1 then
+        table.insert(search_dirs, file_path)
+      end
+    end
+
+    -- Step 3: Check if we found any valid files
+    if #search_dirs == 0 then
+      print("❌ No matching files found for keyword: " .. keyword)
+      return
+    end
+
+    -- Step 4: Run Telescope live_grep only inside the matched files
+    builtins.live_grep({
+      prompt_title = "Live Grep in Files Matching '" .. keyword .. "'",
+      search_dirs = search_dirs,
+    })
+  end
+
+  nm('<leader>fs', find_files_and_live_grep, "Live Grep in Quickfix Files")
 
   -- Spell suggest
   nm("<leader>s", function() builtins.spell_suggest(themes.get_cursor({})) end, "Spell suggest")
@@ -159,7 +191,6 @@ local telescope_settings = function()
 
   -- Headers
   nm("<leader>H", heading.heading, "Jump to headings")
-
 end
 
 return {
