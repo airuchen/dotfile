@@ -96,6 +96,14 @@ local telescope_settings = function()
       ["ui-select"] = {
         themes.get_cursor({})
       }
+    },
+    pickers = {
+      find_files = {
+        hidden = true
+      },
+      fd = {
+        hidden = true
+      }
     }
   }
   -- To get fzf loaded and working with telescope, you need to call
