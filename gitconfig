@@ -1,8 +1,8 @@
 [user]
-	name = Felix
-	email = felix@fzeltner.de
+	name = Yu-Wen Chen
+	email = ywc907@node-robotics.com
 [core]
-	excludesfile = ~/config/gitignore
+	editor = nvim
 [clangFormat]
   binary = clang-format
 [alias]
@@ -25,5 +25,4 @@
 [fetch]
   # Issues for LazyNvim
 	writeCommitGraph = false
-[includeIf "gitdir:~/git"]
-  path = ~/config/gitconfig_extra
+
