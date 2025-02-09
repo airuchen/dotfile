@@ -14,9 +14,9 @@ alias l='ls -CF'
 alias devcontainer_up='devcontainer up --workspace-folder ./'
 alias ..='cd ..'
 alias ...='cd ../..'
-alias v='vim'
+alias v='nvim'
 alias vim='nvim'
-# alias nv='neovide --multigrid'
+alias nv='neovide'
 alias g='git'
 alias ga='git commit --amend --no-edit'
 alias gP='git push --force-with-lease'
@@ -652,6 +652,12 @@ export ROS_MASTER_URI=http://localhost:11311
 # Keep ros2 on localhost
 # export ROS_AUTOMATIC_DISCOVERY_RANGE=SUBNET
 # export RMW_IMPLEMENTATION=rmw_cyclonedds_cpp
+export ROS_AUTOMATIC_DISCOVERY_RANGE=LOCALHOST
+export RMW_IMPLEMENTATION=rmw_cyclonedds_cpp
+export ROS_PYTHON_CHECK_FIELDS=1
+export RCUTILS_COLORIZED_OUTPUT=1
+export CYCLONEDDS_URI="file:///${HOME}/config/cyclonedds.xml"
+export MAKEFLAGS="-j12 -l12"
 
 #  personal alias
 alias s_lmi='sros2 && source ~/node/logistics_manager_ws/install/setup.sh'
@@ -660,3 +666,7 @@ alias s_fms='source ~/node/venvs/fms_venv/bin/activate && pip install --upgrade 
 alias s_node_edge='source ~/node/venvs/node_edge_venv/bin/activate && pip install --upgrade node-edge-provisioning'
 alias jiq='~/ws/jiq/jiq_linux_amd64'
 alias copy='xclip -sel clip'
+
+# Nix
+alias nixsw='sudo nixos-rebuild switch --flake ~/nixos-config#default'
+alias nixgc='sudo nix-collect-garbage -d'
