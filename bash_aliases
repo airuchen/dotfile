@@ -1,26 +1,47 @@
+alias trash='mv -t ~/.local/share/Trash/files/'
+alias dbg_enable='echo 0 | sudo tee /proc/sys/kernel/yama/ptrace_scope'
+alias dbg_disable='echo 1 | sudo tee /proc/sys/kernel/yama/ptrace_scope'
+alias ckin_dbg_cfg='catkin config --cmake-args "-DCMAKE_EXPORT_COMPILE_COMMANDS=1" "-DCMAKE_BUILD_TYPE=Debug" -DCMAKE_CXX_FLAGS="-Werror=uninitialized -Werror=return-type -Werror=format -ggdb"'
+alias cb='colcon build --symlink-install --cmake-args -DCMAKE_EXPORT_COMPILE_COMMANDS=1 --cmake-args -DBUILD_TESTING=OFF --parallel-workers 12'
+alias cb_db='colcon build --symlink-install --cmake-args -DCMAKE_EXPORT_COMPILE_COMMANDS=1 --cmake-args -DBUILD_TESTING=OFF --cmake-args -DCMAKE_BUILD_TYPE=RelWithDebInfo --parallel-workers 12'
+alias cb_db_p='colcon build --symlink-install --cmake-args -DCMAKE_EXPORT_COMPILE_COMMANDS=1 --cmake-args -DBUILD_TESTING=OFF --cmake-args -DCMAKE_BUILD_TYPE=RelWithDebInfo --parallel-workers 12 --packages-up-to '
+alias cb_test='colcon build --symlink-install --cmake-args -DCMAKE_EXPORT_COMPILE_COMMANDS=1 --cmake-args -DBUILD_TESTING=ON --cmake-args -DCMAKE_BUILD_TYPE=Debug --parallel-workers 12'
+alias is_ros_workspace='[ -n "${ROS_WORKSPACE}" ] && [ -d "${ROS_WORKSPACE}" ] || (echo "Not a ROS workspace" && false)'
+alias rdi='rosdep install --from-paths src -r -y'
+
 # General aliases
+alias l='ls -CF'
+alias devcontainer_up='devcontainer up --workspace-folder ./'
 alias ..='cd ..'
 alias ...='cd ../..'
 alias v='vim'
-alias nv='neovide'
+alias vim='nvim'
+# alias nv='neovide --multigrid'
 alias g='git'
+alias ga='git commit --amend --no-edit'
+alias gP='git push --force-with-lease'
+alias gp='git pull --rebase'
+alias gb='git branch'
+alias gs='git status'
+alias gd='git diff'
+alias gf='git fetch --all'
+
 alias grep='grep --color=auto'
 alias gdb='gdb -q'
-alias feh="feh --scale-down"
+# alias feh="feh --scale-down"
 alias diff='diff --color=auto'
 alias cp='cp -i'
 alias mv='mv -i'
-alias mpvs='mpv --shuffle -- '
-alias ncal3='ncal -3 -w'
-alias cal='cal -m'
-alias ytdl720="yt-dlp -f 'bestvideo[height<=720]+bestaudio'"
-alias ytdlhd="yt-dlp -f 'bestvideo[width<=1920]+bestaudio'"
-alias ytdl_it='yt-dlp --no-mtime --no-call-home'
-alias ytaudio='mpv --ytdl-format=bestaudio'
+# alias mpvs='mpv --shuffle -- '
+# alias ncal3='ncal -3 -w'
+# alias cal='cal -m'
+# alias ytdl720="yt-dlp -f 'bestvideo[height<=720]+bestaudio'"
+# alias ytdlhd="yt-dlp -f 'bestvideo[width<=1920]+bestaudio'"
+# alias ytdl_it='yt-dlp --no-mtime --no-call-home'
 command -v fdfind > /dev/null && alias fd='fdfind'
-alias pmode_toggle='xfconf-query -c xfce4-power-manager -p /xfce4-power-manager/presentation-mode -T && echo "Presentation mode is $(xfconf-query  -c xfce4-power-manager -p /xfce4-power-manager/presentation-mode -v)"'
+# alias pmode_toggle='xfconf-query -c xfce4-power-manager -p /xfce4-power-manager/presentation-mode -T && echo "Presentation mode is $(xfconf-query  -c xfce4-power-manager -p /xfce4-power-manager/presentation-mode -v)"'
 # Load loopback module for monitoring inputs
-alias paloop='pactl load-module module-loopback'
+# alias paloop='pactl load-module module-loopback'
 
 # Apt
 alias sau='sudo apt update && apt list --upgradable'
@@ -32,7 +53,8 @@ alias clang_build_traced='CC="clang-15 -ftime-trace" CXX="clang++-15 -ftime-trac
 alias clang_asan='CC="clang-15 -fsanitize=address" CXX="clang++-15 -fsanitize=address" LD=clang++-15'
 alias gnu_asan='CC="gcc -fsanitize=address -ggdb" CXX="g++ -fsanitize=address -ggdb"'
 alias alias_edit='vim ~/config/bash_aliases && alias_reload'
-alias alias_reload='source ~/config/bash_aliases'
+# alias alias_reload='source ~/config/bash_aliases'
+alias alias_reload='source ~/.bash_aliases'
 alias pformat='autopep8 --max-line-length 120 -i -r'
 
 run_asan() {
@@ -54,25 +76,79 @@ alias coredumpsoff='ulimit -c 0'
 #setxkbmap to reset kb layout
 
 # Docker
-if command -v docker &> /dev/null ; then
-  alias kaniko='docker run --rm -v$(pwd):/context:ro gcr.io/kaniko-project/executor:debug --context /context'
-  # Docker image inspection tool
-  alias dive='docker run --rm -it -v /var/run/docker.sock:/var/run/docker.sock wagoodman/dive:latest'
-  if command -v fzf &> /dev/null ; then
-    source ~/config/docker_fzf
-  fi
-elif command -v podman &> /dev/null ; then
-  alias kaniko='podman run --rm -v$(pwd):/context:ro gcr.io/kaniko-project/executor:debug --context /context'
-  # Docker image inspection tool
-  # Needs systempct start --user podman.socket
-  alias dive='podman run --rm -it -v /var/run/user/${UID}/podman/podman.sock:/var/run/docker.sock wagoodman/dive:latest'
-fi
+alias dcd='docker compose down'
+alias dc='docker compose'
+alias dp='docker ps --format "{{.Names}}"'
+alias kaniko='docker run --rm -v$(pwd):/context:ro gcr.io/kaniko-project/executor:debug --context /context'
+alias docker_killall='docker kill $(docker ps -q)'
+doexec() {
+    # Get the list of running containers and their IDs
+    local container=$(docker ps --format "{{.Names}}" | fzf --height=40% --reverse --border --prompt="Select container: ")
 
+    # If a container is selected, execute into it
+    if [[ -n "$container" ]]; then
+        docker exec -it "$container" bash
+    else
+        echo "No container selected."
+    fi
+}
+doimages() {
+  # Prompt for SSH device selection or manual input
+  local ssh_device=$(cat ~/.ssh/config | grep -E "^Host " | awk '{print $2}' | fzf --height=10% --reverse --border --prompt="Select host or press Enter to input manually: ")
+  if [[ -z "$ssh_device" ]]; then
+    read -p "Enter SSH device: " ssh_device
+  fi
+
+  # Select Docker image
+  local image=$(docker images --format "{{.Repository}}:{{.Tag}}" | fzf --height=40% --reverse --border --prompt="Select image: ")
+  if [[ -n "$image" ]]; then
+    docker save "$image" | pigz | pv | ssh "$ssh_device" "unpigz | docker load"
+  else
+    echo "No image selected."
+  fi
+}
+
+dologs() {
+    # Get the list of running containers and their IDs
+    local container=$(docker ps -a --format "{{.Names}}" | fzf --height=40% --reverse --border --prompt="Select container: ")
+    if [[ -n "$container" ]]; then
+        docker logs -f "$container" 
+    else
+        echo "No container selected."
+    fi
+}
+dostop() {
+    # Get the list of running containers and their IDs
+    # tab to select multiple containers
+    local containers=$(docker ps --format "{{.Names}}" | fzf --height=40% --reverse --border --prompt="Select container: " --multi)
+    if [[ -n "$containers" ]]; then
+       docker stop $containers
+    else
+        echo "No container selected."
+    fi
+}
+dorestart() {
+    # Get the list of running containers and their IDs
+    # tab to select multiple containers
+    local containers=$(docker ps -a --format "{{.Names}}" | fzf --height=40% --reverse --border --prompt="Select container: " --multi)
+    if [[ -n "$containers" ]]; then
+      docker restart $containers
+    else
+        echo "No container selected."
+    fi
+}
+alias docker-transfer='function _docker_transfer() { 
+  images=$(docker images --format "{{.Repository}}:{{.Tag}}" | fzf --multi)
+  for image in $images; do
+    echo "Processing $image..."
+    docker save "$image" | pigz | pv | ssh node@node-fms "unpigz | docker load"
+  done
+}; _docker_transfer'
 
 
 # Workspaces
 alias cdnav='cdws nav'
-# alias cdbmw='cdws bmwstr'
+alias cdbmw='cdws bmwstr'
 # alias cdlearn='cdws learning'
 # alias source_ikos='export PATH=/home/fez/local/ikos/bin:$PATH'
 # alias tf_env='. ~/git/tensorflow-env/bin/activate'
@@ -167,6 +243,97 @@ add_ros_alias() {
 	}
 }
 
+add_ros2_alias() {
+	function colb {
+		is_ros_workspace && colcon --log-base "${ROS_WORKSPACE}/log" build --mixin compile-commands ccache --base-paths "${ROS_WORKSPACE}" --cmake-args -DENABLE_SANITIZER_ADDRESS=ON -DCMAKE_EXPORT_COMPILE_COMMANDS=1 "-DCMAKE_CXX_FLAGS=-ggdb -fdiagnostics-color=always" --build-base "${ROS_WORKSPACE}/build" --install-base ${ROS_WORKSPACE}/install $@
+	}
+	alias colt='is_ros_workspace && colcon --log-base "${ROS_WORKSPACE}/log" test --base-paths "${ROS_WORKSPACE}" --cmake-args -DCMAKE_EXPORT_COMPILE_COMMANDS=1 "-DCMAKE_CXX_FLAGS=-ggdb -fdiagnostics-color=always" --build-base "${ROS_WORKSPACE}/build" --install-base "${ROS_WORKSPACE}/install"'
+	alias colbthis='is_ros_workspace && colcon --log-base "${ROS_WORKSPACE}/log" build --mixin compile-commands ccache --cmake-args -DCMAKE_EXPORT_COMPILE_COMMANDS=1 "-DCMAKE_CXX_FLAGS=-ggdb -fdiagnostics-color=always" --build-base "${ROS_WORKSPACE}/build" --install-base "${ROS_WORKSPACE}/install"'
+	alias coltr='is_ros_workspace && colcon --log-base "${ROS_WORKSPACE}/log" test-result --test-result-base "${ROS_WORKSPACE}/build" --verbose'
+	alias colrelbuild='is_ros_workspace && colcon --log-base "${ROS_WORKSPACE}/log" build --mixin compile-commands ccache --base-paths "${ROS_WORKSPACE}" --cmake-args --DCMAKE_EXPORT_COMPILE_COMMANDS=1 DCMAKE_BUILD_TYPE=Release -DSANITIZE=OFF -DBUILD_TESTING=OFF -DCMAKE_CXX_FLAGS=-ggdb --build-base "${ROS_WORKSPACE}/build" --install-base "${ROS_WORKSPACE}/install"'
+
+	single_ros2test() {
+		if [ $# -lt 2 ]; then
+			echo "Need a package name and test name"
+			return;
+		fi
+		is_ros_workspace || return
+		function rostest_in_base {
+			# suppress cmake stuff
+			colb --packages-up-to "${1}" --symlink-install --cmake-target-skip-unavailable --cmake-target "${2}" > /dev/null || return
+			local test_executable
+			test_executable=$(find "${ROS_WORKSPACE}/build/${1}" -type f -iname "${2}") || return
+			# echo ${test_executable}
+			[ -x "${test_executable}" ] || return 1
+			${test_executable}
+		}
+		rostest_in_base "${1}" "${2}"
+	}
+
+	single_ros2test_gdb() {
+		if [ $# -lt 1 ]; then
+			echo "Need a test name"
+			return;
+		fi
+		is_ros_workspace || return
+		local test_executable
+		test_executable=$(find ${ROS_WORKSPACE}/build -type f -iname "${1}") || return
+		gdb ${test_executable}
+	}
+
+	# Takes filename to unit test and rebuilds it without dependencies + runs it
+	# Any extra arguments will be used as prefix for the test
+	single_ros2test_from_file_fast() {
+		test_executable=$1
+		shift
+		test_name=$(basename "${test_executable}")
+		# Account for /test subfolder
+		build_dir=$(dirname "$test_executable" | sed -e 's#/test$##')
+		pkg_name=$(basename "$build_dir")
+		#echo "Test executable: '${test_executable}', build dir: '${build_dir}', pkg name: '${pkg_name}'"
+		colb --packages-select "${pkg_name}" --cmake-target "${test_name}" && $@ ${test_executable}
+	}
+
+	# Takes filename to unit test and rebuilds + runs it
+	# Any extra arguments will be used as prefix for the test
+	single_ros2test_from_file() {
+		test_executable=$1
+		shift
+		test_name=$(basename "${test_executable}")
+		# Account for /test subfolder
+		build_dir=$(dirname "$test_executable" | sed -e 's#/test$##')
+		pkg_name=$(basename "$build_dir")
+		colb --packages-up-to "${pkg_name}" > /dev/null && $@ ${test_executable}
+	}
+
+	single_ros2test_from_source_file() {
+		is_ros_workspace || return
+		exe=$(basename $1 .cpp)
+		test_executable=$(find ${ROS_WORKSPACE}/build -type f -iname "${exe}") || return
+		single_ros2test_from_file_fast "$test_executable"
+	}
+
+	r2t() {
+		is_ros_workspace || return
+		local test_executable
+		test_executable=$(fd -t x '_test$' "${ROS_WORKSPACE}/build" | fzf) || return
+		single_ros2test_from_file "$test_executable" $@
+	}
+
+	release_ros2_pkg() {
+		if [ $# -lt 1 ]; then
+			echo "Need a pkg name"
+			return
+		fi
+		is_ros_workspace || return
+
+		tmpdir=$(mktemp -d)
+		colcon --log-base "${tmpdir}/log" build --base-paths "${ROS_WORKSPACE}" --executor parallel --merge-install --install-base "${tmpdir}/install" --build-base "${tmpdir}/build" --ament-cmake-args -DCMAKE_BUILD_TYPE=Release -DBUILD_TESTING=OFF --packages-up-to $@
+		echo -e "- Install ROS ${ROS_DISTRO}\n- Install dependencies \`rosdep install --ignore-src --from-path install/share\`\n- Source the workspace \`source install/setup.bash\`" > "${tmpdir}/SETUP.md"
+		tar -czf "/tmp/${1}_$(date --iso-8601).tar.gz" -C "${tmpdir}" SETUP.md install
+	}
+}
+
 function pandocslides {
 	if [ $# -ne 1 ]; then
 		echo "Usage: pandocslides source.org"
@@ -177,6 +344,23 @@ function pandocslides {
 
 function mp3_convert {
   find -maxdepth 1 -iname '*.flac' -type f -print0  | xargs -0 -P 8 -n 1 lame --out-dir /tmp -V 0 -S
+}
+
+function ffmpeg_x {
+  if [ $# -ne 3 ]; then
+    echo "Usage: ffmpeg_x in out speed_up_factor"
+    return;
+  fi;
+  # Get the total duration of the video in seconds using ffprobe
+  DURATION=$(ffprobe -i $1 -show_entries format=duration -v quiet -of csv="p=0")
+  echo "duration: ${DURATION}"
+
+  # Calculate half the duration
+  LEFT_DURATION=$(echo "$DURATION / $3" | bc -l)
+  
+
+  # Run the ffmpeg command to speed up the video by 2x and trim to half the duration
+  ffmpeg -i $1 -vf "setpts=(1/$3)*PTS" -af "atempo=$3" -to "$LEFT_DURATION" $2
 }
 
 function ffmpeg_compress {
@@ -216,43 +400,42 @@ function ffmpeg_make_gif {
 	ffmpeg -i "$1" -i /tmp/palette.png -filter_complex "[0:v][1:v] paletteuse" "${1}.gif"
 }
 
-function rsource_ros2_base {
+function sros2 {
   local ROS_ROOT
-  [ -d "/opt/ros/jazzy" ] && . /opt/ros/jazzy/setup.bash
-  # [ -d "/opt/ros/iron" ] && . /opt/ros/iron/setup.bash
+  [ -d "/opt/ros/iron" ] && . /opt/ros/iron/setup.bash
   [ -e /usr/share/colcon_argcomplete/hook/colcon-argcomplete.bash ]\
     && . /usr/share/colcon_argcomplete/hook/colcon-argcomplete.bash
   [ -e /usr/share/colcon_cd/function/colcon_cd.sh ]\
     && . /usr/share/colcon_cd/function/colcon_cd.sh
 }
 
-function rsource {
-  local ROS_ROOT
-  [ -d "/opt/ros/noetic" ] && ROS_ROOT="/opt/ros/noetic/setup.bash"
-  # ROS2 things
-  [ -e /usr/share/colcon_argcomplete/hook/colcon-argcomplete.bash ]\
-    && . /usr/share/colcon_argcomplete/hook/colcon-argcomplete.bash
-  [ -e /usr/share/colcon_cd/function/colcon_cd.sh ]\
-    && . /usr/share/colcon_cd/function/colcon_cd.sh
-	local WS_ROOT="git"
-	local ws
-  ws=$(pwd | grep -o -e "^/home/${USER}/${WS_ROOT}/[^\/]\+")
-	if [ -z "$ws" ]; then
-		echo "Not inside a workspace, sourcing from ${ROS_ROOT}";
-		source "${ROS_ROOT}"
-		return 0;
-	fi
-  for cs in "install" "devel"; do
-    local path="${ws}/${cs}/setup.bash"
-    if [ -e "${path}" ]; then
-      echo "Sourcing workspace in ${path}";
-      source "${path}";
-      return 0;
-    fi
-  done
-  echo "Devel space not found";
-  return 2;
-}
+# function rsource {
+#   local ROS_ROOT
+#   [ -d "/opt/ros/iron" ] && ROS_ROOT="/opt/ros/iron/setup.bash"
+#   # ROS2 things
+#   [ -e /usr/share/colcon_argcomplete/hook/colcon-argcomplete.bash ]\
+#     && . /usr/share/colcon_argcomplete/hook/colcon-argcomplete.bash
+#   [ -e /usr/share/colcon_cd/function/colcon_cd.sh ]\
+#     && . /usr/share/colcon_cd/function/colcon_cd.sh
+# 	local WS_ROOT="git"
+# 	local ws
+#   ws=$(pwd | grep -o -e "^/home/${USER}/${WS_ROOT}/[^\/]\+")
+# 	if [ -z "$ws" ]; then
+# 		echo "Not inside a workspace, sourcing from ${ROS_ROOT}";
+# 		source "${ROS_ROOT}"
+# 		return 0;
+# 	fi
+#   for cs in "install" "devel"; do
+#     local path="${ws}/${cs}/setup.bash"
+#     if [ -e "${path}" ]; then
+#       echo "Sourcing workspace in ${path}";
+#       source "${path}";
+#       return 0;
+#     fi
+#   done
+#   echo "Devel space not found";
+#   return 2;
+# }
 
 function cdws {
   if [ $# -lt 1 ]; then
@@ -264,12 +447,13 @@ function cdws {
     export ROS_WORKSPACE=${workspace}
 		export RCUTILS_COLORIZED_OUTPUT=1
     cd "${workspace}/src/${1}" 2>/dev/null || cd "${workspace}/src/" || cd "${workspace}" || return
-    # if [ -e "${workspace}/.built_by" ]; then
-			rsource_ros2_base
-		# else
-		# 	add_ros_alias
-		# 	rsource
-		# fi
+    if [ -e "${workspace}/.built_by" ]; then
+			add_ros2_alias
+			sros2
+		else
+			add_ros_alias
+			rsource
+		fi
   fi
 }
 
@@ -322,7 +506,7 @@ function perf_record {
 }
 
 function prompted_dmenu {
-  dmenu -f -c -l 30 -i -p "$(echo "${@:1}")"
+  fzf -dmenu --height=40% --reverse --border --prompt="$1"
 }
 
 function list_ros_masters {
@@ -339,20 +523,28 @@ function with_rosmaster {
 alias wrm='with_rosmaster'
 
 function with_rosnode {
-  rosnode list |  prompted_dmenu "${@:1}" | xargs -r "${@:1}"
+  rosnode list |  prompted_dmenu "Select ROS Node: " | xargs -r "${@:1}"
 }
 
-alias rni='with_rosnode rosnode info'
+function rni {
+  with_rosnode rosnode info
+}
 
 function with_rostopic {
-  rostopic list | prompted_dmenu "${@:1}" | xargs -r "${@:1}"
+  rostopic list | prompted_dmenu "Select ROS Topic: " | xargs -r "${@:1}"
 }
 
-alias rti='with_rostopic rostopic info'
+function rte {
+  with_rostopic rostopic echo "$@"
+}
+
+function rti {
+  with_rostopic rostopic info "$@"
+}
 
 function exportrosmaster {
-  local wifi_dev="enp5s0"
-  local lan_dev="enp5s0"
+  local wifi_dev="wlp3s0"
+  local lan_dev="wlp3s0"
 
   local dev=${lan_dev}
   local uri="http://127.0.0.1:11311"
@@ -391,7 +583,7 @@ function detect_on_network {
 }
 
 function srm_detect {
-  local wifi_dev="enp5s0"
+  local wifi_dev="wlp3s0"
   local ip
   ip=$(if_ip_addr ${wifi_dev})
   local candidates
@@ -416,6 +608,7 @@ function srm {
   fi
 
   local presets="${discovered}
+ottobo-s8 10.66.77.28 wifi
 automatica 192.168.10.22:11311 wifi
 logimat 192.168.1.42:11311 wifi
 vfd_serer 192.168.0.104:11311 wifi
@@ -431,6 +624,7 @@ mir 192.168.12.20:11311 wifi
 mir_pc_2 192.168.10.133:11311 wifi
 cob4-18 10.4.18.11:11311 wifi
 cob4-20 10.4.20.11:11311 wifi"
+
 
   local selected
   selected=$(echo "${presets}" | prompted_dmenu "set ros master") || return
@@ -449,40 +643,20 @@ function kill_named_pythons {
   fi
 }
 
-function jqdiff {
-  if [ $# -ne 2 ]; then
-    echo "Usage: jqdiff base candidate"
-    return;
-  fi
-
-  diff <(jq --sort-keys . "${1}") <(jq --sort-keys . "${2}")
-}
-
-function devenv {
-  if [ -e "pyproject.toml" ] || [ -e "tox.ini" ]; then
-    tox devenv
-    source venv/bin/activate
-  else
-    echo "No pyproject.toml/tox.ini found"
-  fi
-}
-
-function verbose_ros2console {
-  export RCUTILS_CONSOLE_OUTPUT_FORMAT="[{severity} {time}] [{name}] [{function_name} @ {file_name}:{line_number})]: {message}"
-}
-
-
 # Transferring GPG keys
 # gpg --export-secret-key KeyId | ssh user@remote gpg --allow-secret-key-import --import
 # gpg --export KeyId | ssh user@remote gpg --import
 
-
 # Keep ros1 on localhost
 export ROS_MASTER_URI=http://localhost:11311
 # Keep ros2 on localhost
-export ROS_AUTOMATIC_DISCOVERY_RANGE=LOCALHOST
-export RMW_IMPLEMENTATION=rmw_cyclonedds_cpp
-export ROS_PYTHON_CHECK_FIELDS=1
-export RCUTILS_COLORIZED_OUTPUT=1
-export CYCLONEDDS_URI="file:///${HOME}/config/cyclonedds.xml"
-export MAKEFLAGS="-j12 -l12"
+# export ROS_AUTOMATIC_DISCOVERY_RANGE=SUBNET
+# export RMW_IMPLEMENTATION=rmw_cyclonedds_cpp
+
+#  personal alias
+alias s_lmi='sros2 && source ~/node/logistics_manager_ws/install/setup.sh'
+alias s_nav='sros2 && source ~/node/navigation_ws/install/setup.sh'
+alias s_fms='source ~/node/venvs/fms_venv/bin/activate && pip install --upgrade fms_python_tools'
+alias s_node_edge='source ~/node/venvs/node_edge_venv/bin/activate && pip install --upgrade node-edge-provisioning'
+alias jiq='~/ws/jiq/jiq_linux_amd64'
+alias copy='xclip -sel clip'
