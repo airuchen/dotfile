@@ -59,9 +59,90 @@ local telescope_settings = function()
     return "colcon"
   end
 
+  local pickers = require('telescope.pickers')
+  local finders = require('telescope.finders')
+  local conf = require('telescope.config').values
+  local action_state = require('telescope.actions.state')
+
+  local function get_matching_files(keyword)
+    if not keyword or keyword == "" then
+      return {}
+    end
+
+    -- Get matching files
+    local output = vim.fn.systemlist("rg --files | grep -i " .. vim.fn.shellescape(keyword))
+
+    -- Filter only readable files
+    return vim.tbl_filter(function(path)
+      return vim.fn.filereadable(path) == 1
+    end, output)
+  end
+
+  local function search_with_live_input()
+    pickers.new({}, {
+      prompt_title = "Enter a File Keyword",
+      finder = finders.new_dynamic({
+        fn = function(input)
+          if not input or input == "" then return {} end
+          return get_matching_files(input)
+        end
+      }),
+      sorter = conf.generic_sorter({}),
+      attach_mappings = function(prompt_bufnr, map)
+        local function search_files()
+          local keyword = action_state.get_current_line() -- Get user input
+          actions.close(prompt_bufnr)
+
+          if keyword == "" then
+            print("❌ No keyword entered.")
+            return
+          end
+
+          -- Find files matching the keyword
+          local search_dirs = get_matching_files(keyword)
+
+          if #search_dirs == 0 then
+            print("❌ No matching files found for keyword: " .. keyword)
+            return
+          end
+
+          -- Run Telescope live_grep inside the matched files
+          builtins.live_grep({
+            prompt_title = "Live Grep in Files Matching '" .. keyword .. "'",
+            search_dirs = search_dirs,
+          })
+        end
+
+        -- Bind <CR> (Enter) to start the search
+        map("i", "<CR>", search_files)
+        map("n", "<CR>", search_files)
+
+        return true
+      end
+    }):find()
+  end
+
+  local function find_files_and_live_grep()
+    -- Ask for a keyword
+    local keyword = vim.fn.input("File Keyword (e.g., lua, config, test): ")
+    if keyword == "" then return end
+
+    -- Use ripgrep to find files containing the keyword
+    local search_dirs = get_matching_files(keyword)
+    if #search_dirs == 0 then
+      print("❌ No matching files found for keyword: " .. keyword)
+      return
+    end
+
+    -- Step 4: Run Telescope live_grep only inside the matched files
+    builtins.live_grep({
+      prompt_title = "Live Grep in Files Matching '" .. keyword .. "'",
+      search_dirs = search_dirs,
+    })
+  end
+
   telescope.setup {
     defaults = {
-      -- prompt_prefix = ">",
       layout_strategy = "bottom_pane",
       layout_config = {
         height = 0.4,
@@ -131,36 +212,8 @@ local telescope_settings = function()
     vim.keymap.set('n', key, rhs, opts)
   end
 
-  local function find_files_and_live_grep()
-    -- Step 1: Ask for a keyword
-    local keyword = vim.fn.input("File Keyword (e.g., lua, config, test): ")
-    if keyword == "" then return end
-
-    -- Step 2: Use ripgrep (rg) to find files containing the keyword
-    local output = vim.fn.systemlist("rg --files | grep " .. keyword)
-    local search_dirs = {}
-
-    -- Convert the output into a Lua table (instead of Quickfix)
-    for _, file_path in ipairs(output) do
-      if vim.fn.filereadable(file_path) == 1 then
-        table.insert(search_dirs, file_path)
-      end
-    end
-
-    -- Step 3: Check if we found any valid files
-    if #search_dirs == 0 then
-      print("❌ No matching files found for keyword: " .. keyword)
-      return
-    end
-
-    -- Step 4: Run Telescope live_grep only inside the matched files
-    builtins.live_grep({
-      prompt_title = "Live Grep in Files Matching '" .. keyword .. "'",
-      search_dirs = search_dirs,
-    })
-  end
-
   nm('<leader>fs', find_files_and_live_grep, "Live Grep in Quickfix Files")
+  nm('<leader>ff', search_with_live_input, "Live Grep in Quickfix Files")
 
   -- Spell suggest
   nm("<leader>s", function() builtins.spell_suggest(themes.get_cursor({})) end, "Spell suggest")
