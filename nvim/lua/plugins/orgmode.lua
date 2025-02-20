@@ -16,6 +16,7 @@ return {
       require('orgmode').setup({
         org_agenda_files = { '~/Documents/org/**/*' },
         org_default_notes_file = '~/Documents/org/0_refile.org',
+        org_archive_location = '~/Documents/org/z_archive/%s_archive::',
         org_startup_indented = true,
         -- org_startup_folded = "content",
         -- We have a telescope plugin for this

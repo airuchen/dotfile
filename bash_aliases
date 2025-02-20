@@ -247,6 +247,8 @@ function rsource {
     if [ -e "${path}" ]; then
       echo "Sourcing workspace in ${path}";
       source "${path}";
+      export ASAN_OPTIONS=new_delete_type_mismatch=0
+      alias navrviz='rviz2 -d ~/git/nav/src/navigation/core/ipa_navigation_config/config/rviz_config.rviz'
       return 0;
     fi
   done
@@ -458,7 +460,7 @@ function jqdiff {
   diff <(jq --sort-keys . "${1}") <(jq --sort-keys . "${2}")
 }
 
-function devenv {
+function tdevenv {
   if [ -e "pyproject.toml" ] || [ -e "tox.ini" ]; then
     tox devenv
     source venv/bin/activate

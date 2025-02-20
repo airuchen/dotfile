@@ -55,6 +55,7 @@ nm("<C-H>", ":nohl<CR>", { silent = true, desc = "Clear hlsearch" })
 --inoremap <C-Space>	<C-n>
 -- Terminal
 --inoremap <Nul>	<C-n>
+vim.keymap.set("t", "<esc><esc>", "<c-\\><c-n>", { desc = "Terminal normal mode"})
 
 -- Header <-> Source
 --noremap <F4> :A<CR>

@@ -24,8 +24,8 @@ vim.api.nvim_create_autocmd('LspAttach', {
     nm('<c-]>', vim.lsp.buf.definition, "Jump to definition")
     nm('<leader>h', vim.lsp.buf.hover, "LSP hover")
     nm('<leader>H', function()
-      local hints_on = vim.lsp.inlay_hint.is_enabled({bufnr=ev.buf})
-      vim.lsp.inlay_hint.enable(not hints_on, {bufnr=ev.buf})
+      local hints_on = vim.lsp.inlay_hint.is_enabled({ bufnr = ev.buf })
+      vim.lsp.inlay_hint.enable(not hints_on, { bufnr = ev.buf })
     end, "Toggle inlay hints")
     -- Using inc-rename instead
     nm('<leader>cr', vim.lsp.buf.rename, "LSP Rename")
@@ -74,6 +74,15 @@ local setup_lsp = function()
     capabilities = capabilities,
   }
 
+  if vim.fn.executable("typescript-language-server") == 1 then
+    nvim_lsp.ts_ls.setup {}
+  end
+
+  -- pnpm install -g @angular/language-server
+  if vim.fn.executable("ngserver") == 1 then
+    nvim_lsp.angularls.setup {}
+  end
+
   -- https://github.com/regen100/cmake-language-server
   -- Can in theory format with cmake-format, but that's not in the PATH since it's in the venv, so it doesn't find it
   nvim_lsp.cmake.setup {
@@ -121,7 +130,7 @@ local setup_lsp = function()
         client.config.settings = vim.tbl_deep_extend('force', client.config.settings, {
           Lua = {
             diagnostics = {
-              globals = {'vim'}
+              globals = { 'vim' }
             },
             runtime = {
               -- Tell the language server which version of Lua you're using
@@ -149,7 +158,7 @@ local setup_lsp = function()
     capabilities = capabilities
   }
 
-  nvim_lsp.hyprls.setup{}
+  nvim_lsp.hyprls.setup {}
 end
 
 return {
@@ -214,9 +223,9 @@ return {
               procMacro = {
                 ignored = {
                   leptos_macro = {
-                  -- optional:
-                  -- "component",
-                  -- "server"
+                    -- optional:
+                    -- "component",
+                    -- "server"
                   }
                 }
               },
