@@ -60,7 +60,6 @@ nm("<C-H>", ":nohl<CR>", { silent = true, desc = "Clear hlsearch" })
 --inoremap <Nul>	<C-n>
 nm("<space>t", ":belowright split | terminal<CR>", {silent = true, desc = "Open terminal"})
 
-
 -- Header <-> Source
 --noremap <F4> :A<CR>
 --noremap [14~ :A<CR>

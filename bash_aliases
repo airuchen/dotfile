@@ -28,20 +28,9 @@ alias gf='git fetch --all'
 
 alias grep='grep --color=auto'
 alias gdb='gdb -q'
-# alias feh="feh --scale-down"
 alias diff='diff --color=auto'
 alias cp='cp -i'
 alias mv='mv -i'
-# alias mpvs='mpv --shuffle -- '
-# alias ncal3='ncal -3 -w'
-# alias cal='cal -m'
-# alias ytdl720="yt-dlp -f 'bestvideo[height<=720]+bestaudio'"
-# alias ytdlhd="yt-dlp -f 'bestvideo[width<=1920]+bestaudio'"
-# alias ytdl_it='yt-dlp --no-mtime --no-call-home'
-command -v fdfind > /dev/null && alias fd='fdfind'
-# alias pmode_toggle='xfconf-query -c xfce4-power-manager -p /xfce4-power-manager/presentation-mode -T && echo "Presentation mode is $(xfconf-query  -c xfce4-power-manager -p /xfce4-power-manager/presentation-mode -v)"'
-# Load loopback module for monitoring inputs
-# alias paloop='pactl load-module module-loopback'
 
 # Apt
 alias sau='sudo apt update && apt list --upgradable'
@@ -53,7 +42,6 @@ alias clang_build_traced='CC="clang-15 -ftime-trace" CXX="clang++-15 -ftime-trac
 alias clang_asan='CC="clang-15 -fsanitize=address" CXX="clang++-15 -fsanitize=address" LD=clang++-15'
 alias gnu_asan='CC="gcc -fsanitize=address -ggdb" CXX="g++ -fsanitize=address -ggdb"'
 alias alias_edit='vim ~/config/bash_aliases && alias_reload'
-# alias alias_reload='source ~/config/bash_aliases'
 alias alias_reload='source ~/.bash_aliases'
 alias pformat='autopep8 --max-line-length 120 -i -r'
 
@@ -402,60 +390,13 @@ function ffmpeg_make_gif {
 
 function sros2 {
   local ROS_ROOT
-  [ -d "/opt/ros/iron" ] && . /opt/ros/iron/setup.bash
+  [ -d "/opt/ros/jazzy" ] && . /opt/ros/jazzy/setup.bash
   [ -e /usr/share/colcon_argcomplete/hook/colcon-argcomplete.bash ]\
     && . /usr/share/colcon_argcomplete/hook/colcon-argcomplete.bash
   [ -e /usr/share/colcon_cd/function/colcon_cd.sh ]\
     && . /usr/share/colcon_cd/function/colcon_cd.sh
 }
 
-# function rsource {
-#   local ROS_ROOT
-#   [ -d "/opt/ros/iron" ] && ROS_ROOT="/opt/ros/iron/setup.bash"
-#   # ROS2 things
-#   [ -e /usr/share/colcon_argcomplete/hook/colcon-argcomplete.bash ]\
-#     && . /usr/share/colcon_argcomplete/hook/colcon-argcomplete.bash
-#   [ -e /usr/share/colcon_cd/function/colcon_cd.sh ]\
-#     && . /usr/share/colcon_cd/function/colcon_cd.sh
-# 	local WS_ROOT="git"
-# 	local ws
-#   ws=$(pwd | grep -o -e "^/home/${USER}/${WS_ROOT}/[^\/]\+")
-# 	if [ -z "$ws" ]; then
-# 		echo "Not inside a workspace, sourcing from ${ROS_ROOT}";
-# 		source "${ROS_ROOT}"
-# 		return 0;
-# 	fi
-#   for cs in "install" "devel"; do
-#     local path="${ws}/${cs}/setup.bash"
-#     if [ -e "${path}" ]; then
-#       echo "Sourcing workspace in ${path}";
-#       source "${path}";
-#       return 0;
-#     fi
-#   done
-#   echo "Devel space not found";
-#   return 2;
-# }
-
-function cdws {
-  if [ $# -lt 1 ]; then
-    echo "No ws!"
-    return
-  fi
-  local workspace=~/git/${1}
-  if [ -d "${workspace}" ]; then
-    export ROS_WORKSPACE=${workspace}
-		export RCUTILS_COLORIZED_OUTPUT=1
-    cd "${workspace}/src/${1}" 2>/dev/null || cd "${workspace}/src/" || cd "${workspace}" || return
-    if [ -e "${workspace}/.built_by" ]; then
-			add_ros2_alias
-			sros2
-		else
-			add_ros_alias
-			rsource
-		fi
-  fi
-}
 
 function is_ros_workspace {
 	{ [ -n "${ROS_WORKSPACE}" ] && [ -d "${ROS_WORKSPACE}" ]; } || { echo "Not a ROS workspace" && false; }
@@ -642,6 +583,29 @@ function kill_named_pythons {
     kill -9 $(pgrep -f "python.*${1}")
   fi
 }
+
+function jqdiff {
+  if [ $# -ne 2 ]; then
+    echo "Usage: jqdiff base candidate"
+    return;
+  fi
+
+  diff <(jq --sort-keys . "${1}") <(jq --sort-keys . "${2}")
+}
+
+function tdevenv {
+  if [ -e "pyproject.toml" ] || [ -e "tox.ini" ]; then
+    tox devenv
+    source venv/bin/activate
+  else
+    echo "No pyproject.toml/tox.ini found"
+  fi
+}
+
+function verbose_ros2console {
+  export RCUTILS_CONSOLE_OUTPUT_FORMAT="[{severity} {time}] [{name}] [{function_name} @ {file_name}:{line_number})]: {message}"
+}
+
 
 # Transferring GPG keys
 # gpg --export-secret-key KeyId | ssh user@remote gpg --allow-secret-key-import --import

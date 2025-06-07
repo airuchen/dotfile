@@ -81,6 +81,15 @@ local setup_lsp = function()
     capabilities = capabilities,
   }
 
+  if vim.fn.executable("typescript-language-server") == 1 then
+    nvim_lsp.ts_ls.setup {}
+  end
+
+  -- pnpm install -g @angular/language-server
+  if vim.fn.executable("ngserver") == 1 then
+    nvim_lsp.angularls.setup {}
+  end
+
   -- https://github.com/regen100/cmake-language-server
   -- Can in theory format with cmake-format, but that's not in the PATH since it's in the venv, so it doesn't find it
   nvim_lsp.cmake.setup {
