@@ -8,15 +8,16 @@ alias cb_db_p='colcon build --symlink-install --cmake-args -DCMAKE_EXPORT_COMPIL
 alias cb_test='colcon build --symlink-install --cmake-args -DCMAKE_EXPORT_COMPILE_COMMANDS=1 --cmake-args -DBUILD_TESTING=ON --cmake-args -DCMAKE_BUILD_TYPE=Debug --parallel-workers 12'
 alias is_ros_workspace='[ -n "${ROS_WORKSPACE}" ] && [ -d "${ROS_WORKSPACE}" ] || (echo "Not a ROS workspace" && false)'
 alias rdi='rosdep install --from-paths src -r -y'
+alias colb='/home/virtual/.cargo/bin/colb'
 
 # General aliases
 alias l='ls -CF'
 alias devcontainer_up='devcontainer up --workspace-folder ./'
 alias ..='cd ..'
 alias ...='cd ../..'
-alias v='nvim'
+alias v='vim'
 alias vim='nvim'
-alias nv='neovide'
+# alias nv='neovide --multigrid'
 alias g='git'
 alias ga='git commit --amend --no-edit'
 alias gP='git push --force-with-lease'
@@ -28,9 +29,20 @@ alias gf='git fetch --all'
 
 alias grep='grep --color=auto'
 alias gdb='gdb -q'
+# alias feh="feh --scale-down"
 alias diff='diff --color=auto'
 alias cp='cp -i'
 alias mv='mv -i'
+# alias mpvs='mpv --shuffle -- '
+# alias ncal3='ncal -3 -w'
+# alias cal='cal -m'
+# alias ytdl720="yt-dlp -f 'bestvideo[height<=720]+bestaudio'"
+# alias ytdlhd="yt-dlp -f 'bestvideo[width<=1920]+bestaudio'"
+# alias ytdl_it='yt-dlp --no-mtime --no-call-home'
+command -v fdfind > /dev/null && alias fd='fdfind'
+# alias pmode_toggle='xfconf-query -c xfce4-power-manager -p /xfce4-power-manager/presentation-mode -T && echo "Presentation mode is $(xfconf-query  -c xfce4-power-manager -p /xfce4-power-manager/presentation-mode -v)"'
+# Load loopback module for monitoring inputs
+# alias paloop='pactl load-module module-loopback'
 
 # Apt
 alias sau='sudo apt update && apt list --upgradable'
@@ -42,6 +54,7 @@ alias clang_build_traced='CC="clang-15 -ftime-trace" CXX="clang++-15 -ftime-trac
 alias clang_asan='CC="clang-15 -fsanitize=address" CXX="clang++-15 -fsanitize=address" LD=clang++-15'
 alias gnu_asan='CC="gcc -fsanitize=address -ggdb" CXX="g++ -fsanitize=address -ggdb"'
 alias alias_edit='vim ~/config/bash_aliases && alias_reload'
+# alias alias_reload='source ~/config/bash_aliases'
 alias alias_reload='source ~/.bash_aliases'
 alias pformat='autopep8 --max-line-length 120 -i -r'
 
@@ -69,58 +82,11 @@ alias dc='docker compose'
 alias dp='docker ps --format "{{.Names}}"'
 alias kaniko='docker run --rm -v$(pwd):/context:ro gcr.io/kaniko-project/executor:debug --context /context'
 alias docker_killall='docker kill $(docker ps -q)'
-doexec() {
-    # Get the list of running containers and their IDs
-    local container=$(docker ps --format "{{.Names}}" | fzf --height=40% --reverse --border --prompt="Select container: ")
-
-    # If a container is selected, execute into it
-    if [[ -n "$container" ]]; then
-        docker exec -it "$container" bash
-    else
-        echo "No container selected."
-    fi
-}
-doimages() {
-  # Prompt for SSH device selection or manual input
-  local ssh_device=$(cat ~/.ssh/config | grep -E "^Host " | awk '{print $2}' | fzf --height=10% --reverse --border --prompt="Select host or press Enter to input manually: ")
-  if [[ -z "$ssh_device" ]]; then
-    read -p "Enter SSH device: " ssh_device
-  fi
-
-  # Select Docker image
-  local image=$(docker images --format "{{.Repository}}:{{.Tag}}" | fzf --height=40% --reverse --border --prompt="Select image: ")
-  if [[ -n "$image" ]]; then
-    docker save "$image" | pigz | pv | ssh "$ssh_device" "unpigz | docker load"
-  else
-    echo "No image selected."
-  fi
-}
-
-dologs() {
+doinsp() {
     # Get the list of running containers and their IDs
     local container=$(docker ps -a --format "{{.Names}}" | fzf --height=40% --reverse --border --prompt="Select container: ")
     if [[ -n "$container" ]]; then
-        docker logs -f "$container" 
-    else
-        echo "No container selected."
-    fi
-}
-dostop() {
-    # Get the list of running containers and their IDs
-    # tab to select multiple containers
-    local containers=$(docker ps --format "{{.Names}}" | fzf --height=40% --reverse --border --prompt="Select container: " --multi)
-    if [[ -n "$containers" ]]; then
-       docker stop $containers
-    else
-        echo "No container selected."
-    fi
-}
-dorestart() {
-    # Get the list of running containers and their IDs
-    # tab to select multiple containers
-    local containers=$(docker ps -a --format "{{.Names}}" | fzf --height=40% --reverse --border --prompt="Select container: " --multi)
-    if [[ -n "$containers" ]]; then
-      docker restart $containers
+        docker inspect "$container" 
     else
         echo "No container selected."
     fi
@@ -390,13 +356,60 @@ function ffmpeg_make_gif {
 
 function sros2 {
   local ROS_ROOT
-  [ -d "/opt/ros/jazzy" ] && . /opt/ros/jazzy/setup.bash
+  [ -d "/opt/ros/iron" ] && . /opt/ros/iron/setup.bash
   [ -e /usr/share/colcon_argcomplete/hook/colcon-argcomplete.bash ]\
     && . /usr/share/colcon_argcomplete/hook/colcon-argcomplete.bash
   [ -e /usr/share/colcon_cd/function/colcon_cd.sh ]\
     && . /usr/share/colcon_cd/function/colcon_cd.sh
 }
 
+# function rsource {
+#   local ROS_ROOT
+#   [ -d "/opt/ros/iron" ] && ROS_ROOT="/opt/ros/iron/setup.bash"
+#   # ROS2 things
+#   [ -e /usr/share/colcon_argcomplete/hook/colcon-argcomplete.bash ]\
+#     && . /usr/share/colcon_argcomplete/hook/colcon-argcomplete.bash
+#   [ -e /usr/share/colcon_cd/function/colcon_cd.sh ]\
+#     && . /usr/share/colcon_cd/function/colcon_cd.sh
+# 	local WS_ROOT="git"
+# 	local ws
+#   ws=$(pwd | grep -o -e "^/home/${USER}/${WS_ROOT}/[^\/]\+")
+# 	if [ -z "$ws" ]; then
+# 		echo "Not inside a workspace, sourcing from ${ROS_ROOT}";
+# 		source "${ROS_ROOT}"
+# 		return 0;
+# 	fi
+#   for cs in "install" "devel"; do
+#     local path="${ws}/${cs}/setup.bash"
+#     if [ -e "${path}" ]; then
+#       echo "Sourcing workspace in ${path}";
+#       source "${path}";
+#       return 0;
+#     fi
+#   done
+#   echo "Devel space not found";
+#   return 2;
+# }
+
+function cdws {
+  if [ $# -lt 1 ]; then
+    echo "No ws!"
+    return
+  fi
+  local workspace=~/git/${1}
+  if [ -d "${workspace}" ]; then
+    export ROS_WORKSPACE=${workspace}
+		export RCUTILS_COLORIZED_OUTPUT=1
+    cd "${workspace}/src/${1}" 2>/dev/null || cd "${workspace}/src/" || cd "${workspace}" || return
+    if [ -e "${workspace}/.built_by" ]; then
+			add_ros2_alias
+			sros2
+		else
+			add_ros_alias
+			rsource
+		fi
+  fi
+}
 
 function is_ros_workspace {
 	{ [ -n "${ROS_WORKSPACE}" ] && [ -d "${ROS_WORKSPACE}" ]; } || { echo "Not a ROS workspace" && false; }
@@ -450,163 +463,6 @@ function prompted_dmenu {
   fzf -dmenu --height=40% --reverse --border --prompt="$1"
 }
 
-function list_ros_masters {
-  # Seems to be reliable for roscores, but technically the -p argument could be anywhere...
-  pgrep -a rosmaster | awk '{print $6}' | sort
-}
-
-function with_rosmaster {
-  local port
-  port=$(ps -ax | awk '/[r]osmaster/ {print $9}' | sort | prompted_dmenu "${@:1}")
-  ROS_MASTER_URI=http://localhost:${port} "${@:1}"
-}
-
-alias wrm='with_rosmaster'
-
-function with_rosnode {
-  rosnode list |  prompted_dmenu "Select ROS Node: " | xargs -r "${@:1}"
-}
-
-function rni {
-  with_rosnode rosnode info
-}
-
-function with_rostopic {
-  rostopic list | prompted_dmenu "Select ROS Topic: " | xargs -r "${@:1}"
-}
-
-function rte {
-  with_rostopic rostopic echo "$@"
-}
-
-function rti {
-  with_rostopic rostopic info "$@"
-}
-
-function exportrosmaster {
-  local wifi_dev="wlp3s0"
-  local lan_dev="wlp3s0"
-
-  local dev=${lan_dev}
-  local uri="http://127.0.0.1:11311"
-
-  if [ $# -ge 3 ]; then
-    if [ "${3}" = "lan" ]; then
-      dev=${lan_dev}
-    elif [ "${3}" = "wifi" ]; then
-      dev=${wifi_dev}
-    else
-      dev=${3}
-    fi
-  fi
-
-  if [ $# -ge 2 ]; then
-    uri="http://${2}"
-  else
-    dev="lo" # use loopback if nothing is specified
-  fi
-
-  local profile="local"
-  if [ $# -ge 1 ]; then
-    profile="${1}"
-  fi
-
-  local ip
-  ip=$(if_ip_addr ${dev})
-
-  export ROS_MASTER_URI=${uri}
-  export ROS_IP=${ip}
-  echo "Set ROS_MATER_URI=${uri} and ROS_IP=${ip} for preset ${profile} on device ${dev}"
-}
-
-function detect_on_network {
-  nmap --open -p 11311 "${1}"/24 --host-timeout 2 -oG - | awk '/^[^#]/ {print $3" "$2":11311 wifi"}'
-}
-
-function srm_detect {
-  local wifi_dev="wlp3s0"
-  local ip
-  ip=$(if_ip_addr ${wifi_dev})
-  local candidates
-  candidates=$(detect_on_network "${ip}") || return
-  local selected
-  selected=$(echo "${candidates}" | uniq | prompted_dmenu "set ros master") || return
-  exportrosmaster ${selected}
-}
-
-function srp {
-  export ROS_MASTER_URI=http://localhost:${1}
-  export ROS_IP=127.0.0.1
-  echo "Set ROS_MATER_URI=${ROS_MASTER_URI} and ROS_IP=${ROS_IP}"
-}
-
-function srm {
-  # find running cores/ports
-  local discovered
-  discovered="$(list_ros_masters | awk '{print "running 127.0.0.1:" $0 " lo"}')"
-  if [ -z "$discovered" ]; then
-    discovered="local"
-  fi
-
-  local presets="${discovered}
-ottobo-s8 10.66.77.28 wifi
-automatica 192.168.10.22:11311 wifi
-logimat 192.168.1.42:11311 wifi
-vfd_serer 192.168.0.104:11311 wifi
-raw4-0-lan 192.168.0.127:11311 wifi
-raw3-3 192.168.43.101:11311 wifi
-str16 192.168.10.135:11311 wifi
-str203 192.168.0.147:11311 wifi
-dcartnighthawk 192.168.0.139:11311 wifi
-dcartdirect 10.42.0.1:11311 wifi
-dcart 192.168.10.145:11311 wifi
-begmachine 192.168.1.100:11311 wifi
-mir 192.168.12.20:11311 wifi
-mir_pc_2 192.168.10.133:11311 wifi
-cob4-18 10.4.18.11:11311 wifi
-cob4-20 10.4.20.11:11311 wifi"
-
-
-  local selected
-  selected=$(echo "${presets}" | prompted_dmenu "set ros master") || return
-  exportrosmaster ${selected}
-}
-
-function kill_named_pythons {
-  if [ $# -ne 1 ]; then
-    echo "Need an argument"
-    return;
-  fi
-  pgrep -a -f "python.*${1}" || return
-  read -r -p "Kill those processes?" choice
-  if [ "${choice}" = "y" ]; then
-    kill -9 $(pgrep -f "python.*${1}")
-  fi
-}
-
-function jqdiff {
-  if [ $# -ne 2 ]; then
-    echo "Usage: jqdiff base candidate"
-    return;
-  fi
-
-  diff <(jq --sort-keys . "${1}") <(jq --sort-keys . "${2}")
-}
-
-function tdevenv {
-  if [ -e "pyproject.toml" ] || [ -e "tox.ini" ]; then
-    tox devenv
-    source venv/bin/activate
-  else
-    echo "No pyproject.toml/tox.ini found"
-  fi
-}
-
-function verbose_ros2console {
-  export RCUTILS_CONSOLE_OUTPUT_FORMAT="[{severity} {time}] [{name}] [{function_name} @ {file_name}:{line_number})]: {message}"
-}
-
-
 # Transferring GPG keys
 # gpg --export-secret-key KeyId | ssh user@remote gpg --allow-secret-key-import --import
 # gpg --export KeyId | ssh user@remote gpg --import
@@ -616,12 +472,6 @@ export ROS_MASTER_URI=http://localhost:11311
 # Keep ros2 on localhost
 # export ROS_AUTOMATIC_DISCOVERY_RANGE=SUBNET
 # export RMW_IMPLEMENTATION=rmw_cyclonedds_cpp
-export ROS_AUTOMATIC_DISCOVERY_RANGE=LOCALHOST
-export RMW_IMPLEMENTATION=rmw_cyclonedds_cpp
-export ROS_PYTHON_CHECK_FIELDS=1
-export RCUTILS_COLORIZED_OUTPUT=1
-export CYCLONEDDS_URI="file:///${HOME}/config/cyclonedds.xml"
-export MAKEFLAGS="-j12 -l12"
 
 #  personal alias
 alias s_lmi='sros2 && source ~/node/logistics_manager_ws/install/setup.sh'
@@ -631,6 +481,5 @@ alias s_node_edge='source ~/node/venvs/node_edge_venv/bin/activate && pip instal
 alias jiq='~/ws/jiq/jiq_linux_amd64'
 alias copy='xclip -sel clip'
 
-# Nix
-alias nixsw='sudo nixos-rebuild switch --flake ~/nixos-config#default'
-alias nixgc='sudo nix-collect-garbage -d'
+# NOTE: clone https://github.com/MartinRamm/fzf-docker at ~/ws/tools/
+source ~/tools/fzf-docker/docker-fzf

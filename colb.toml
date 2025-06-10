@@ -1,0 +1,57 @@
+[upstream]
+mixins = [
+    "compile-commands",
+    "ninja",
+    "mold",
+    "ccache",
+    # "clang"
+]
+cmake_args = [
+  # "-DCMAKE_CXX_COMPILER_LAUNCHER=ccache",
+  # "-DCMAKE_C_COMPILER_LAUNCHER=ccache",
+  "-DCMAKE_CXX_FLAGS=-ggdb",
+  "-DNR_ENABLE_ASSERTS=ON",
+  "-DNR_SKIP_CLANG_TIDY=OFF",
+  "-DENABLE_SANITIZER_ADDRESS=OFF",
+  "-DENABLE_SANITIZER_UNDEFINED_BEHAVIOR=OFF",
+  "-DENABLE_SANITIZER_MINIMAL_RUNTIME=OFF",
+  # "-DCMAKE_CXX_FLAGS='-Werror=null-dereference'"
+]
+build_type = "RelWithDebInfo"
+parallel_jobs = 2
+build_tests = true
+
+[upstream.event_handlers]
+desktop_notification = false
+console_cohesion = true
+summary = true
+console_start_end = true
+
+[package]
+mixins = [
+    "compile-commands", # generate compile_commands.json for clangd
+    "ninja",  # use ninja as the build system
+    "mold",   # use mold linker, (faster than ld)
+    "ccache", # enable c++ compiler caching for faster build
+    # "clang"
+]
+cmake_args = [
+  # "-DCMAKE_CXX_COMPILER_LAUNCHER=ccache",
+  # "-DCMAKE_C_COMPILER_LAUNCHER=ccache",
+  "-DCMAKE_CXX_FLAGS=-ggdb",
+  "-DNR_ENABLE_ASSERTS=ON",
+  "-DNR_SKIP_CLANG_TIDY=OFF",
+  "-DENABLE_SANITIZER_ADDRESS=OFF",
+  "-DENABLE_SANITIZER_UNDEFINED_BEHAVIOR=OFF",
+  "-DENABLE_SANITIZER_MINIMAL_RUNTIME=OFF",
+  # "-DCMAKE_CXX_FLAGS='-Werror=null-dereference'"
+]
+build_type = "RelWithDebInfo" # or DEBUG
+parallel_jobs = 2
+build_tests = true
+
+[package.event_handlers]
+desktop_notification = false
+console_cohesion = true
+summary = false
+console_start_end = false
