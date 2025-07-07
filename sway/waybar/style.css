@@ -8,8 +8,8 @@
 
 /* === Workspaces === */
 #workspaces button {
-  color: #cdd6f4;              /* workspace number color (normal) */
-  background: transparent;     /* no weird background by default */
+  color: #6c7086;              /* Dim color for inactive workspaces */
+  background: transparent;     /* no background by default */
   padding: 4px 8px;
   margin: 0 2px;
   border: none;
@@ -19,9 +19,24 @@
 
 /* === Focused workspace === */
 #workspaces button.focused {
-  color: #1e1e2e;              /* text on focused workspace */
-  background: #cdd6f4;         /* background on focused workspace */
+  color: #000000;              /* Pure black text for maximum contrast */
+  background: #f9e2af;         /* Bright yellow background */
   font-weight: bold;
+  border: 2px solid #fab387;   /* Orange border for extra emphasis */
+  box-shadow: 0 0 8px rgba(249, 226, 175, 0.6); /* Glow effect */
+}
+
+/* === Visible but not focused workspaces === */
+#workspaces button.visible {
+  color: #bac2de;              /* Medium visibility for visible workspaces */
+  background: #313244;         /* Subtle background */
+}
+
+/* === Urgent workspaces === */
+#workspaces button.urgent {
+  color: #f38ba8;              /* Pink for urgent */
+  background: #313244;
+  animation: blink 1s linear infinite alternate;
 }
 
 /* === Hover effect === */
@@ -63,5 +78,13 @@
 #clock {
   color: #f38ba8;              /* Pink color for clock */
   font-weight: bold;
+}
+
+/* === Animations === */
+@keyframes blink {
+  to {
+    background-color: #f38ba8;
+    color: #1e1e2e;
+  }
 }
 
