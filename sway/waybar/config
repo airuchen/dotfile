@@ -80,8 +80,8 @@
   },
 
   "clock": {
-    "tooltip-format": "{:%A, %d %b %Y}",   // full date on hover
-    "format": "{:%H:%M}",                  // 24-h time
+    "tooltip-format": "{:%A, %d %B %Y}",     // full date on hover
+    "format": "{:%a %d %b %H:%M}",           // day date month time (e.g., "Mon 15 Jan 14:30")
     "interval": 60
   }
 }

@@ -1,7 +1,7 @@
 /* === Whole bar === */
 #waybar {
   font-family: "JetBrainsMono Nerd Font", sans-serif;
-  font-size: 35px;
+  font-size: 20px;
   background: #1e1e2e;
   color: #cdd6f4;
 }
@@ -34,8 +34,6 @@
 #backlight,
 #pulseaudio,
 #battery,
-#cpu,
-#memory,
 #network {
   padding: 0 10px;
   margin: 0 2px;
@@ -51,16 +49,6 @@
   color: #f9e2af;              /* Yellow color for brightness */
 }
 
-/* === CPU module === */
-#cpu {
-  color: #94e2d5;              /* Teal color for CPU */
-}
-
-/* === Memory module === */
-#memory {
-  color: #cba6f7;              /* Purple color for memory */
-}
-
 /* === Battery module === */
 #battery {
   color: #a6e3a1;              /* Green color for battery */
@@ -69,5 +57,11 @@
 /* === Network module === */
 #network {
   color: #89b4fa;              /* Blue color for network */
+}
+
+/* === Clock module === */
+#clock {
+  color: #f38ba8;              /* Pink color for clock */
+  font-weight: bold;
 }
 
