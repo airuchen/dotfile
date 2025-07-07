@@ -1,0 +1,41 @@
+/* === Whole bar === */
+#waybar {
+  font-family: "JetBrainsMono Nerd Font", sans-serif;
+  font-size: 35px;
+  background: #1e1e2e;
+  color: #cdd6f4;
+}
+
+/* === Workspaces === */
+#workspaces button {
+  color: #cdd6f4;              /* workspace number color (normal) */
+  background: transparent;     /* no weird background by default */
+  padding: 0 8px;
+  border: none;
+}
+
+/* === Focused workspace === */
+#workspaces button.focused {
+  color: #1e1e2e;              /* text on focused workspace */
+  background: #cdd6f4;         /* background on focused workspace */
+  border-radius: 4px;
+}
+
+/* === Hover effect === */
+#workspaces button:hover {
+  background: #313244;         /* subtle hover bg */
+  border-radius: 4px;
+}
+#clock,
+#backlight,
+#pulseaudio,
+#battery {
+  padding: 0 10px; /* <--- THIS fixes your sticking-together numbers */
+}
+
+/* Optional: hover effect for clarity */
+#workspaces button:hover {
+  background: #313244;
+  border-radius: 4px;
+}
+

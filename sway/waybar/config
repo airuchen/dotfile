@@ -1,0 +1,49 @@
+{
+  "layer": "top",              // keeps the bar above windows
+  "position": "top",
+  "modules-left": [
+    "network"                  // 📶 Wi-Fi block (left side)
+  ],
+  "modules-right": [
+    "cpu",                     // 🖥️
+    "memory",                  // 🧠
+    "battery",                 // 🔋
+    "clock"                    // 🕒
+  ],
+
+  ////////////////////////////////////////////////////////////////////
+  // Module-specific settings
+  ////////////////////////////////////////////////////////////////////
+
+  "network": {
+    "interface": "wlp2s0",      // set your Wi-Fi NIC (e.g. wlan0, wlp2s0)
+    "family": "ipv4",
+    "interval": 3,
+    "format-wifi": "📶 {essid} {signalStrength}%",
+    "tooltip-format": "{ipaddr}"
+  },
+
+  "cpu": {
+    "format": "{usage:2}%   ",
+    "interval": 2
+  },
+
+  "memory": {
+    "format": "{used:0.1f}/{total:0.1f}G  ",
+    "interval": 5
+  },
+
+  "battery": {
+    // Works for most laptops; check `upower -e` for your device path.
+    "bat": "BAT0",
+    "format": "{capacity}% {icon}  ",
+    "format-icons": ["", "", "", "", ""]
+  },
+
+  "clock": {
+    "tooltip-format": "{:%A, %d %b %Y}",   // full date on hover
+    "format": "{:%H:%M}",                  // 24-h time
+    "interval": 60
+  }
+}
+
