@@ -10,32 +10,64 @@
 #workspaces button {
   color: #cdd6f4;              /* workspace number color (normal) */
   background: transparent;     /* no weird background by default */
-  padding: 0 8px;
+  padding: 4px 8px;
+  margin: 0 2px;
   border: none;
+  border-radius: 4px;
+  min-width: 30px;
 }
 
 /* === Focused workspace === */
 #workspaces button.focused {
   color: #1e1e2e;              /* text on focused workspace */
   background: #cdd6f4;         /* background on focused workspace */
-  border-radius: 4px;
+  font-weight: bold;
 }
 
 /* === Hover effect === */
 #workspaces button:hover {
   background: #313244;         /* subtle hover bg */
-  border-radius: 4px;
 }
+
+/* === Individual module styling === */
 #clock,
 #backlight,
 #pulseaudio,
-#battery {
-  padding: 0 10px; /* <--- THIS fixes your sticking-together numbers */
+#battery,
+#cpu,
+#memory,
+#network {
+  padding: 0 10px;
+  margin: 0 2px;
 }
 
-/* Optional: hover effect for clarity */
-#workspaces button:hover {
-  background: #313244;
-  border-radius: 4px;
+/* === Volume module === */
+#pulseaudio {
+  color: #fab387;              /* Orange color for volume */
+}
+
+/* === Brightness module === */
+#backlight {
+  color: #f9e2af;              /* Yellow color for brightness */
+}
+
+/* === CPU module === */
+#cpu {
+  color: #94e2d5;              /* Teal color for CPU */
+}
+
+/* === Memory module === */
+#memory {
+  color: #cba6f7;              /* Purple color for memory */
+}
+
+/* === Battery module === */
+#battery {
+  color: #a6e3a1;              /* Green color for battery */
+}
+
+/* === Network module === */
+#network {
+  color: #89b4fa;              /* Blue color for network */
 }
 

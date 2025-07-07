@@ -2,11 +2,12 @@
   "layer": "top",              // keeps the bar above windows
   "position": "top",
   "modules-left": [
+    "sway/workspaces",         // 🏢 Workspaces (left side)
     "network"                  // 📶 Wi-Fi block (left side)
   ],
   "modules-right": [
-    "cpu",                     // 🖥️
-    "memory",                  // 🧠
+    "pulseaudio",              // 🔊 Volume
+    "backlight",               // ☀️ Brightness
     "battery",                 // 🔋
     "clock"                    // 🕒
   ],
@@ -14,6 +15,19 @@
   ////////////////////////////////////////////////////////////////////
   // Module-specific settings
   ////////////////////////////////////////////////////////////////////
+
+  "sway/workspaces": {
+    "disable-scroll": true,
+    "all-outputs": true,
+    "format": "{index}",
+    "persistent_workspaces": {
+      "1": [],
+      "2": [],
+      "3": [],
+      "4": [],
+      "5": []
+    }
+  },
 
   "network": {
     "interface": "wlp2s0",      // set your Wi-Fi NIC (e.g. wlan0, wlp2s0)
@@ -23,8 +37,33 @@
     "tooltip-format": "{ipaddr}"
   },
 
+  "pulseaudio": {
+    "format": "{icon} {volume}%",
+    "format-muted": "🔇 Muted",
+    "format-icons": {
+      "headphone": "🎧",
+      "hands-free": "🎧",
+      "headset": "🎧",
+      "phone": "📞",
+      "portable": "📱",
+      "car": "🚗",
+      "default": ["🔈", "🔉", "🔊"]
+    },
+    "scroll-step": 5,
+    "on-click": "pactl set-sink-mute @DEFAULT_SINK@ toggle",
+    "on-click-right": "pavucontrol"
+  },
+
+  "backlight": {
+    "device": "intel_backlight",
+    "format": "☀️ {percent}%",
+    "scroll-step": 5,
+    "on-scroll-up": "brightnessctl set 5%+",
+    "on-scroll-down": "brightnessctl set 5%-"
+  },
+
   "cpu": {
-    "format": "{usage:2}%   ",
+    "format": "{usage:2}%   ",
     "interval": 2
   },
 
@@ -36,7 +75,7 @@
   "battery": {
     // Works for most laptops; check `upower -e` for your device path.
     "bat": "BAT0",
-    "format": "{capacity}% {icon}  ",
+    "format": "{icon} {capacity}% ",
     "format-icons": ["", "", "", "", ""]
   },
 
