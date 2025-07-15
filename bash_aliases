@@ -477,7 +477,7 @@ export ROS_MASTER_URI=http://localhost:11311
 alias s_lmi='sros2 && source ~/node/logistics_manager_ws/install/setup.sh'
 alias s_nav='sros2 && source ~/node/navigation_ws/install/setup.sh'
 alias s_fms='source ~/node/venvs/fms_venv/bin/activate && pip install --upgrade fms_python_tools'
-alias s_node_edge='source ~/node/venvs/node_edge_venv/bin/activate && pip install --upgrade node-edge-provisioning'
+alias s_node_edge='source ~/node/venvs/node_edge_venv/bin/activate && pip install --upgrade node-tool'
 alias jiq='~/ws/jiq/jiq_linux_amd64'
 alias copy='xclip -sel clip'
 
