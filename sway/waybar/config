@@ -3,6 +3,7 @@
   "position": "top",
   "modules-left": [
     "sway/workspaces",         // 🏢 Workspaces (left side)
+    "sway/language",           // 🌐 Keyboard layout/language
     "network"                  // 📶 Wi-Fi block (left side)
   ],
   "modules-right": [
@@ -25,6 +26,12 @@
       "focused": "",
       "default": ""
     }
+  },
+
+  "sway/language": {
+    "format": "🌐 {short}",
+    "tooltip-format": "Keyboard: {long}",
+    "on-click": "swaymsg 'input * xkb_switch_layout next'"
   },
 
   "network": {

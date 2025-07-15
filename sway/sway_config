@@ -66,10 +66,12 @@ bindsym $mod+Shift+z exec swaylock -f -i ~/Pictures/BackgroundTeams_NODE.jpg
       natural_scroll enabled
       middle_emulation enabled
   }
-#
-#   input type:keyboard {
-#       xkb_layout "eu"
-#   }
+
+  # Keyboard configuration with multiple layouts
+  input * {
+      xkb_layout "us,de"
+      xkb_options "grp:alt_shift_toggle"
+  }
 #
 # You can also configure each device individually.
 # Read `man 5 sway-input` for more information about this section.
@@ -243,6 +245,9 @@ bindsym $mod+r mode "resize"
     # WiFi and Bluetooth menus (with proper environment)
     bindsym $mod+Ctrl+w exec env WAYLAND_DISPLAY=$WAYLAND_DISPLAY XDG_RUNTIME_DIR=$XDG_RUNTIME_DIR ~/.local/bin/wofi-wifi-menu/wofi-wifi-menu.sh
     bindsym $mod+Ctrl+b exec env WAYLAND_DISPLAY=$WAYLAND_DISPLAY XDG_RUNTIME_DIR=$XDG_RUNTIME_DIR ~/.local/bin/wofi-bluetooth/wofi-bluetooth
+
+    # Language switching
+    bindsym $mod+Ctrl+l exec swaymsg 'input * xkb_switch_layout next'
 
 # Window rules
 for_window [class=".*"] border none
