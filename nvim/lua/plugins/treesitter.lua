@@ -1,9 +1,9 @@
 local config_treesitter = function()
   require('nvim-dap-repl-highlights').setup()
 
-vim.filetype.add({
-  pattern = { [".*/hypr/.*%.conf"] = "hyprlang" },
-})
+  vim.filetype.add({
+    pattern = { [".*/hypr/.*%.conf"] = "hyprlang" },
+  })
 
   local tsconf = require('nvim-treesitter.configs')
 
@@ -66,6 +66,7 @@ vim.filetype.add({
     highlight = {
       enable = true,
       disable = ts_disable_func,
+      additional_vim_regex_highlighting = { 'python' },
     },
     indent = {
       enable = true,
@@ -170,8 +171,8 @@ return {
     },
     config = config_treesitter,
     build = function()
-	    config_treesitter()
-	    pcall(require('nvim-treesitter.install').update({with_sync = true}))
+      config_treesitter()
+      pcall(require('nvim-treesitter.install').update({ with_sync = true }))
     end,
   }
 }
