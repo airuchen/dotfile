@@ -10,7 +10,8 @@
     "pulseaudio",              // 🔊 Volume
     "backlight",               // ☀️ Brightness
     "battery",                 // 🔋
-    "clock"                    // 🕒
+    "clock",                   // 🕒
+    "custom/power"             // ⚡ Power menu
   ],
 
   ////////////////////////////////////////////////////////////////////
@@ -88,6 +89,12 @@
     "tooltip-format": "{:%A, %d %B %Y}",     // full date on hover
     "format": "{:%a %d %b %H:%M}",           // day date month time (e.g., "Mon 15 Jan 14:30")
     "interval": 60
+  },
+
+  "custom/power": {
+    "format": "⚡",
+    "tooltip": "Power Menu",
+    "on-click": "echo -e 'Shutdown\\nReboot\\nSleep\\nLogout' | wofi --dmenu --prompt 'Power Menu' | xargs -I {} sh -c 'case {} in Shutdown) systemctl poweroff;; Reboot) systemctl reboot;; Sleep) systemctl suspend;; Logout) swaymsg exit;; esac'"
   }
 }
 
