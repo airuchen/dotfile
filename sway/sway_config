@@ -259,6 +259,16 @@ exec_always pgrep waybar || waybar
 # Startup applications
 exec dbus-update-activation-environment --systemd WAYLAND_DISPLAY XDG_CURRENT_DESKTOP=sway
 
+# Workspace assignments for automatic layout
+assign [app_id="kitty"] workspace number 1
+assign [class="brave-browser"] workspace number 2
+assign [class="Logseq"] workspace number 3
+
+# Auto-start applications in specific workspaces
+exec kitty -e tmux a || tmux
+exec brave-browser
+exec logseq
+
 # Clipboard Manager
 exec wl-paste --type text --watch cliphist store
 exec wl-paste --type image --watch cliphist store
