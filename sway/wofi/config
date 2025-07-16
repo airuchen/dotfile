@@ -1,0 +1,9 @@
+show = drun # desktop files
+matching = fuzzy
+allow-markup = true
+location = center
+width = 35%
+height = 40%
+lines = 10
+hide-scroll = true
+gtk-dark = true # dark theme
