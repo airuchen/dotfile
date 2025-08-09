@@ -255,7 +255,7 @@ for_window [app_id="pavucontrol"] floating enable, resize set 800 600
 for_window [app_id="blueman-manager"] floating enable, resize set 700 500
 
 # Status Bar:
-exec_always pgrep waybar || waybar
+exec_always bash -c 'pkill waybar 2>/dev/null; sleep 0.1; waybar'
 
 # Startup applications
 exec dbus-update-activation-environment --systemd WAYLAND_DISPLAY XDG_CURRENT_DESKTOP=sway
