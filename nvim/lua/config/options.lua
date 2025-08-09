@@ -8,7 +8,7 @@ o.background = "dark"
 
 -- Misc settings
 -- Listmode chars, tab, trailing spaces, long lines, end-of-line
-vim.opt.listchars = { tab = ">-" , trail = ".", extends = ">", eol = "$"}
+vim.opt.listchars = { tab = ">-", trail = ".", extends = ">", eol = "$" }
 vim.opt.fillchars:append { diff = "╱" } -- nicer diff fillchar
 
 -- Don't treat 04 as octal
@@ -26,7 +26,7 @@ o.hlsearch = true
 o.inccommand = "split" -- show preview of offscreen substitute commands
 
 -- UI settings
-o.title = true -- Set terminal title
+o.title = true   -- Set terminal title
 o.visualbell = true
 o.showcmd = true -- Show partial commands in the status line (like pending, <leader>, etc)
 o.cmdheight = 1
@@ -34,18 +34,18 @@ o.lazyredraw = true
 -- o.ttyfast = true " Does nothing in neovim
 
 -- Linenumbers
-o.number = true -- Make cursor line show real line in relativenumber
+o.number = true         -- Make cursor line show real line in relativenumber
 o.relativenumber = true -- relative line numbers
 o.signcolumn = "yes"
-o.scrolloff = 10 -- Try to keep cursor away from window top/bottom
-o.cursorline = true -- Hilight cursor line
-o.colorcolumn = "120" -- Max line length marker
-o.laststatus = 2 -- Always show status line
+o.scrolloff = 10        -- Try to keep cursor away from window top/bottom
+o.cursorline = true     -- Hilight cursor line
+o.colorcolumn = "120"   -- Max line length marker
+o.laststatus = 2        -- Always show status line
 
 -- Behaviour
-o.hidden = true -- Keep files open after hiding buffers
+o.hidden = true  -- Keep files open after hiding buffers
 o.history = 1000 -- Number of history items to keep
-o.mouse = "a" -- Mouse in all modes
+o.mouse = "a"    -- Mouse in all modes
 -- vim.cmd("behave xterm") -- Set mouse behaviour (deprecated in 0.10))
 o.mousemodel = "extend"
 o.selection = "inclusive"
@@ -72,7 +72,7 @@ o.expandtab = true
 o.autoindent = true
 o.smartindent = true
 
-o.linebreak = true -- Wrapping settings
+o.linebreak = true   -- Wrapping settings
 o.joinspaces = false -- Only add one space when joining lines
 
 -- Autocomplete on :
@@ -90,18 +90,18 @@ o.undofile = true
 o.undolevels = 500
 o.undoreload = 500
 
-o.backupskip="/tmp/*,$TMPDIR/*,$TMP/*,$TEMP/*,/dev/*"
+o.backupskip = "/tmp/*,$TMPDIR/*,$TMP/*,$TEMP/*,/dev/*"
 
 local grp = vim.api.nvim_create_augroup("HistorySettings", { clear = true })
 vim.api.nvim_create_autocmd("BufReadPre", {
-    pattern = {"/tmp/*", "/dev/*"},
-    group = grp,
-    desc = "No undo/swap for tmp files",
-    callback = function()
-      vim.bo.undofile = false
-      vim.bo.swapfile = false
-    end
-  })
+  pattern = { "/tmp/*", "/dev/*" },
+  group = grp,
+  desc = "No undo/swap for tmp files",
+  callback = function()
+    vim.bo.undofile = false
+    vim.bo.swapfile = false
+  end
+})
 
 -- Netrw settings
 -- Hide banner
@@ -154,7 +154,7 @@ local ignored_for_ws = function(match)
 end
 
 local ws_group = vim.api.nvim_create_augroup("whitespace", { clear = true })
-vim.api.nvim_create_autocmd({"BufWinEnter", "InsertLeave", "BufEnter"}, {
+vim.api.nvim_create_autocmd({ "BufWinEnter", "InsertLeave", "BufEnter" }, {
   pattern = "*",
   group = ws_group,
   desc = "highlight trailing whitespace",
@@ -163,9 +163,10 @@ vim.api.nvim_create_autocmd({"BufWinEnter", "InsertLeave", "BufEnter"}, {
       return
     end
     vim.cmd([[match Error /\s\+$/]])
-  end}
+  end
+}
 )
-vim.api.nvim_create_autocmd({"InsertEnter"}, {
+vim.api.nvim_create_autocmd({ "InsertEnter" }, {
   pattern = "*",
   group = ws_group,
   desc = "highlight trailing whitespace",
@@ -174,7 +175,8 @@ vim.api.nvim_create_autocmd({"InsertEnter"}, {
       return
     end
     vim.cmd([[match Error /\s\+\%#\@<!$/]])
-  end}
+  end
+}
 )
 -- Hilight trailing spaces while not in insert
 -- autocmd BufWinEnter * match Error /\s\+$/
