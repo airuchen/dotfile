@@ -279,6 +279,8 @@ bindsym $mod+v exec cliphist list | wofi -d | cliphist decode | wl-copy
 bindsym $mod+e exec nautilus
 
 # Notification
-exec mako
+exec swaync
+# Toggle control center
+bindsym $mod+Shift+n exec swaync-client -t -sw
 
 include @sysconfdir@/sway/config.d/*

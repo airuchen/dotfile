@@ -59,14 +59,22 @@ create_symlink \
     "$CONFIG_DIR/sway/config" \
     "Sway"
 
+# SwayNC configuration
+create_symlink \
+    "$DOTFILES_DIR/swaync" \
+    "$CONFIG_DIR/swaync" \
+    "SwayNC"
+
 echo "🎉 All symbolic links created successfully!"
 echo ""
 echo "📋 Summary:"
 echo "   waybar/     → ~/.config/waybar/"
 echo "   wofi/       → ~/.config/wofi/"
 echo "   sway_config → ~/.config/sway/config"
+echo "   swaync/     → ~/.config/swaync/"
 echo ""
 echo "💡 To reload configurations:"
 echo "   • Waybar: killall waybar && waybar &"
 echo "   • Sway: sway reload (or Mod+Shift+C)"
+echo "   • SwayNC: killall swaync && swaync &"
 echo "   • Wofi: No reload needed" 
