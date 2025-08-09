@@ -235,15 +235,16 @@ bindsym $mod+r mode "resize"
     bindsym --locked XF86MonBrightnessUp exec brightnessctl set 5%+
 
     # Special key to take a screenshot with grim
-    bindsym Print exec grim ~/Pictures/screenshot-$(date +'%Y-%m-%d_%H-%M-%S').png
-    bindsym $mod+Print exec grim -g "$(slurp)" ~/Pictures/screenshot-$(date +'%Y-%m-%d_%H-%M-%S').png
+    bindsym $mod+Print exec grim - | tee ~/Pictures/Screenshots/screenshot-$(date +'%Y-%m-%d_%H-%M-%S').png | wl-copy
+    bindsym Print exec grim -g "$(slurp)" - | tee ~/Pictures/Screenshots/screenshot-$(date +'%Y-%m-%d_%H-%M-%S').png | wl-copy
+
 
     # WiFi and Bluetooth menus (with proper environment)
     bindsym $mod+Ctrl+w exec env WAYLAND_DISPLAY=$WAYLAND_DISPLAY XDG_RUNTIME_DIR=$XDG_RUNTIME_DIR ~/.local/bin/wofi-wifi-menu/wofi-wifi-menu.sh
     bindsym $mod+Ctrl+b exec env WAYLAND_DISPLAY=$WAYLAND_DISPLAY XDG_RUNTIME_DIR=$XDG_RUNTIME_DIR ~/.local/bin/wofi-bluetooth/wofi-bluetooth
 
     # Power menu
-    bindsym Ctrl+Alt+p exec echo -e 'Shutdown\\nReboot\\nSleep\\nLogout' | wofi --dmenu --prompt 'Power Menu' --width 200 --height 200 --cache-file /dev/null | xargs -I {} sh -c 'case {} in Shutdown) systemctl poweroff;; Reboot) systemctl reboot;; Sleep) systemctl suspend;; Logout) swaymsg exit;; esac'
+    bindsym Ctrl+Alt+p exec echo 'Logout\\nReboot\\nSleep\\nShutdown' | wofi --dmenu --prompt 'Power Menu' --width 200 --height 200 --cache-file /dev/null | xargs -I {} sh -c 'case {} in Shutdown) systemctl poweroff;; Reboot) systemctl reboot;; Sleep) systemctl suspend;; Logout) swaymsg exit;; esac'
 
     # Language switching
     bindsym $mod+Ctrl+l exec swaymsg 'input * xkb_switch_layout next'
