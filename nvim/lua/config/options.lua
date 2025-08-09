@@ -76,7 +76,8 @@ o.linebreak = true -- Wrapping settings
 o.joinspaces = false -- Only add one space when joining lines
 
 -- Autocomplete on :
-vim.opt.iskeyword:append { ":" }
+-- disable to avoid select ':' in a word
+-- vim.opt.iskeyword:append { ":" }
 
 -- Autocomplete to longest common string
 o.wildmode = "list:longest,full"
