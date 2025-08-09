@@ -94,7 +94,7 @@
   "custom/power": {
     "format": "⚡",
     "tooltip": "Power Menu",
-    "on-click": "echo -e 'Shutdown\\nReboot\\nSleep\\nLogout' | wofi --dmenu --prompt 'Power Menu' --width 200 --height 200 --cache-file /dev/null | xargs -I {} sh -c 'case {} in Shutdown) systemctl poweroff;; Reboot) systemctl reboot;; Sleep) systemctl suspend;; Logout) swaymsg exit;; esac'"
+    "on-click": "echo 'Logout\\nReboot\\nSleep\\nShutdown' | wofi --dmenu --prompt 'Power Menu' --width 200 --height 200 --cache-file /dev/null | xargs -I {} sh -c 'case {} in Shutdown) systemctl poweroff;; Reboot) systemctl reboot;; Sleep) systemctl suspend;; Logout) swaymsg exit;; esac'"
   }
 }
 
