@@ -275,6 +275,9 @@ exec wl-paste --type text --watch cliphist store
 exec wl-paste --type image --watch cliphist store
 bindsym $mod+v exec cliphist list | wofi -d | cliphist decode | wl-copy
 
+# Window Switcher with Wofi
+bindsym $mod+Tab exec /home/wen/ws/dotfile/scripts/sway-window-switcher.sh
+
 # File Manager
 bindsym $mod+e exec nautilus
 
