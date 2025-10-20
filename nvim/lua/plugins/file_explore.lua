@@ -5,12 +5,13 @@ local setup_harpoon = function()
   vim.keymap.set("n", "<space>m", function() harpoon:list():add() end, { desc = "Add to harpoon" })
   vim.keymap.set("n", "<leader>p", function() harpoon.ui:toggle_quick_menu(harpoon:list()) end, { desc = "Harpoon menu" })
 
-  vim.keymap.set("n", "<m-n>", function() harpoon:list():select(1) end, { desc = "Harpoon 1" })
-  vim.keymap.set("n", "<m-e>", function() harpoon:list():select(2) end, { desc = "Harpoon 2" })
-  vim.keymap.set("n", "<m-i>", function() harpoon:list():select(3) end, { desc = "Harpoon 3" })
-  vim.keymap.set("n", "<m-o>", function() harpoon:list():select(4) end, { desc = "Harpoon 4" })
+  -- Jump to specific harpoon slots (QWERTY-friendly)
+  vim.keymap.set("n", "<m-1>", function() harpoon:list():select(1) end, { desc = "Harpoon 1" })
+  vim.keymap.set("n", "<m-2>", function() harpoon:list():select(2) end, { desc = "Harpoon 2" })
+  vim.keymap.set("n", "<m-3>", function() harpoon:list():select(3) end, { desc = "Harpoon 3" })
+  vim.keymap.set("n", "<m-4>", function() harpoon:list():select(4) end, { desc = "Harpoon 4" })
 
-  -- Toggle previous & next buffers stored within Harpoon list
+  -- Cycle through harpoon list
   vim.keymap.set("n", "<C-P>", function() harpoon:list():prev() end, { desc = "Harpoon prev" })
   vim.keymap.set("n", "<C-B>", function() harpoon:list():next() end, { desc = "Harpoon next" })
 end
