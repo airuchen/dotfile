@@ -50,6 +50,45 @@ nm("<space>F", "<C-w>F", { desc = "Open file under cursor in split at line" })
 -- Hide hilights from hlsearch
 nm("<C-H>", ":nohl<CR>", { silent = true, desc = "Clear hlsearch" })
 
+-- Multi-word search: add words to search pattern
+-- Usage: * to start, then <leader>* to add more words
+local function add_to_search()
+  local text
+  local mode = vim.fn.mode()
+  
+  if mode == "v" or mode == "V" then
+    -- Get visually selected text
+    vim.cmd('noau normal! "vy"')
+    text = vim.fn.getreg("v")
+    text = vim.fn.escape(text, [[\/]])
+  else
+    -- Get word under cursor with word boundaries
+    text = "\\<" .. vim.fn.expand("<cword>") .. "\\>"
+  end
+  
+  local current = vim.fn.getreg("/")
+  if current == "" then
+    vim.fn.setreg("/", text)
+  else
+    vim.fn.setreg("/", current .. "\\|" .. text)
+  end
+  
+  vim.cmd("set hlsearch")
+  vim.o.hlsearch = true
+  
+  -- Print the pattern for visibility
+  print("Search: " .. vim.fn.getreg("/"))
+end
+
+-- Clear search and start fresh
+local function clear_and_search()
+  vim.fn.setreg("/", "")
+  add_to_search()
+end
+
+vim.keymap.set({"n", "v"}, "<leader>*", add_to_search, { desc = "Add word to search" })
+vim.keymap.set({"n", "v"}, "<leader>/", clear_and_search, { desc = "Clear and search word" })
+
 -- Type ß with alt - on UK layout :)
 -- vim.keymap.set("i", "<leader>-", "ß") -- too annoying
 
