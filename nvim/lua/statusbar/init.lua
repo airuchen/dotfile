@@ -211,7 +211,8 @@ local lineInactive = function(bufno)
   local right_elems = value_sep(theme, vim.tbl_filter(not_nil, {
     short_line_stats(theme)
   }), " | ")
-  return box_it(theme, table.concat(vim.tbl_flatten({ left_elems, rhs_sep, right_elems })))
+  return box_it(theme, vim.iter({ left_elems, rhs_sep, right_elems }):flatten():join())
+
 end
 
 M._opts = {
