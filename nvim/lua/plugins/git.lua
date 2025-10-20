@@ -91,12 +91,26 @@ return {
       disable_signs = true,                -- no signs for collapsed things
       graph_style = "unicode",             -- make log view look nicer
       git_services = {
-        ["github.com"] = "https://github.com/${owner}/${repository}/compare/${branch_name}?expand=1",
-        ["bitbucket.org"] = "https://bitbucket.org/${owner}/${repository}/pull-requests/new?source=${branch_name}&t=1",
-        ["gitlab.com"] =
-        "https://gitlab.com/${owner}/${repository}/merge_requests/new?merge_request[source_branch]=${branch_name}",
-        ["gitlab.node-robotics.com"] =
-        "https://gitlab.node-robotics.com/${owner}/${repository}/merge_requests/new?merge_request[source_branch]=${branch_name}",
+        ["github.com"] = {
+          pull_request = "https://github.com/${owner}/${repository}/compare/${branch_name}?expand=1",
+          commit = "https://github.com/${owner}/${repository}/commit/${commit_hash}",
+          tree = "https://github.com/${owner}/${repository}/tree/${branch_name}",
+        },
+        ["bitbucket.org"] = {
+          pull_request = "https://bitbucket.org/${owner}/${repository}/pull-requests/new?source=${branch_name}&t=1",
+          commit = "https://bitbucket.org/${owner}/${repository}/commits/${commit_hash}",
+          tree = "https://bitbucket.org/${owner}/${repository}/src/${branch_name}",
+        },
+        ["gitlab.com"] = {
+          pull_request = "https://gitlab.com/${owner}/${repository}/merge_requests/new?merge_request[source_branch]=${branch_name}",
+          commit = "https://gitlab.com/${owner}/${repository}/-/commit/${commit_hash}",
+          tree = "https://gitlab.com/${owner}/${repository}/-/tree/${branch_name}",
+        },
+        ["gitlab.node-robotics.com"] = {
+          pull_request = "https://gitlab.node-robotics.com/${owner}/${repository}/merge_requests/new?merge_request[source_branch]=${branch_name}",
+          commit = "https://gitlab.node-robotics.com/${owner}/${repository}/-/commit/${commit_hash}",
+          tree = "https://gitlab.node-robotics.com/${owner}/${repository}/-/tree/${branch_name}",
+        },
       },
       ignored_settings = {
         "NeogitPushPopup--force-with-lease",
