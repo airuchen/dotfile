@@ -15,6 +15,37 @@ return {
   -- TODO: gc is native in nvim 0.10.0
   { 'numToStr/Comment.nvim',    opts = {} },
 
+  -- Highlight TODO, FIXME, NOTE, etc. in comments
+  {
+    'folke/todo-comments.nvim',
+    dependencies = { 'nvim-lua/plenary.nvim' },
+    event = { "BufReadPost", "BufNewFile" },
+    opts = {
+      signs = false, -- don't show signs in gutter
+      highlight = {
+        multiline = false,
+        before = "",
+        keyword = "wide", -- highlight keyword and text after
+        after = "",
+      },
+      colors = {
+        error = { "#fb4934" },   -- gruvbox red
+        warning = { "#fe8019" }, -- gruvbox orange
+        info = { "#83a598" },    -- gruvbox blue
+        hint = { "#8ec07c" },    -- gruvbox aqua
+        default = { "#fabd2f" }, -- gruvbox yellow
+      },
+      keywords = {
+        FIX = { icon = " ", color = "error", alt = { "FIXME", "BUG", "FIXIT", "ISSUE" } },
+        TODO = { icon = " ", color = "default" },
+        HACK = { icon = " ", color = "warning" },
+        WARN = { icon = " ", color = "warning", alt = { "WARNING", "XXX" } },
+        PERF = { icon = " ", color = "hint", alt = { "OPTIM", "PERFORMANCE", "OPTIMIZE" } },
+        NOTE = { icon = " ", color = "info", alt = { "INFO" } },
+      },
+    },
+  },
+
   -- Make . work with commands that support it
   'tpope/vim-repeat',
 
