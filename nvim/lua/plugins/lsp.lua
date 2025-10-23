@@ -45,10 +45,24 @@ vim.api.nvim_create_autocmd('LspAttach', {
 })
 
 local setup_lsp = function()
+  -- Suppress lspconfig deprecation warnings (ecosystem not ready for new API)
+  local notify = vim.notify
+  vim.notify = function(msg, ...)
+    if msg:match("lspconfig") then
+      return
+    end
+    notify(msg, ...)
+  end
+
+  local lspconfig = require('lspconfig')
+  
+  -- Restore original notify
+  vim.notify = notify
+
   local capabilities = vim.lsp.protocol.make_client_capabilities()
   capabilities = vim.tbl_deep_extend('force', capabilities, require('cmp_nvim_lsp').default_capabilities())
 
-  vim.lsp.config.rnix = {
+  lspconfig.rnix.setup {
     settings = {
       format = {
         enable = true,
@@ -57,7 +71,7 @@ local setup_lsp = function()
   }
 
   -- pip install "python-lsp-server[all]" pyls-mypy python-lsp-black
-  vim.lsp.config.pylsp = {
+  lspconfig.pylsp.setup {
     cmd = { vim.loop.os_homedir() .. "/venvs/pylsp/bin/pylsp" },
     capabilities = capabilities,
     settings = {
@@ -75,23 +89,23 @@ local setup_lsp = function()
     }
   }
 
-  vim.lsp.config.pyright = {
+  lspconfig.pyright.setup {
     cmd = { vim.loop.os_homedir() .. "/venvs/pylsp/bin/pyright-langserver", "--stdio" },
     capabilities = capabilities,
   }
 
   if vim.fn.executable("typescript-language-server") == 1 then
-    vim.lsp.config.ts_ls = {}
+    lspconfig.ts_ls.setup {}
   end
 
   -- pnpm install -g @angular/language-server
   if vim.fn.executable("ngserver") == 1 then
-    vim.lsp.config.angularls = {}
+    lspconfig.angularls.setup {}
   end
 
   -- https://github.com/regen100/cmake-language-server
   -- Can in theory format with cmake-format, but that's not in the PATH since it's in the venv, so it doesn't find it
-  vim.lsp.config.cmake = {
+  lspconfig.cmake.setup {
     cmd = { vim.loop.os_homedir() .. "/venvs/cmake_lsp/bin/cmake-language-server" },
     capabilities = capabilities,
     on_new_config = function(new_config, new_root_dir)
@@ -113,7 +127,7 @@ local setup_lsp = function()
   -- https://github.com/swyddfa/esbonio
   -- https://github.com/neovim/nvim-lspconfig/blob/master/doc/server_configurations.md#esbonio
   -- https://docs.esbon.io/en/latest/lsp/getting-started.html#lsp-getting-started
-  vim.lsp.config.esbonio = {
+  lspconfig.esbonio.setup {
     cmd = { vim.loop.os_homedir() .. "/venvs/esbonio/bin/esbonio" },
     capabilities = capabilities
   }
@@ -122,7 +136,7 @@ local setup_lsp = function()
   -- https://github.com/regen100/cmake-language-server
   require("clangd_extensions").setup {}
 
-  vim.lsp.config.clangd = {
+  lspconfig.clangd.setup {
     -- cmd = { "docker", "exec", "ros2_jazzy_virtualized", "clangd", "--log=error", "--background-index", "--clang-tidy", "--header-insertion=never", "-j=6", "--compile-commands-dir=/home/wen/node/dev_containers/jazzy_dev/workspaces/ros2_jazzy_virtualized/workspace/build", "--path-mappings=/home/wen/node/dev_containers/jazzy_dev/workspaces/ros2_jazzy_virtualized/workspace=/home/virtual/workspace" },
     -- cmd = { "docker", "exec", "ros2_jazzy_virtualized", "clangd", "--log=error", "--background-index", "--clang-tidy", "--header-insertion=never", "-j=6"},
     cmd = { "clangd", "--log=error", "--background-index", "--clang-tidy", "--header-insertion=never", "-j=6" },
@@ -130,7 +144,7 @@ local setup_lsp = function()
   }
 
   -- requires lua-language-server
-  vim.lsp.config.lua_ls = {
+  lspconfig.lua_ls.setup {
     -- Make vim runtime visible
     on_init = function(client)
       local path = client.workspace_folders[1].name
@@ -165,9 +179,9 @@ local setup_lsp = function()
     capabilities = capabilities
   }
 
-  vim.lsp.config.hyprls = {}
+  lspconfig.hyprls.setup {}
 
-  vim.lsp.config.yamlls = {
+  lspconfig.yamlls.setup {
     settings = {
       yaml = {
         schemas = {
@@ -185,13 +199,13 @@ local setup_lsp = function()
     },
   }
 
-  vim.lsp.config.ts_ls = {
+  lspconfig.ts_ls.setup {
   }
 
   -- Needs vscode-langservers-extracted
   -- npm i -g vscode-langservers-extracted
   capabilities.textDocument.completion.completionItem.snippetSupport = true
-  vim.lsp.config.jsonls = {
+  lspconfig.jsonls.setup {
     capabilities = capabilities
   }
 end
