@@ -1,5 +1,7 @@
 -- Don't parse modelines
 vim.opt.modeline = false
+-- Make "+ the default clipboard
+vim.opt.clipboard = "unnamedplus"
 -- Don't parse .editorconfig files
 vim.g.editorconfig_enable = false
 -- nvim >= 0.9
@@ -44,8 +46,16 @@ require("lazy").setup({
   },
 })
 
+vim.g.clipboard = {
+  name = "wl-clipboard",
+  copy = { ["+"] = "wl-copy", ["*"] = "wl-copy" },
+  paste = { ["+"] = "wl-paste --no-newline", ["*"] = "wl-paste --no-newline" },
+  cache_enabled = 1,
+}
+
 require("config.options")
 require("config.keybinds")
 require("config.ft")
 require("statusbar").setup()
 require("config.neovide")
+require("config.minimal_highlights").setup()
