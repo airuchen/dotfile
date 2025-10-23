@@ -33,6 +33,7 @@ output HDMI-A-1 pos 0 0
 output eDP-1 pos 3840 0
 output DP-1 pos 0 0
 output DP-2 pos 0 0
+output DP-8 transform 270
 
 ## Font
 font pango:JetBrainsMono Nerd Font Mono 12
