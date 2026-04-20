@@ -10,6 +10,7 @@
     "pulseaudio",              // 🔊 Volume
     "backlight",               // ☀️ Brightness
     "battery",                 // 🔋
+    "custom/pomodoro",         // 🍅 Pomodoro timer
     "clock",                   // 🕒
     "custom/power"             // ⚡ Power menu
   ],
@@ -68,21 +69,19 @@
     "on-scroll-down": "brightnessctl set 5%-"
   },
 
-  "cpu": {
-    "format": "{usage:2}%   ",
-    "interval": 2
-  },
-
-  "memory": {
-    "format": "{used:0.1f}/{total:0.1f}G  ",
-    "interval": 5
-  },
-
   "battery": {
     // Works for most laptops; check `upower -e` for your device path.
     "bat": "BAT0",
-    "format": "{icon} {capacity}% ",
-    "format-icons": ["", "", "", "", ""]
+    "interval": 60,
+    "states": {
+      "warning": 20,
+      "critical": 10
+    },
+    "format": "{icon} {capacity}%",
+    "format-charging": "⚡ {capacity}%",
+    "format-plugged": "🔌 {capacity}%",
+    "format-icons": ["🪫", "🪫", "🔋", "🔋", "🔋"],
+    "on-update": "$HOME/.config/waybar/scripts/battery-notify.sh"
   },
 
   "clock": {
@@ -91,10 +90,16 @@
     "interval": 60
   },
 
+
+  "custom/pomodoro": {
+    "exec": "$HOME/.config/waybar/scripts/pomo.sh",
+    "interval": 1,
+    "return-type": "json"
+  },
+
   "custom/power": {
     "format": "⚡",
     "tooltip": "Power Menu",
     "on-click": "echo 'Logout\\nReboot\\nSleep\\nShutdown' | wofi --dmenu --prompt 'Power Menu' --width 200 --height 200 --cache-file /dev/null | xargs -I {} sh -c 'case {} in Shutdown) systemctl poweroff;; Reboot) systemctl reboot;; Sleep) systemctl suspend;; Logout) swaymsg exit;; esac'"
   }
 }
-

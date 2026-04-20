@@ -1,0 +1,84 @@
+# Satty Configuration
+# Modern Screenshot Annotation Tool
+
+[general]
+# Start in fullscreen mode
+fullscreen = true
+
+# Exit after copy/save action
+early-exit = true
+
+# Path to output file (uses strftime format)
+output-filename = "~/Pictures/Screenshots/satty-%Y%m%d-%H:%M:%S.png"
+
+# Copy command for clipboard
+copy-command = "wl-copy"
+
+# Initial tool to select on startup
+initial-tool = "arrow"
+
+# Annotation size factor (increase/decrease size)
+annotation-size-factor = 1.0
+
+# Actions to perform when pressing Enter
+actions-on-enter = ["save-to-clipboard", "exit"]
+
+# Actions to perform when pressing Escape  
+actions-on-escape = ["save-to-clipboard", "exit"]
+
+# Actions to perform on right click
+actions-on-right-click = ["save-to-clipboard"]
+
+# Hide toolbars by default (toggle with Tab)
+default-hide-toolbars = false
+
+# Corner roundness for rectangles (0 disables)
+corner-roundness = 12
+
+# Primary highlighter mode
+primary-highlighter = "block"
+
+# Brush smoothing (0 = disabled, higher = smoother)
+brush-smooth-history-size = 5
+
+# Disable notifications
+disable-notifications = false
+
+# Fill shapes by default
+default-fill-shapes = false
+
+# Remove window decorations
+# no-window-decoration = true
+
+[color-palette]
+# Colors shown in the toolbar for quick selection
+palette = [
+    "#4c7bb8",  # Blue (your theme color)
+    "#ff5555",  # Red
+    "#ffb86c",  # Orange
+    "#f1fa8c",  # Yellow
+    "#50fa7b",  # Green
+    "#8be9fd",  # Cyan
+    "#bd93f9",  # Purple
+    "#f38ba8",  # Pink
+    "#ffffff",  # White
+    "#000000",  # Black
+]
+
+# Custom colors available in color picker
+custom = [
+    "#4c7bb8",  # Your theme blue
+    "#6db3f2",  # Lighter blue
+    "#ff5555",  # Red
+    "#ffb86c",  # Orange
+    "#f1fa8c",  # Yellow
+    "#50fa7b",  # Green
+    "#8be9fd",  # Cyan
+    "#bd93f9",  # Purple
+]
+
+[font]
+# Font family to use for text annotations
+family = "JetBrainsMono Nerd Font"
+# Font style (optional)
+# style = "Bold"

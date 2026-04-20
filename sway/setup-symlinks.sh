@@ -65,6 +65,12 @@ create_symlink \
     "$CONFIG_DIR/swaync" \
     "SwayNC"
 
+# Satty configuration
+create_symlink \
+    "$DOTFILES_DIR/satty" \
+    "$CONFIG_DIR/satty" \
+    "Satty"
+
 echo "🎉 All symbolic links created successfully!"
 echo ""
 echo "📋 Summary:"
@@ -72,6 +78,7 @@ echo "   waybar/     → ~/.config/waybar/"
 echo "   wofi/       → ~/.config/wofi/"
 echo "   sway_config → ~/.config/sway/config"
 echo "   swaync/     → ~/.config/swaync/"
+echo "   satty/      → ~/.config/satty/"
 echo ""
 echo "💡 To reload configurations:"
 echo "   • Waybar: killall waybar && waybar &"

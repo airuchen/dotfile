@@ -21,7 +21,7 @@ set $menu wofi --show drun --gtk-dark
 ### Output configuration
 #
 # Default wallpaper (more resolutions are available in @datadir@/backgrounds/sway/)
-output * bg /home/wen/Pictures/BackgroundTeams_NODE.jpg fill
+output * bg /home/wen/Pictures/Background_Desktop_NODE-Robotics_3024×1964_v1-bw.png fill
 #
 # Example configuration:
 #
@@ -32,8 +32,15 @@ output HDMI-A-1 pos 0 0
 ## Arena monitor
 output eDP-1 pos 3840 0
 output DP-1 pos 0 0
-output DP-2 pos 0 0
+output DP-9 pos 0 0
+output DP-10 transform 270
+output DP-8 pos -2160 0
 output DP-8 transform 270
+exec_always {
+    swaymsg "[output=DP-8]" layout splitv
+    swaymsg "[output=eDP-1]" layout splith
+}
+
 
 ## Font
 font pango:JetBrainsMono Nerd Font Mono 12
@@ -45,13 +52,12 @@ font pango:JetBrainsMono Nerd Font Mono 12
 # your displays after another 300 seconds, and turn your screens back on when
 # resumed. It will also lock your screen before your computer goes to sleep.
 exec swayidle -w \
-         timeout 300 'swaylock -f -i ~/Pictures/BackgroundTeams_NODE.jpg' \
+         timeout 300 'swaylock -f -i /home/wen/Pictures/Background_Desktop_NODE-Robotics_3024×1964_v1-bw.png' \
          timeout 600 'swaymsg "output * power off"' resume 'swaymsg "output * power on"' \
-         before-sleep 'swaylock -f -i ~/Pictures/BackgroundTeams_NODE.jpg'
-# - Ctrl+Alt+l Lock screen only
-# - Ctrl+Alt+s Lock screen and then sleep (secure)
-bindsym Ctrl+Alt+l exec swaylock -f -i ~/Pictures/BackgroundTeams_NODE.jpg
-bindsym Ctrl+Alt+s exec swaylock -f -i ~/Pictures/BackgroundTeams_NODE.jpg && systemctl suspend
+         before-sleep 'swaylock -f -i /home/wen/Pictures/Background_Desktop_NODE-Robotics_3024×1964_v1-bw.png'
+
+bindsym Ctrl+Alt+l exec swaylock -f -i /home/wen/Pictures/Background_Desktop_NODE-Robotics_3024×1964_v1-bw.png
+bindsym Ctrl+Alt+s exec swaylock -f -i /home/wen/Pictures/Background_Desktop_NODE-Robotics_3024×1964_v1-bw.png && systemctl suspend
 
 ### Input configuration
 #
@@ -127,7 +133,7 @@ bindsym Ctrl+Alt+s exec swaylock -f -i ~/Pictures/BackgroundTeams_NODE.jpg && sy
 # Workspaces:
 
     # Set workspaces to the specific monitor
-    workspace 1 output DP-2
+    workspace 1 output DP-9
 
     # Switch to workspace
     bindsym $mod+1 workspace number 1
@@ -161,7 +167,7 @@ bindsym Ctrl+Alt+s exec swaylock -f -i ~/Pictures/BackgroundTeams_NODE.jpg && sy
     # $mod+b or $mod+v, for horizontal and vertical splits
     # respectively.
     # bindsym $mod+b splith
-    # bindsym $mod+v splitv
+    # bindsym $mod+b splith
 
     # Switch the current container between different layout styles
     # bindsym $mod+s layout stacking
@@ -235,9 +241,18 @@ bindsym $mod+r mode "resize"
     bindsym --locked XF86MonBrightnessDown exec brightnessctl set 5%-
     bindsym --locked XF86MonBrightnessUp exec brightnessctl set 5%+
 
-    # Special key to take a screenshot with grim
-    bindsym $mod+Print exec grim - | tee ~/Pictures/Screenshots/screenshot-$(date +'%Y-%m-%d_%H-%M-%S').png | wl-copy
+    # Simple screenshot (grim only - no annotation)
+    # Full screen screenshot
+    bindsym $mod+Print exec grim ~/Pictures/Screenshots/screenshot-$(date '+%Y-%m-%d_%H-%M-%S').png && notify-send "Screenshot saved" "Full screen captured"
+    # Area selection screenshot
     bindsym Print exec grim -g "$(slurp)" - | tee ~/Pictures/Screenshots/screenshot-$(date +'%Y-%m-%d_%H-%M-%S').png | wl-copy
+
+
+    # Screenshot with Satty annotation
+    # Full screen with annotation
+    bindsym $mod+Shift+Print exec grim -t ppm - | satty --filename - --fullscreen --output-filename ~/Pictures/Screenshots/satty-$(date '+%Y%m%d-%H:%M:%S').png
+    # Area selection with annotation
+    bindsym Shift+Print exec grim -g "$(slurp -o -r -c '#ff0000ff')" -t ppm - | satty --filename - --fullscreen --output-filename ~/Pictures/Screenshots/satty-$(date '+%Y%m%d-%H:%M:%S').png
 
 
     # WiFi and Bluetooth menus (with proper environment)
@@ -256,20 +271,14 @@ for_window [app_id="pavucontrol"] floating enable, resize set 800 600
 for_window [app_id="blueman-manager"] floating enable, resize set 700 500
 
 # Status Bar:
-exec_always bash -c 'pkill waybar 2>/dev/null; sleep 0.1; waybar'
+exec_always bash -c 'pkill waybar 2>/dev/null; sleep 0.5; waybar'
 
 # Startup applications
 exec dbus-update-activation-environment --systemd WAYLAND_DISPLAY XDG_CURRENT_DESKTOP=sway
 
-# Workspace assignments for automatic layout
-assign [app_id="kitty"] workspace number 1
-assign [class="brave-browser"] workspace number 2
-assign [class="Logseq"] workspace number 3
-
 # Auto-start applications in specific workspaces
-exec kitty -e tmux a || tmux
-exec brave-browser
-exec logseq
+# exec brave-browser
+# exec logseq
 
 # Clipboard Manager
 exec wl-paste --type text --watch cliphist store

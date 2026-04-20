@@ -70,6 +70,21 @@
   color: #a6e3a1;              /* Green color for battery */
 }
 
+#battery.warning {
+  color: #f9e2af;              /* Yellow color for warning state */
+  font-weight: bold;
+}
+
+#battery.critical {
+  color: #f38ba8;              /* Pink/Red color for critical state */
+  font-weight: bold;
+  animation: blink 1s linear infinite alternate;
+}
+
+#battery.charging, #battery.plugged {
+  color: #89dceb;              /* Cyan color when charging */
+}
+
 /* === Network module === */
 #network {
   color: #89b4fa;              /* Blue color for network */
@@ -86,6 +101,15 @@
   color: #f38ba8;              /* Pink color for clock */
   font-weight: bold;
 }
+
+#custom-pomodoro {
+  color: #89b4fa;              /* Pink color for clock */
+  font-weight: bold;
+  min-width: 140px;
+}
+#custom-pomodoro.Work   { color: #fab387; }
+#custom-pomodoro.Break  { color: #a6e3a1; }
+#custom-pomodoro.Paused { color: #6c7086; }
 
 /* === Animations === */
 @keyframes blink {
