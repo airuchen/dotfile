@@ -45,6 +45,12 @@ exec_always {
 ## Font
 font pango:JetBrainsMono Nerd Font Mono 12
 
+## Gaps
+gaps inner 6
+gaps outer 4
+exec_always swaymsg gaps inner all set 6
+exec_always swaymsg gaps outer all set 4
+
 
 ## Power management keybindings:
 #
@@ -267,11 +273,12 @@ bindsym $mod+r mode "resize"
 
 # Window rules
 for_window [class=".*"] border none
+for_window [app_id=".*"] border none
 for_window [app_id="pavucontrol"] floating enable, resize set 800 600
 for_window [app_id="blueman-manager"] floating enable, resize set 700 500
 
 # Status Bar:
-exec_always bash -c 'pkill waybar 2>/dev/null; sleep 0.5; waybar'
+exec_always bash -c 'killall -qw waybar 2>/dev/null; waybar'
 
 # Startup applications
 exec dbus-update-activation-environment --systemd WAYLAND_DISPLAY XDG_CURRENT_DESKTOP=sway
